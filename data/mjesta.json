@@ -1,0 +1,13 @@
+{
+  "opis": "Fotografije za mini igru 'Gdje je ovo?'. Svaki unos: slika (putanja u folderu slike/), odgovor (šta igrač bira), autor i licenca (ako slika nije tvoja). Igra se uključuje kad ima bar 6 unosa.",
+  "primjer": { "slika": "slike/sveti-stefan.jpg", "odgovor": "Sveti Stefan, Crna Gora", "autor": "Ime autora", "licenca": "CC BY-SA 4.0" },
+  "predlog": [
+    "Sveti Stefan, Crna Gora", "Gospa od Škrpjela (Perast), Crna Gora", "Stari grad Kotor, Crna Gora", "Most na Đurđevića Tari, Crna Gora",
+    "Ostrog, Crna Gora", "Njegošev mauzolej (Lovćen), Crna Gora", "Crno jezero (Durmitor), Crna Gora", "Stari Bar, Crna Gora",
+    "Kalemegdan (Beograd), Srbija", "Hram Svetog Save (Beograd), Srbija", "Petrovaradinska tvrđava (Novi Sad), Srbija", "Studenica, Srbija",
+    "Stari most (Mostar), BiH", "Baščaršija (Sarajevo), BiH", "Dubrovnik, Hrvatska", "Plitvička jezera, Hrvatska", "Bled, Slovenija", "Ohrid, Sjeverna Makedonija",
+    "Ajfelova kula (Pariz), Francuska", "Koloseum (Rim), Italija", "Akropolj (Atina), Grčka", "Sagrada Familija (Barselona), Španija",
+    "Big Ben (London), Velika Britanija", "Kip slobode (Njujork), SAD", "Tadž Mahal (Agra), Indija", "Kineski zid, Kina", "Piramide u Gizi, Egipat", "Maču Pikču, Peru"
+  ],
+  "mjesta": []
+}

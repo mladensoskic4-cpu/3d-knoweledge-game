@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provjera veze sa Supabaseom</title>
+<style>
+  body { font: 16px/1.5 system-ui, "Segoe UI", sans-serif; background: #edf5f8; color: #14232e; margin: 0; padding: 32px 16px; }
+  main { max-width: 620px; margin: 0 auto; background: #fff; border: 2px solid #14232e; border-radius: 16px; padding: 24px; box-shadow: 0 5px 0 #14232e; }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  p { margin: 0 0 16px; color: #536a78; }
+  ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: #edf5f8; }
+  li b { min-width: 22px; }
+  li.ok { background: #e2f4e8; } li.ok b { color: #1d8a4e; }
+  li.err { background: #fde8eb; } li.err b { color: #c8102e; }
+  small { display: block; color: #536a78; word-break: break-word; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Provjera veze sa Supabaseom</h1>
+  <p>Stranica sama provjerava pet stvari. Ako je sve zeleno, igra je spremna za server.</p>
+  <ol id="list"></ol>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+const URL_ = 'https://soyaqpuronnhxcbwhnwt.supabase.co';
+const KEY = 'sb_publishable_RoIgUlgm6tyatqSPQOa-Og_ZBVsGUYz';
+const list = document.getElementById('list');
+function row(text) {
+  const li = document.createElement('li');
+  li.innerHTML = '<b>…</b><div><span></span><small></small></div>';
+  li.querySelector('span').textContent = text;
+  list.append(li);
+  return {
+    ok(note = '') { li.className = 'ok'; li.querySelector('b').textContent = '✓'; li.querySelector('small').textContent = note; },
+    err(note) { li.className = 'err'; li.querySelector('b').textContent = '✗'; li.querySelector('small').textContent = note; }
+  };
+}
+(async () => {
+  const r1 = row('Biblioteka Supabase se učitala');
+  if (!window.supabase) { r1.err('Nema interneta ili je CDN blokiran.'); return; }
+  r1.ok();
+  const sb = window.supabase.createClient(URL_, KEY);
+
+  const r2 = row('Prijava kao gost (anonimna prijava)');
+  const { data: auth, error: e2 } = await sb.auth.signInAnonymously();
+  if (e2) { r2.err(e2.message + ' → U Supabaseu: Authentication → Sign In / Providers → uključi Anonymous sign-ins.'); return; }
+  r2.ok('ID: ' + auth.user.id);
+
+  const r3 = row('Upis profila u tabelu profiles');
+  const { error: e3 } = await sb.from('profiles').upsert({ id: auth.user.id, ime: 'Test veze', grad: 'Podgorica', bodovi: 0 });
+  if (e3) { r3.err(e3.message + ' → Šema možda nije pokrenuta. Pokreni supabase/schema.sql u SQL Editoru.'); return; }
+  r3.ok();
+
+  const r4 = row('Upis rezultata trke');
+  const { error: e4 } = await sb.from('rezultati').insert({ user_id: auth.user.id, mapa: 'cg', mjesto: 1, bodovi: 10, tacni: 1, odgovori: 1 });
+  if (e4) { r4.err(e4.message); return; }
+  r4.ok();
+
+  const r5 = row('Čitanje sedmične rang-liste');
+  const { data: lb, error: e5 } = await sb.from('rang_sedmica').select('ime, bodovi').limit(5);
+  if (e5) { r5.err(e5.message); return; }
+  r5.ok('Na listi: ' + lb.map(x => `${x.ime} (${x.bodovi})`).join(', '));
+
+  const r6 = row('Sve radi. Možeš obrisati test profil u Table Editor → profiles (ime „Test veze”).');
+  r6.ok();
+})();
+</script>
+</body>
+</html>
