@@ -87,6 +87,7 @@ async function showMenu() {
   world.cam.orbit();
   hideHud();
   const S = P.podesavanja;
+  if (!AGES[S.uzrast]) S.uzrast = 'odrasli'; // stara grupa „tinejdžeri” više ne postoji
   const counts = availableAreas();
   const avail = Object.keys(AREAS).filter(a => counts[a]);
   let picked = new Set((S.oblasti || []).filter(a => avail.includes(a)));
@@ -192,6 +193,7 @@ function followMe() { world.cam.follow(track.tokenPosition(human())); }
 
 async function startRace(areas) {
   const S = P.podesavanja;
+  if (!AGES[S.uzrast]) S.uzrast = 'odrasli'; // stara grupa „tinejdžeri” više ne postoji
   await prepareMap(MAPS_RACE.find(m => m.id === S.mapa), TRACK_LENGTHS[S.duzina].tiles);
   track.clearTokens();
   players = [
@@ -409,6 +411,7 @@ function showResults() {
     profileBar(),
     h('div', { class: 'row-bar end' }, menu, again));
   const S = P.podesavanja;
+  if (!AGES[S.uzrast]) S.uzrast = 'odrasli'; // stara grupa „tinejdžeri” više ne postoji
   again.addEventListener('click', () => startRace(S.miks || !S.oblasti ? Object.keys(availableAreas()) : S.oblasti));
   menu.addEventListener('click', showMenu);
 }

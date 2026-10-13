@@ -71,7 +71,7 @@ Object.assign(EN_EXACT, {
   'Trka do Durmitora': 'Race to Durmitor', 'Kviz-trka': 'Quiz race', 'Nauka i svemir': 'Science & space', 'Jezici svijeta': 'World languages',
   'Tehnologija i gejming': 'Tech & gaming', 'Brz na obaraču': 'Quick on the trigger', 'Zna svaku uvalu': 'Knows every cove', 'Spor, ali temeljan': 'Slow but thorough',
   'Grad (za rang-listu)': 'City (for the leaderboard)', 'Škola (opciono)': 'School (optional)', 'npr. Podgorica': 'e.g. Podgorica', 'Igrač': 'Player',
-  'sva pitanja': 'all questions', 'do 12 godina · lakša pitanja, više vremena': 'up to 12 · easier questions, more time', '13–17 · bez najtežih pitanja': '13–17 · no hardest questions',
+  'sva pitanja': 'all questions', '5–12 godina · lakša pitanja, više vremena': 'ages 5–12 · easier questions, more time', '13–17 · bez najtežih pitanja': '13–17 · no hardest questions',
   'oko 3–5 min': 'about 3–5 min', 'oko 6–8 min': 'about 6–8 min', 'oko 10 min': 'about 10 min', 'Odgovaraj brzo i tačno da pređeš više polja. Na zlatnim stanicama te čeka mini igra. Pobjede donose bodove za rang, a viši rang otključava veće mape.': 'Answer fast and right to move more tiles. Golden stations hold a mini game. Wins earn rank points, and higher ranks unlock bigger maps.',
   'Uključi muziku': 'Turn music on', 'Isključi muziku': 'Turn music off', 'Muzika': 'Music',
   'Nagrada: novčići i skok do 3 polja naprijed.': 'Reward: coins and a jump of up to 3 tiles.', 'Bonus runda · svi igraju': 'Bonus round · everyone plays',

@@ -25,8 +25,7 @@ export function rankProgress(points) {
 }
 
 export const AGES = {
-  djeca: { label: 'Djeca', note: 'do 12 godina · lakša pitanja, više vremena', maxTezina: 1, bonus: 6 },
-  tinejdzeri: { label: 'Tinejdžeri', note: '13–17 · bez najtežih pitanja', maxTezina: 2, bonus: 2 },
+  djeca: { label: 'Djeca', note: '5–12 godina · lakša pitanja, više vremena', maxTezina: 1, bonus: 6 },
   odrasli: { label: 'Odrasli', note: 'sva pitanja', maxTezina: 3, bonus: 0 }
 };
 
