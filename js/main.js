@@ -12,10 +12,11 @@ import { profile, save, RANKS, rankOf, rankProgress, rankIndex, AGES, awardRace,
 import { randomBotLook } from './models.js';
 import { openGarage } from './garage.js';
 import { loadFlags } from './flags.js';
-import { LANGS, setLang, loadCountryNames } from './i18n.js';
+import { LANGS, setLang, loadCountryNames, L } from './i18n.js';
 import { initNet, isOnline, pushProfile, submitResult, submitSuggestion, approvedQuestions } from './net.js';
 import { openLeaderboard, openSuggest } from './social.js';
 import { musicEnabled, startMusic, setMusic, isPlaying, duck } from './music.js';
+import { sfxEnabled, setSfx, installClicks } from './sfx.js';
 
 // Muzika: kreće na prvi klik (pregledači ne dozvoljavaju zvuk prije toga); dugme u uglu je pali i gasi.
 const musicBtn = h('button', { type: 'button', id: 'muzika', class: 'music-btn', 'aria-label': 'Muzika' });
@@ -23,6 +24,13 @@ const syncMusicBtn = () => { musicBtn.classList.toggle('off', !isPlaying()); mus
 musicBtn.addEventListener('click', e => { e.stopPropagation(); setMusic(!isPlaying()); syncMusicBtn(); });
 document.getElementById('app').append(musicBtn);
 syncMusicBtn();
+// Zvučni efekti (klikovi, tačno/netačno, vozilo): posebno dugme pored muzike.
+const sfxBtn = h('button', { type: 'button', id: 'efekti', class: 'music-btn sfx-btn', 'aria-label': 'Zvučni efekti' });
+const syncSfxBtn = () => { sfxBtn.classList.toggle('off', !sfxEnabled()); sfxBtn.title = sfxEnabled() ? 'Isključi zvučne efekte' : 'Uključi zvučne efekte'; };
+sfxBtn.addEventListener('click', e => { e.stopPropagation(); setSfx(!sfxEnabled()); syncSfxBtn(); });
+document.getElementById('app').append(sfxBtn);
+syncSfxBtn();
+installClicks();
 window.addEventListener('pointerdown', () => { if (musicEnabled() && !isPlaying()) { startMusic(); syncMusicBtn(); } }, { once: true });
 // tiša muzika dok se sluša melodija ili zvuk
 new MutationObserver(() => duck(!!document.querySelector('.mel-stage'))).observe(document.getElementById('layer'), { childList: true, subtree: true });
@@ -276,8 +284,12 @@ async function raceLoop(deck, timeBonus) {
 
 // Bonus runda: svi igrači, bez obzira gdje su na stazi, igraju istu mini igru. Pobjednik dobija nagradu.
 const BONUS_ROUNDS = [4, 10, 16];
+const BONUS_TIME = 1.6; // bonus runda traje duže od obične mini igre
 async function bonusRound() {
-  const mg = pickMinigame(rng);
+  const base = pickMinigame(rng);
+  const mg = Object.create(base);
+  mg.duration = Math.round(base.duration * BONUS_TIME / 5) * 5;
+  mg.intro = L(base.intro).replace(/\d+(?= (sekund|seconds|секунд))/g, String(mg.duration));
   const card = openCard('mg-card-wrap bonus');
   const startBtn = h('button', { class: 'btn btn-primary', type: 'button', id: 'bonus-start' }, 'Počni');
   card.append(
@@ -292,7 +304,9 @@ async function bonusRound() {
   card.append(host);
   const me = human();
   const mine = await mg.play(host, { rng });
-  const results = players.map(p => ({ p, ...(p.human ? mine : mg.simulateBot(botMinigameSkill(p), rng)) }))
+  // bot ima isto duže vrijeme: rezultat i broj u opisu se srazmjerno povećavaju
+  const botBonus = r => ({ score: Math.min(1, r.score * 1.25), label: r.label.replace(/\d+(\.\d+)?/, n => String(+(n * BONUS_TIME).toFixed(n.includes('.') ? 1 : 0))) });
+  const results = players.map(p => ({ p, ...(p.human ? mine : botBonus(mg.simulateBot(botMinigameSkill(p), rng))) }))
     .sort((a, b) => b.score - a.score);
   const prize = [{ jump: 3, coins: 50 }, { jump: 1, coins: 20 }, { jump: 0, coins: 10 }, { jump: 0, coins: 0 }];
   results.forEach((r, i) => { r.jump = prize[i].jump; r.coins = prize[i].coins; r.p.coins += r.coins; });

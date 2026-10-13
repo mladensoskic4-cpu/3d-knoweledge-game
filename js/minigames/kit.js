@@ -1,6 +1,7 @@
 // Zajednički dio za mini igre sa tajmerom: traka vremena, brojač, 4 ponuđena odgovora, tasteri 1–4.
 import { h } from '../ui.js';
 import { clamp, gaussian, sleep } from '../util.js';
+import { correct as sfxOk, wrong as sfxBad } from '../sfx.js';
 
 export function timerBar(host, label = '') {
   const fill = h('i');
@@ -30,6 +31,7 @@ export function playChoiceRounds(host, { duration = 20, goal = 8, next, unit = '
           if (done || busy) return;
           busy = true;
           const ok = o === cur.answer;
+          (ok ? sfxOk : sfxBad)();
           if (ok) { hits++; b.classList.add('is-right'); }
           else { misses++; b.classList.add('is-wrong'); grid.querySelectorAll('.mc-opt[data-ok="true"]').forEach(x => x.classList.add('is-right')); }
           cur.reveal?.(ok);

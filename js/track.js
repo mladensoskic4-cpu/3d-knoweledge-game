@@ -1,5 +1,6 @@
 // Staza: polja duž rute izabrane mape, oznake gradova, stanice za mini igre i figure igrača (lik + vozilo).
 import { toWorld, LAND_TOP, tween, ease } from './scene.js';
+import { vehicle } from './sfx.js';
 import { buildToken } from './models.js';
 import { L } from './i18n.js';
 
@@ -173,7 +174,9 @@ export function createTrack(world, map, TILE_COUNT) {
     tokenPosition(player) { return tokens.get(player.id).position; },
     async move(player, from, to) {
       const car = tokens.get(player.id);
+      const snd = player.human && to > from ? vehicle(player.look?.vozilo) : null;
       for (let i = from; i < to; i++) {
+        snd?.hop();
         const a = car.position.clone(), b = tiles[i + 1].pos;
         const dir = b.clone().sub(tiles[i].pos).setY(0).normalize();
         car.rotation.y = yaw(dir);
@@ -182,6 +185,7 @@ export function createTrack(world, map, TILE_COUNT) {
           car.position.y = Y + Math.sin(Math.PI * k) * 0.4;
         });
       }
+      snd?.stop();
     },
     async relayout(players) {
       await Promise.all(players.map(p => {

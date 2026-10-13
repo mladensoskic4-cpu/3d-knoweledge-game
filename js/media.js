@@ -1,6 +1,6 @@
 // Pravi mediji tokom igre:
 // - fotografije: glavna slika članka sa Wikipedije (REST API), uz link na izvor;
-// - zvuci životinja: snimci sa Wikimedia Commonsa (pretraga zvučnih fajlova);
+// - zvuci životinja: snimci ugrađeni u Wikipedia članak o toj životinji (Wikimedia Commons);
 // - zvuci instrumenata: snimci iz FluidR3 GM soundfonta (CC BY 3.0) u data/zvuk/.
 // Ako mreža ili izvor nisu dostupni, funkcije vraćaju null, a igra koristi rezervu (ilustraciju ili sliku).
 
@@ -34,23 +34,37 @@ export function preloadImage(src) {
 
 const canOgg = (() => { try { return !!new Audio().canPlayType('audio/ogg; codecs="vorbis"'); } catch { return false; } })();
 
-export async function commonsSound(query) {
-  const key = `snd:${query}`;
+// Zvuk životinje: SAMO snimci koji su ugrađeni u Wikipedia članak o toj životinji (urednici ih provjeravaju),
+// i to samo fajlovi čiji naziv sadrži ime životinje (npr. „Dog barking.ogg”, „Strix aluco … .ogg”).
+// Izgovori riječi (En-us-…, LL-…) i izgovoreni članci se preskaču. Nema pogađanja preko slobodne pretrage.
+const AUDIO_RX = /\.(ogg|oga|opus|wav|mp3|flac|webm)$/i;
+const BAD_RX = /spoken|pronunc|^File:[A-Za-z]{2}(-[A-Za-z]{2})?-|^File:LL-|wikipedia|anthem|song by|music/i;
+export function soundFileOk(name, rx) { return AUDIO_RX.test(name) && !BAD_RX.test(name) && rx.test(name.replace(/_/g, ' ')); }
+export async function wikiSound(titles, rx) {
+  const key = `snd:${titles.join('|')}`;
   if (cache.has(key)) return cache.get(key);
   const job = (async () => {
     try {
-      const url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=10'
-        + `&gsrsearch=${encodeURIComponent(query + ' filetype:audio')}&prop=imageinfo&iiprop=url|mime|size`;
-      const r = await withTimeout(fetch(url), 6000);
-      if (!r.ok) return null;
-      const d = await r.json();
-      const files = Object.values(d.query?.pages || {})
+      const u1 = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=images&imlimit=500&titles='
+        + encodeURIComponent(titles.join('|'));
+      const r1 = await withTimeout(fetch(u1), 6000);
+      if (!r1.ok) return null;
+      const d1 = await r1.json();
+      const names = [...new Set(Object.values(d1.query?.pages || {}).flatMap(p => (p.images || []).map(i => i.title)))]
+        .filter(n => soundFileOk(n, rx));
+      if (!names.length) return null;
+      const u2 = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=url|mime|size&titles='
+        + encodeURIComponent(names.slice(0, 20).join('|'));
+      const r2 = await withTimeout(fetch(u2), 6000);
+      if (!r2.ok) return null;
+      const d2 = await r2.json();
+      const files = Object.values(d2.query?.pages || {})
         .map(p => ({ title: p.title, ...(p.imageinfo?.[0] || {}) }))
-        .filter(f => f.url && /^audio\//.test(f.mime || '') && (f.size || 0) < 3e6)
-        .sort((a, b) => (a.size || 0) - (b.size || 0));
+        .filter(f => f.url && /^(audio|video|application\/ogg)/.test(f.mime || '') && f.size > 15000 && f.size < 4e6)
+        .sort((a, b) => a.size - b.size);
       for (const f of files) {
         let src = f.url;
-        if (/ogg|opus|webm/.test(f.mime) && !canOgg) {
+        if (/ogg|opus|webm/.test(f.mime + src) && !canOgg) {
           // Safari/iOS: Commons pravi mp3 kopiju ogg snimaka
           const m = src.match(/\/commons\/(\w)\/(\w\w)\/(.+)$/);
           if (!m) continue;

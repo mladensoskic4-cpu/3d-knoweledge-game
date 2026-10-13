@@ -1,10 +1,10 @@
 // Mini igre „Prepoznaj”: instrumenti i životinje, naizmjenično po ZVUKU i po pravoj FOTOGRAFIJI.
-// Zvuk instrumenata: FluidR3 GM (CC BY 3.0). Zvuk životinja: Wikimedia Commons. Fotografije: Wikipedia.
+// Zvuk instrumenata: FluidR3 GM (CC BY 3.0). Zvuk životinja: snimci iz Wikipedia članka o životinji (Wikimedia Commons). Fotografije: Wikipedia.
 // Ako fotografija ne može da se učita, koristi se ilustracija (Microsoft Fluent Emoji, MIT).
 import { h } from '../ui.js';
 import { shuffle } from '../util.js';
 import { playChoiceRounds, simulate, pickOptions } from './kit.js';
-import { wikiImage, preloadImage, commonsSound, playInstrument, playUrl, stopSounds } from '../media.js';
+import { wikiImage, preloadImage, wikiSound, playInstrument, playUrl, stopSounds } from '../media.js';
 
 // [naziv, folder sa zvukom, Wikipedia naslov, ključ ilustracije]
 export const INSTRUMENTS = [
@@ -20,16 +20,24 @@ export const INSTRUMENTS = [
   ['Čelični bubanj', 'steel_drums', 'Steelpan']
 ].map(([name, folder, wiki, ilu]) => ({ name, folder, wiki, ilu }));
 
-// [naziv, Wikipedia naslov, pretraga zvuka (ili null ako je samo slika)]
+// [naziv, Wikipedia naslov (za fotografiju), članci u kojima tražimo snimak, ime u nazivu fajla (regex)]
+// Bez zvuka (null) = samo fotografija.
+const S = (articles, names) => ({ articles, rx: new RegExp(`\\b(${names})`, 'i') });
 export const ANIMALS = [
-  ['Lav', 'Lion', 'lion roar'], ['Vuk', 'Wolf', 'wolf howl'], ['Pas', 'Dog', 'dog barking'], ['Mačka', 'Cat', 'cat meow'],
-  ['Krava', 'Cattle', 'cow moo'], ['Konj', 'Horse', 'horse neigh'], ['Ovca', 'Sheep', 'sheep bleat'], ['Koza', 'Goat', 'goat bleat'],
-  ['Svinja', 'Pig', 'pig grunt'], ['Pijetao', 'Chicken', 'rooster crowing'], ['Patka', 'Duck', 'duck quack'], ['Magarac', 'Donkey', 'donkey bray'],
-  ['Slon', 'Elephant', 'elephant trumpeting'], ['Sova', 'Tawny_owl', 'tawny owl call'], ['Žaba', 'Common_frog', 'frog croaking'],
-  ['Kukavica', 'Common_cuckoo', 'cuckoo call'], ['Delfin', 'Common_bottlenose_dolphin', 'dolphin whistle'], ['Gavran', 'Common_raven', 'raven call'],
-  ['Pčela', 'Western_honey_bee', 'bee buzzing'], ['Cvrčak', 'Field_cricket', 'cricket chirping'], ['Galeb', 'European_herring_gull', 'herring gull call'],
-  ['Tigar', 'Tiger', 'tiger growl'], ['Kit grbavac', 'Humpback_whale', 'humpback whale song'], ['Guska', 'Goose', 'goose honking'],
-  ['Ćurka', 'Wild_turkey', 'turkey gobble'], ['Žirafa', 'Giraffe', null], ['Zebra', 'Zebra', null], ['Kengur', 'Kangaroo', null],
+  ['Lav', 'Lion', S(['Lion'], 'lions?\\b|panthera leo')], ['Vuk', 'Wolf', S(['Wolf', 'Howling'], 'wol(f|ves)\\b|canis lupus')],
+  ['Pas', 'Dog', S(['Dog', 'Bark (sound)'], 'dogs?\\b|canis familiaris|puppy')], ['Mačka', 'Cat', S(['Cat', 'Meow', 'Purr'], 'cats?\\b|felis catus|kitten')],
+  ['Krava', 'Cattle', S(['Cattle', 'Moo'], 'cows?\\b|cattle|bos taurus')], ['Konj', 'Horse', S(['Horse', 'Neigh'], 'horses?\\b|equus ferus|neigh')],
+  ['Ovca', 'Sheep', S(['Sheep'], 'sheep|ovis aries|lambs?\\b')], ['Koza', 'Goat', S(['Goat'], 'goats?\\b|capra hircus')],
+  ['Svinja', 'Pig', S(['Pig', 'Domestic pig'], 'pigs?\\b|sus scrofa|piglets?\\b')], ['Pijetao', 'Chicken', S(['Chicken', 'Rooster', 'Crowing'], 'roosters?\\b|cockerel|chickens?\\b|gallus gallus|cock crow')],
+  ['Patka', 'Duck', S(['Duck', 'Mallard', 'Quack'], 'ducks?\\b|mallard|anas platyrhynchos')], ['Magarac', 'Donkey', S(['Donkey', 'Bray (sound)'], 'donkeys?\\b|equus asinus|burro')],
+  ['Slon', 'Elephant', S(['Elephant', 'African bush elephant', 'Asian elephant'], 'elephants?\\b|loxodonta|elephas')], ['Sova', 'Tawny_owl', S(['Tawny owl'], 'strix aluco|tawny owl')],
+  ['Žaba', 'Common_frog', S(['Common frog', 'Frog'], 'frogs?\\b|rana temporaria|rana\\b')], ['Kukavica', 'Common_cuckoo', S(['Common cuckoo'], 'cuculus canorus|cuckoo')],
+  ['Delfin', 'Common_bottlenose_dolphin', S(['Common bottlenose dolphin', 'Dolphin'], 'dolphins?\\b|tursiops')], ['Gavran', 'Common_raven', S(['Common raven'], 'corvus corax|raven')],
+  ['Pčela', 'Western_honey_bee', S(['Western honey bee', 'Honey bee'], 'bees?\\b|apis mellifera|honeybee')], ['Cvrčak', 'Field_cricket', S(['Field cricket', 'Cricket (insect)'], 'crickets?\\b|gryllus')],
+  ['Galeb', 'European_herring_gull', S(['European herring gull', 'Gull'], 'gulls?\\b|larus')], ['Tigar', 'Tiger', S(['Tiger'], 'tigers?\\b|panthera tigris')],
+  ['Kit grbavac', 'Humpback_whale', S(['Humpback whale', 'Whale vocalization'], 'humpback|megaptera')], ['Guska', 'Goose', S(['Goose', 'Greylag goose'], 'goose|geese|anser\\b')],
+  ['Ćurka', 'Wild_turkey', S(['Wild turkey', 'Domestic turkey'], 'turkeys?\\b|meleagris')],
+  ['Žirafa', 'Giraffe', null], ['Zebra', 'Zebra', null], ['Kengur', 'Kangaroo', null],
   ['Koala', 'Koala', null], ['Panda', 'Giant_panda', null], ['Pingvin', 'Emperor_penguin', null], ['Orao', 'Golden_eagle', null],
   ['Flamingo', 'Flamingo', null], ['Paun', 'Indian_peafowl', null], ['Ajkula', 'Great_white_shark', null], ['Hobotnica', 'Octopus', null],
   ['Krokodil', 'Nile_crocodile', null], ['Kornjača', 'Turtle', null], ['Jež', 'European_hedgehog', null], ['Lisica', 'Red_fox', null],
@@ -107,7 +115,7 @@ export const zivotinje = makeGame({
   intro: 'Naizmjenično čuješ glas životinje ili vidiš njenu fotografiju. Izaberi koja je životinja. Što više tačnih za 25 sekundi.',
   canSound: it => !!it.sound,
   playSound: async it => {
-    const s = await commonsSound(it.sound);
+    const s = await wikiSound(it.sound.articles, it.sound.rx);
     return s ? () => playUrl(s.src) : null;
   }
 });

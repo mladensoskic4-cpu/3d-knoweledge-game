@@ -34,6 +34,12 @@ export function toCyr(text) {
 
 // Engleski: prevod interfejsa. Pitanja su za sada na našem jeziku.
 const EN_EXACT = {
+  'Poništi': 'Clear', 'Tapni stavke redom: prva ide na mjesto 1.': 'Tap the items in order: the first goes to place 1.',
+  'Strelica s brojem pokazuje tačno mjesto stavke.': 'The arrow and number show where each item belongs.',
+  'Zvučni efekti': 'Sound effects', 'Isključi zvučne efekte': 'Turn off sound effects', 'Uključi zvučne efekte': 'Turn on sound effects',
+  'Uvećaj': 'Zoom in', 'Umanji': 'Zoom out', 'Cijela mapa': 'Whole map', 'Tapni na mapu. Prevuci za pomjeranje.': 'Tap the map. Drag to move it.',
+  'Na mapi svijeta tapni traženu državu, grad ili rijeku. Mapu možeš uvećati (＋, točkić ili dva prsta) i pomjerati prevlačenjem. Što bliže, to više bodova. Imaš 35 sekundi.': 'Tap the requested country, city or river on the world map. Zoom in (＋, mouse wheel or two fingers) and drag to move the map. The closer, the more points. You have 35 seconds.',
+  'prvo': 'first', 'posljednje': 'last',
   'Kreni na start': 'Start the race', 'Kreni': 'Go', 'Potvrdi': 'Confirm', 'Nastavi': 'Continue', 'Počni': 'Start',
   'Nova trka': 'New race', 'Promijeni podešavanja': 'Change settings', 'Pusti ponovo': 'Play again', 'Oblasti': 'Topics',
   'Botovi': 'Bots', 'Protivnici': 'Opponents', 'Tvoje ime': 'Your name', 'Uzrast': 'Age group', 'Dužina staze': 'Track length',
@@ -80,7 +86,7 @@ Object.assign(EN_EXACT, {
   'Bijeli je na potezu i može da matira u jednom potezu. Tapni bijelu figuru, pa polje na koje ide. Imaš 30 sekundi za što više problema.': 'White to move and mate in one. Tap a white piece, then its target square. Solve as many as you can in 30 seconds.',
   'Na mapi svijeta tapni traženu državu, grad ili rijeku. Što bliže, to više bodova. Imaš 25 sekundi.': 'Tap the requested country, city or river on the world map. The closer, the more points. You have 25 seconds.',
   'Okreni kartice i spoji svaku zastavu sa nazivom njene države. Ima 6 parova i 25 sekundi. Na početku sve kartice vidiš na trenutak.': 'Flip the cards and match each flag with its country name. 6 pairs, 25 seconds. You see all cards for a moment at the start.',
-  'Pojavljuje se obris države. Izaberi koja je to država. Što više tačnih za 20 sekundi, greška oduzima pola boda.': 'A country outline appears. Pick which country it is. As many as you can in 20 seconds; a mistake costs half a point.',
+  'Pojavljuje se država (zeleno) sa susjedima i morem oko nje. Izaberi koja je to država. Što više tačnih za 20 sekundi, greška oduzima pola boda.': 'A country appears in green, with its neighbours and the sea around it. Pick which country it is. As many as you can in 20 seconds; a mistake costs half a point.',
   'Pojavljuje se država, a ti biraš njen glavni grad. Odgovori na što više za 20 sekundi. Greška oduzima pola boda.': 'A country appears and you pick its capital. Answer as many as you can in 20 seconds; a mistake costs half a point.',
   'Pojavljuje se fotografija mjesta ili spomenika. Izaberi gdje se nalazi. Što više tačnih za 25 sekundi.': 'A photo of a place or landmark appears. Pick where it is. As many as you can in 25 seconds.',
   'Naizmjenično čuješ zvuk instrumenta ili vidiš njegovu fotografiju. Izaberi koji je instrument. Što više tačnih za 25 sekundi.': 'You alternately hear an instrument or see its photo. Pick the instrument. As many as you can in 25 seconds.',

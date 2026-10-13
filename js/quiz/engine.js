@@ -15,6 +15,7 @@ import melodija from './types/melody.js';
 import { h, AREAS } from '../ui.js';
 import { shuffle, clamp } from '../util.js';
 import { getLang } from '../i18n.js';
+import { correct as sfxOk, wrong as sfxBad } from '../sfx.js';
 
 const REGISTRY = new Map();
 export function registerType(mod) { REGISTRY.set(mod.id, mod); }
@@ -145,6 +146,7 @@ export function runQuestion(q, card, { round, rng = Math.random, powerups = [], 
       res.tiles = tilesFor(res.accuracy, timeUsed, limit);
       handle.reveal?.(res);
       const good = res.accuracy >= 0.75 ? 'good' : res.accuracy >= 0.2 ? 'mid' : 'bad';
+      (good === 'bad' ? sfxBad : sfxOk)();
       foot.append(h('div', { class: `verdict ${good}` },
         h('strong', {}, verdictText(res)),
         h('span', {}, res.tiles ? `+${res.tiles} ${res.tiles === 1 ? 'polje' : 'polja'}` : 'bez pomaka')
