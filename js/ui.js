@@ -8,7 +8,10 @@ export const AREAS = {
   priroda:    { label: 'Priroda i životinje', color: '#5c8d2c' },
   hrana:      { label: 'Hrana i običaji', color: '#d9822b' },
   logika:     { label: 'Logika i matematika', color: '#3d5a80' },
-  film:       { label: 'Filmovi i serije', color: '#c2410c' }
+  film:       { label: 'Filmovi i serije', color: '#c2410c' },
+  nauka:      { label: 'Nauka i svemir', color: '#2a4d9b' },
+  jezici:     { label: 'Jezici svijeta', color: '#0f8a8a' },
+  tehnologija: { label: 'Tehnologija i gejming', color: '#6b3fa0' }
 };
 
 export function h(tag, attrs = {}, ...kids) {

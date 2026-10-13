@@ -14,6 +14,7 @@ import mutna from './types/blur.js';
 import melodija from './types/melody.js';
 import { h, AREAS } from '../ui.js';
 import { shuffle, clamp } from '../util.js';
+import { getLang } from '../i18n.js';
 
 const REGISTRY = new Map();
 export function registerType(mod) { REGISTRY.set(mod.id, mod); }
@@ -87,6 +88,7 @@ function verdictText(r) {
 
 // powerups: [{ id, label, count, kind: 'fifty' | 'freeze' | 'shortcut' | 'slow' }], onUse(id) javlja potrošnju.
 export function runQuestion(q, card, { round, rng = Math.random, powerups = [], onUse = () => {} }) {
+  if (getLang() === 'en' && q.en) q = { ...q, ...q.en };
   return new Promise(resolve => {
     const type = getType(q.tip);
     const limit = timeLimitOf(q);

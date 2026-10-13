@@ -1,87 +1,113 @@
-// Mini igre „Prepoznaj”: pokaže se ilustracija (instrument ili životinja), biraš naziv. Što više tačnih za 20 sekundi.
-// Ilustracije: Microsoft Fluent Emoji (MIT licenca), spakovane u data/ilustracije.json.
+// Mini igre „Prepoznaj”: instrumenti i životinje, naizmjenično po ZVUKU i po pravoj FOTOGRAFIJI.
+// Zvuk instrumenata: FluidR3 GM (CC BY 3.0). Zvuk životinja: Wikimedia Commons. Fotografije: Wikipedia.
+// Ako fotografija ne može da se učita, koristi se ilustracija (Microsoft Fluent Emoji, MIT).
 import { h } from '../ui.js';
-import { clamp, gaussian, shuffle, sleep } from '../util.js';
+import { shuffle } from '../util.js';
+import { playChoiceRounds, simulate, pickOptions } from './kit.js';
+import { wikiImage, preloadImage, commonsSound, playInstrument, playUrl, stopSounds } from '../media.js';
 
-let DATA = null;
-async function loadData() {
-  if (DATA) return DATA;
-  const r = await fetch('data/ilustracije.json');
-  DATA = r.ok ? await r.json() : { instrumenti: {}, zivotinje: {} };
-  [...Object.values(DATA.instrumenti || {}), ...Object.values(DATA.zivotinje || {})].forEach(src => { const i = new Image(); i.src = src; });
-  return DATA;
+// [naziv, folder sa zvukom, Wikipedia naslov, ključ ilustracije]
+export const INSTRUMENTS = [
+  ['Klavir', 'acoustic_grand_piano', 'Piano', 'Klavijature'], ['Violina', 'violin', 'Violin', 'Violina'], ['Violončelo', 'cello', 'Cello'],
+  ['Kontrabas', 'contrabass', 'Double_bass'], ['Truba', 'trumpet', 'Trumpet', 'Truba'], ['Trombon', 'trombone', 'Trombone'],
+  ['Horna', 'french_horn', 'French_horn', 'Rog'], ['Tuba', 'tuba', 'Tuba'], ['Flauta', 'flute', 'Western_concert_flute', 'Frula'],
+  ['Panova frula', 'pan_flute', 'Pan_flute'], ['Klarinet', 'clarinet', 'Clarinet'], ['Oboa', 'oboe', 'Oboe'],
+  ['Saksofon', 'alto_sax', 'Saxophone', 'Saksofon'], ['Klasična gitara', 'acoustic_guitar_nylon', 'Classical_guitar'],
+  ['Električna gitara', 'electric_guitar_clean', 'Electric_guitar', 'Gitara'], ['Bendžo', 'banjo', 'Banjo', 'Bendžo'],
+  ['Sitar', 'sitar', 'Sitar'], ['Harmonika', 'accordion', 'Accordion', 'Harmonika'], ['Usna harmonika', 'harmonica', 'Harmonica'],
+  ['Gajde', 'bagpipe', 'Bagpipes'], ['Orgulje', 'church_organ', 'Pipe_organ'], ['Harfa', 'orchestral_harp', 'Harp'],
+  ['Ksilofon', 'xylophone', 'Xylophone'], ['Marimba', 'marimba', 'Marimba'], ['Timpani', 'timpani', 'Timpani'],
+  ['Čelični bubanj', 'steel_drums', 'Steelpan']
+].map(([name, folder, wiki, ilu]) => ({ name, folder, wiki, ilu }));
+
+// [naziv, Wikipedia naslov, pretraga zvuka (ili null ako je samo slika)]
+export const ANIMALS = [
+  ['Lav', 'Lion', 'lion roar'], ['Vuk', 'Wolf', 'wolf howl'], ['Pas', 'Dog', 'dog barking'], ['Mačka', 'Cat', 'cat meow'],
+  ['Krava', 'Cattle', 'cow moo'], ['Konj', 'Horse', 'horse neigh'], ['Ovca', 'Sheep', 'sheep bleat'], ['Koza', 'Goat', 'goat bleat'],
+  ['Svinja', 'Pig', 'pig grunt'], ['Pijetao', 'Chicken', 'rooster crowing'], ['Patka', 'Duck', 'duck quack'], ['Magarac', 'Donkey', 'donkey bray'],
+  ['Slon', 'Elephant', 'elephant trumpeting'], ['Sova', 'Tawny_owl', 'tawny owl call'], ['Žaba', 'Common_frog', 'frog croaking'],
+  ['Kukavica', 'Common_cuckoo', 'cuckoo call'], ['Delfin', 'Common_bottlenose_dolphin', 'dolphin whistle'], ['Gavran', 'Common_raven', 'raven call'],
+  ['Pčela', 'Western_honey_bee', 'bee buzzing'], ['Cvrčak', 'Field_cricket', 'cricket chirping'], ['Galeb', 'European_herring_gull', 'herring gull call'],
+  ['Tigar', 'Tiger', 'tiger growl'], ['Kit grbavac', 'Humpback_whale', 'humpback whale song'], ['Guska', 'Goose', 'goose honking'],
+  ['Ćurka', 'Wild_turkey', 'turkey gobble'], ['Žirafa', 'Giraffe', null], ['Zebra', 'Zebra', null], ['Kengur', 'Kangaroo', null],
+  ['Koala', 'Koala', null], ['Panda', 'Giant_panda', null], ['Pingvin', 'Emperor_penguin', null], ['Orao', 'Golden_eagle', null],
+  ['Flamingo', 'Flamingo', null], ['Paun', 'Indian_peafowl', null], ['Ajkula', 'Great_white_shark', null], ['Hobotnica', 'Octopus', null],
+  ['Krokodil', 'Nile_crocodile', null], ['Kornjača', 'Turtle', null], ['Jež', 'European_hedgehog', null], ['Lisica', 'Red_fox', null],
+  ['Jelen', 'Red_deer', null], ['Nosorog', 'Rhinoceros', null], ['Nilski konj', 'Hippopotamus', null], ['Gorila', 'Gorilla', null],
+  ['Lijenčina', 'Sloth', null], ['Dabar', 'Beaver', null], ['Lama', 'Llama', null], ['Medvjed', 'Brown_bear', null],
+  ['Polarni medvjed', 'Polar_bear', null], ['Leptir', 'Butterfly', null], ['Bubamara', 'Coccinella_septempunctata', null],
+  ['Foka', 'Harbor_seal', null], ['Kamila', 'Bactrian_camel', null], ['Ris', 'Eurasian_lynx', null], ['Divokoza', 'Chamois', null]
+].map(([name, wiki, sound]) => ({ name, wiki, sound }));
+
+let ILU = null;
+async function illustrations() {
+  if (ILU) return ILU;
+  try { ILU = await (await fetch('data/ilustracije.json')).json(); } catch { ILU = { instrumenti: {}, zivotinje: {} }; }
+  return ILU;
 }
 
-function makeGame({ id, name, intro, group, goal, exclude = [] }) {
+function soundStage(replay) {
+  const btn = h('button', { type: 'button', class: 'btn btn-ghost', id: 'rec-replay' }, 'Pusti ponovo');
+  btn.addEventListener('click', replay);
+  return h('div', { class: 'mel-stage rec-sound' }, h('div', { class: 'eq on', 'aria-hidden': 'true' }, [0, 1, 2, 3, 4, 5, 6].map(() => h('i'))),
+    h('div', { class: 'mel-ctrl' }, h('span', { class: 'map-hint' }, 'Slušaj: šta je ovo?'), btn));
+}
+async function photoStage(item, iluGroup) {
+  const img = await wikiImage(item.wiki);
+  if (img && await preloadImage(img.src)) {
+    return h('div', { class: 'photo-frame rec-photo' }, h('img', { src: img.src, alt: 'Šta je na fotografiji?' }),
+      h('a', { class: 'photo-credit', href: img.page, target: '_blank', rel: 'noopener' }, img.credit));
+  }
+  const ilu = (await illustrations())[iluGroup]?.[item.ilu || item.name];
+  if (ilu) return h('div', { class: 'rec-frame' }, h('img', { class: 'rec-img', src: ilu, alt: 'Šta je na slici?' }));
+  return null;
+}
+
+function makeGame({ id, name, intro, list, iluGroup, playSound, canSound }) {
   return {
-    id, name, intro, duration: 20, ready: false, items: [],
-    async init() {
-      const d = await loadData();
-      this.items = Object.entries(d[group] || {}).filter(([n]) => !exclude.includes(n)).map(([label, src]) => ({ label, src }));
-      this.ready = this.items.length >= 6;
-    },
+    id, name, intro, duration: 25,
     play(host, { rng = Math.random } = {}) {
-      const dur = this.duration * 1000, items = this.items;
-      return new Promise(resolve => {
-        const fill = h('i');
-        const status = h('span', { class: 'mg-status' }, '');
-        const img = h('img', { class: 'rec-img', alt: '', draggable: 'false' });
-        const frame = h('div', { class: 'rec-frame' }, img);
-        const grid = h('div', { class: 'cap-grid' });
-        host.append(h('div', { class: 'timer' }, h('div', { class: 'timer-track' }, fill), status), frame, grid);
-        let bag = shuffle([...items], rng), hits = 0, misses = 0, done = false, busy = false;
-        function next() {
-          if (!bag.length) bag = shuffle([...items], rng);
-          const it = bag.pop();
-          const opts = shuffle([it, ...shuffle(items.filter(x => x !== it), rng).slice(0, 3)], rng);
-          img.src = it.src;
-          img.alt = 'Šta je na slici?';
-          frame.classList.remove('pop'); void frame.offsetWidth; frame.classList.add('pop');
-          grid.replaceChildren(...opts.map((o, i) => {
-            const b = h('button', { type: 'button', class: 'mc-opt', id: `rec-${i}`, 'data-ok': String(o === it) }, h('span', { class: 'mc-key' }, String(i + 1)), h('span', { class: 'mc-txt' }, o.label));
-            b.addEventListener('click', async () => {
-              if (done || busy) return;
-              busy = true;
-              if (o === it) { hits++; b.classList.add('is-right'); }
-              else { misses++; b.classList.add('is-wrong'); grid.querySelectorAll('.mc-opt[data-ok="true"]').forEach(x => x.classList.add('is-right')); }
-              await sleep(o === it ? 220 : 650);
-              busy = false;
-              if (!done) next();
-            });
-            return b;
-          }));
-        }
-        const onKey = e => { const n = Number(e.key); if (n >= 1 && n <= 4) grid.children[n - 1]?.click(); };
-        window.addEventListener('keydown', onKey);
-        next();
-        const t0 = performance.now();
-        const tick = now => {
-          const left = Math.max(0, dur - (now - t0));
-          fill.style.transform = `scaleX(${left / dur})`;
-          status.textContent = `${hits} tačnih · ${Math.ceil(left / 1000)} s`;
-          if (left <= 0) {
-            done = true;
-            window.removeEventListener('keydown', onKey);
-            grid.querySelectorAll('button').forEach(b => (b.disabled = true));
-            return resolve({ score: clamp((hits - misses * 0.5) / goal, 0, 1), label: `${hits} tačnih` });
+      let bag = shuffle([...list], rng), turn = 0;
+      return playChoiceRounds(host, {
+        duration: this.duration, goal: 7,
+        next: async () => {
+          for (let tries = 0; tries < 6; tries++) {
+            if (!bag.length) bag = shuffle([...list], rng);
+            const it = bag.pop();
+            const wantSound = turn % 2 === 0 && canSound(it);
+            if (wantSound) {
+              const play = await playSound(it);
+              if (play) {
+                turn++;
+                const pool = list.filter(canSound).map(x => x.name);
+                return { stage: soundStage(play), options: pickOptions(rng, it.name, pool), answer: it.name, onShow: play, onDone: stopSounds };
+              }
+            }
+            const stage = await photoStage(it, iluGroup);
+            if (stage) { turn++; return { stage, options: pickOptions(rng, it.name, list.map(x => x.name)), answer: it.name }; }
           }
-          requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+          const it = list[0];
+          return { stage: h('p', { class: 'lede small' }, 'Slike trenutno nisu dostupne.'), options: pickOptions(rng, it.name, list.map(x => x.name)), answer: it.name };
+        }
       });
     },
-    simulateBot(skill, rng = Math.random) {
-      const score = clamp(skill * 0.95 + gaussian(rng) * 0.15, 0, 1);
-      return { score, label: `${Math.round(score * goal)} tačnih` };
-    }
+    simulateBot: simulate(7, 'tačnih')
   };
 }
 
 export const instrumenti = makeGame({
-  id: 'instrumenti', name: 'Koji je ovo instrument?', group: 'instrumenti', goal: 9, exclude: ['Mikrofon'],
-  intro: 'Pojavljuje se muzički instrument. Izaberi kako se zove. Što više tačnih za 20 sekundi, greška oduzima pola boda.'
+  id: 'instrumenti', name: 'Koji je ovo instrument?', list: INSTRUMENTS, iluGroup: 'instrumenti',
+  intro: 'Naizmjenično čuješ zvuk instrumenta ili vidiš njegovu fotografiju. Izaberi koji je instrument. Što više tačnih za 25 sekundi.',
+  canSound: () => true,
+  playSound: async it => () => playInstrument(it.folder)
 });
+
 export const zivotinje = makeGame({
-  id: 'zivotinje', name: 'Koja je ovo životinja?', group: 'zivotinje', goal: 10,
-  intro: 'Pojavljuje se životinja. Izaberi kako se zove. Što više tačnih za 20 sekundi, greška oduzima pola boda.'
+  id: 'zivotinje', name: 'Koja je ovo životinja?', list: ANIMALS, iluGroup: 'zivotinje',
+  intro: 'Naizmjenično čuješ glas životinje ili vidiš njenu fotografiju. Izaberi koja je životinja. Što više tačnih za 25 sekundi.',
+  canSound: it => !!it.sound,
+  playSound: async it => {
+    const s = await commonsSound(it.sound);
+    return s ? () => playUrl(s.src) : null;
+  }
 });

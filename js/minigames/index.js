@@ -10,24 +10,27 @@ import zastave from './flags.js';
 import gradovi from './capitals.js';
 import mjesta from './photos.js';
 import { instrumenti, zivotinje } from './recognize.js';
+import memorija from './memory.js';
+import sah from './chess.js';
+import oblik from './shape.js';
+import mapaSvijeta from './worldmap.js';
 
 const REGISTRY = [];
 export function registerMinigame(m) { REGISTRY.push(m); }
-[zastave, gradovi, instrumenti, zivotinje, mjesta].forEach(registerMinigame);
+[zastave, gradovi, instrumenti, zivotinje, mjesta, memorija, sah, oblik, mapaSvijeta].forEach(registerMinigame);
 
 export async function initMinigames() {
   await Promise.all(REGISTRY.map(m => m.init?.().catch(() => {})));
 }
 const available = () => REGISTRY.filter(m => m.ready !== false);
 
-let lastId = null;
-// Naizmjenično, da se ista mini igra ne ponavlja dvaput zaredom.
+// Smjenjivanje: svaka mini igra dođe na red prije nego što se neka ponovi.
+let queue = [];
 export function pickMinigame(rng = Math.random) {
   const all = available();
-  const pool = all.length > 1 ? all.filter(m => m.id !== lastId) : all;
-  const m = pool[Math.floor(rng() * pool.length)];
-  lastId = m.id;
-  return m;
+  queue = queue.filter(m => all.includes(m));
+  if (!queue.length) queue = all.slice().sort(() => rng() - 0.5);
+  return queue.shift();
 }
 
 export function rewardFor(score) {

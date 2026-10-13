@@ -59,11 +59,106 @@ const EN_RX = [
   [/^(\d+) tačnih · (\d+) s$/, '$1 correct · $2 s'], [/^(\d+) pogodaka · (\d+) s$/, '$1 hits · $2 s'], [/^Mini igra · (\d+) s$/, 'Mini game · $1 s'],
   [/^Otključava se na rangu (.+)$/, 'Unlocks at rank $1']
 ];
+
+// --- dopuna engleskog prevoda (meni, garaža, mini igre, bonus runda, rang-lista) ---
+Object.assign(EN_EXACT, {
+  'Trka do Durmitora': 'Race to Durmitor', 'Kviz-trka': 'Quiz race', 'Nauka i svemir': 'Science & space', 'Jezici svijeta': 'World languages',
+  'Tehnologija i gejming': 'Tech & gaming', 'Brz na obaraču': 'Quick on the trigger', 'Zna svaku uvalu': 'Knows every cove', 'Spor, ali temeljan': 'Slow but thorough',
+  'Grad (za rang-listu)': 'City (for the leaderboard)', 'Škola (opciono)': 'School (optional)', 'npr. Podgorica': 'e.g. Podgorica', 'Igrač': 'Player',
+  'sva pitanja': 'all questions', 'do 12 godina · lakša pitanja, više vremena': 'up to 12 · easier questions, more time', '13–17 · bez najtežih pitanja': '13–17 · no hardest questions',
+  'oko 3–5 min': 'about 3–5 min', 'oko 6–8 min': 'about 6–8 min', 'oko 10 min': 'about 10 min', 'Odgovaraj brzo i tačno da pređeš više polja. Na zlatnim stanicama te čeka mini igra. Pobjede donose bodove za rang, a viši rang otključava veće mape.': 'Answer fast and right to move more tiles. Golden stations hold a mini game. Wins earn rank points, and higher ranks unlock bigger maps.',
+  'Uključi muziku': 'Turn music on', 'Isključi muziku': 'Turn music off', 'Muzika': 'Music',
+  'Nagrada: novčići i skok do 3 polja naprijed.': 'Reward: coins and a jump of up to 3 tiles.', 'Bonus runda · svi igraju': 'Bonus round · everyone plays',
+  'Sva četiri igrača igraju istu mini igru. Pobjednik ide 3 polja naprijed i dobija 50 novčića, drugi ide 1 polje.': 'All four players play the same mini game. The winner moves 3 tiles and gets 50 coins, second place moves 1 tile.',
+  'Pobijedio si u bonus rundi!': 'You won the bonus round!', 'Stigao si prvi do cilja.': 'You reached the finish first.', 'bodova za rang': 'rank points', 'novčića': 'coins',
+  'isteklo vrijeme': 'time ran out', 'sve tačno': 'all correct', 'Broj pokazuje tačno mjesto.': 'The number shows the correct position.', 'ili upiši:': 'or type:',
+  'Možeš tapnuti ponovo da pomjeriš oznaku.': 'Tap again to move your pin.', 'Nisi označio lokaciju.': 'You did not mark a location.', 'Tapni na mapu.': 'Tap the map.',
+  'Slušaj: šta je ovo?': 'Listen: what is this?', 'Slike trenutno nisu dostupne.': 'Pictures are not available right now.', 'Fotografije trenutno nisu dostupne.': 'Photos are not available right now.',
+  'Bijeli na potezu: mat u 1': 'White to move: mate in 1', 'Mat u jednom potezu': 'Mate in one', 'Memorija: zastava i država': 'Memory: flag and country',
+  'Pogodi državu po obliku': 'Guess the country by its shape', 'Pronađi na mapi svijeta': 'Find it on the world map', 'Zastave u letu': 'Flying flags', 'Glavni gradovi': 'Capitals',
+  'Gdje je ovo?': 'Where is this?', 'Koji je ovo instrument?': 'Which instrument is this?', 'Koja je ovo životinja?': 'Which animal is this?',
+  'Bijeli je na potezu i može da matira u jednom potezu. Tapni bijelu figuru, pa polje na koje ide. Imaš 30 sekundi za što više problema.': 'White to move and mate in one. Tap a white piece, then its target square. Solve as many as you can in 30 seconds.',
+  'Na mapi svijeta tapni traženu državu, grad ili rijeku. Što bliže, to više bodova. Imaš 25 sekundi.': 'Tap the requested country, city or river on the world map. The closer, the more points. You have 25 seconds.',
+  'Okreni kartice i spoji svaku zastavu sa nazivom njene države. Ima 6 parova i 25 sekundi. Na početku sve kartice vidiš na trenutak.': 'Flip the cards and match each flag with its country name. 6 pairs, 25 seconds. You see all cards for a moment at the start.',
+  'Pojavljuje se obris države. Izaberi koja je to država. Što više tačnih za 20 sekundi, greška oduzima pola boda.': 'A country outline appears. Pick which country it is. As many as you can in 20 seconds; a mistake costs half a point.',
+  'Pojavljuje se država, a ti biraš njen glavni grad. Odgovori na što više za 20 sekundi. Greška oduzima pola boda.': 'A country appears and you pick its capital. Answer as many as you can in 20 seconds; a mistake costs half a point.',
+  'Pojavljuje se fotografija mjesta ili spomenika. Izaberi gdje se nalazi. Što više tačnih za 25 sekundi.': 'A photo of a place or landmark appears. Pick where it is. As many as you can in 25 seconds.',
+  'Naizmjenično čuješ zvuk instrumenta ili vidiš njegovu fotografiju. Izaberi koji je instrument. Što više tačnih za 25 sekundi.': 'You alternately hear an instrument or see its photo. Pick the instrument. As many as you can in 25 seconds.',
+  'Naizmjenično čuješ glas životinje ili vidiš njenu fotografiju. Izaberi koja je životinja. Što više tačnih za 25 sekundi.': 'You alternately hear an animal or see its photo. Pick the animal. As many as you can in 25 seconds.',
+  'Čim se pojavi naziv države, njena zastava poleti preko ekrana. Tapni je prije nego što izađe, jer se ne vraća. Pogrešna zastava oduzima pola boda.': 'As soon as a country name appears, its flag flies across the screen. Tap it before it leaves — it will not come back. A wrong flag costs half a point.',
+  'Rang-lista sa drugim igračima se uključuje kad povežemo server. Do tada vidiš svoje posljednje trke.': 'The leaderboard with other players needs the server. Until then you see your recent races.',
+  'Još nema trka u ovom periodu.': 'No races in this period yet.', 'Upiši svoj grad u meniju da vidiš rang-listu grada.': 'Enter your city in the menu to see the city leaderboard.',
+  'Upiši svoju školu u meniju da vidiš rang-listu škole.': 'Enter your school in the menu to see the school leaderboard.', 'Učitavam…': 'Loading…',
+  'Napiši pitanje sa četiri ponuđena odgovora. Prvi odgovor je tačan, a u igri se odgovori miješaju. Pitanje ulazi u igru kad ga odobrimo.': 'Write a question with four answers. The first answer is the correct one; answers are shuffled in the game. The question goes live after we approve it.',
+  'Tačan odgovor': 'Correct answer', 'Pitanje je prekratko. Napiši bar 10 znakova.': 'The question is too short. Write at least 10 characters.',
+  'Popuni sva četiri odgovora.': 'Fill in all four answers.', 'Odgovori moraju biti različiti.': 'Answers must be different.',
+  'Hvala! Pitanje je poslato na pregled.': 'Thanks! The question was sent for review.', 'Hvala! Pitanje je sačuvano i biće poslato kad se poveže server.': 'Thanks! The question is saved and will be sent when the server is connected.',
+  'Igra se nije učitala': 'The game did not load', 'Osvježi stranicu da pokušaš ponovo.': 'Refresh the page to try again.', 'Nemaš dovoljno novčića.': 'Not enough coins.',
+  'Auto': 'Car', 'Konj': 'Horse', 'Kamion': 'Truck', 'Crvena': 'Red', 'Plava': 'Blue', 'Zelena': 'Green', 'Narandžasta': 'Orange', 'Ljubičasta': 'Purple', 'Crna': 'Black',
+  'Bijela': 'White', 'Smeđa': 'Brown', 'Zlatna': 'Gold', 'Dijamantska': 'Diamond', 'Žuta': 'Yellow', 'Svijetla': 'Light', 'Vrlo svijetla': 'Very light', 'Tamnija': 'Darker', 'Tamna': 'Dark',
+  'Bez kape': 'No hat', 'Kačket': 'Cap', 'Šešir': 'Hat', 'Tradicionalna kapa': 'Traditional cap', 'Kaciga': 'Helmet', 'Kruna': 'Crown', 'Bez naočara': 'No glasses', 'Naočare za sunce': 'Sunglasses',
+  'Zastavica': 'Little flag', 'Turbo plamen': 'Turbo flame', 'Spojler': 'Spoiler', 'Sedlo': 'Saddle', 'Teret': 'Cargo',
+  'Uklanja dva netačna odgovora (pitanja sa ponuđenim odgovorima).': 'Removes two wrong answers (multiple-choice questions).', 'Zaustavlja vrijeme na 5 sekundi.': 'Stops the clock for 5 seconds.',
+  'U ovoj rundi ideš 2 polja više.': 'You move 2 extra tiles this round.', 'U ovoj rundi svaki protivnik ide polje manje.': 'Each rival moves one tile less this round.',
+  'Klavir': 'Piano', 'Violina': 'Violin', 'Violončelo': 'Cello', 'Kontrabas': 'Double bass', 'Truba': 'Trumpet', 'Trombon': 'Trombone', 'Horna': 'French horn', 'Tuba': 'Tuba',
+  'Flauta': 'Flute', 'Panova frula': 'Pan flute', 'Klarinet': 'Clarinet', 'Oboa': 'Oboe', 'Saksofon': 'Saxophone', 'Klasična gitara': 'Classical guitar', 'Električna gitara': 'Electric guitar',
+  'Bendžo': 'Banjo', 'Sitar': 'Sitar', 'Harmonika': 'Accordion', 'Usna harmonika': 'Harmonica', 'Gajde': 'Bagpipes', 'Orgulje': 'Pipe organ', 'Harfa': 'Harp', 'Ksilofon': 'Xylophone',
+  'Marimba': 'Marimba', 'Timpani': 'Timpani', 'Čelični bubanj': 'Steelpan', 'Lav': 'Lion', 'Vuk': 'Wolf', 'Pas': 'Dog', 'Mačka': 'Cat', 'Krava': 'Cow', 'Ovca': 'Sheep', 'Koza': 'Goat',
+  'Svinja': 'Pig', 'Pijetao': 'Rooster', 'Patka': 'Duck', 'Magarac': 'Donkey', 'Slon': 'Elephant', 'Sova': 'Owl', 'Žaba': 'Frog', 'Kukavica': 'Cuckoo', 'Delfin': 'Dolphin', 'Gavran': 'Raven',
+  'Pčela': 'Bee', 'Cvrčak': 'Cricket', 'Galeb': 'Gull', 'Tigar': 'Tiger', 'Kit grbavac': 'Humpback whale', 'Guska': 'Goose', 'Ćurka': 'Turkey', 'Žirafa': 'Giraffe', 'Zebra': 'Zebra',
+  'Kengur': 'Kangaroo', 'Koala': 'Koala', 'Panda': 'Panda', 'Pingvin': 'Penguin', 'Orao': 'Eagle', 'Flamingo': 'Flamingo', 'Paun': 'Peacock', 'Ajkula': 'Shark', 'Hobotnica': 'Octopus',
+  'Krokodil': 'Crocodile', 'Kornjača': 'Turtle', 'Jež': 'Hedgehog', 'Lisica': 'Fox', 'Jelen': 'Deer', 'Nosorog': 'Rhinoceros', 'Nilski konj': 'Hippopotamus', 'Gorila': 'Gorilla',
+  'Lijenčina': 'Sloth', 'Dabar': 'Beaver', 'Lama': 'Llama', 'Medvjed': 'Bear', 'Polarni medvjed': 'Polar bear', 'Leptir': 'Butterfly', 'Bubamara': 'Ladybird', 'Foka': 'Seal',
+  'Kamila': 'Camel', 'Ris': 'Lynx', 'Divokoza': 'Chamois', 'Gitara': 'Guitar', 'Klavijature': 'Keyboard', 'Frula': 'Flute', 'Rog': 'Horn',
+  'Ajfelova kula, Pariz': 'Eiffel Tower, Paris', 'Koloseum, Rim': 'Colosseum, Rome', 'Krivi toranj, Piza': 'Leaning Tower, Pisa', 'Akropolj, Atina': 'Acropolis, Athens',
+  'Sagrada Familija, Barselona': 'Sagrada Família, Barcelona', 'Big Ben, London': 'Big Ben, London', 'Tauer bridž, London': 'Tower Bridge, London', 'Brandenburška kapija, Berlin': 'Brandenburg Gate, Berlin',
+  'Nojšvanštajn, Njemačka': 'Neuschwanstein, Germany', 'Crkva Vasilija Blaženog, Moskva': "St Basil's Cathedral, Moscow", 'Aja Sofija, Istanbul': 'Hagia Sophia, Istanbul', 'Karlov most, Prag': 'Charles Bridge, Prague',
+  'Kip slobode, Njujork': 'Statue of Liberty, New York', 'Golden Gejt, San Francisko': 'Golden Gate, San Francisco', 'Veliki kanjon, SAD': 'Grand Canyon, USA', 'Nijagarini vodopadi': 'Niagara Falls',
+  'Hrist Iskupitelj, Rio de Žaneiro': 'Christ the Redeemer, Rio de Janeiro', 'Maču Pikču, Peru': 'Machu Picchu, Peru', 'Čičen Ica, Meksiko': 'Chichén Itzá, Mexico', 'Piramide u Gizi, Egipat': 'Pyramids of Giza, Egypt',
+  'Tadž Mahal, Indija': 'Taj Mahal, India', 'Kineski zid': 'Great Wall of China', 'Fudži, Japan': 'Mount Fuji, Japan', 'Petra, Jordan': 'Petra, Jordan', 'Burdž Kalifa, Dubai': 'Burj Khalifa, Dubai',
+  'Opera u Sidneju': 'Sydney Opera House', 'Angkor Vat, Kambodža': 'Angkor Wat, Cambodia', 'Mont Everest': 'Mount Everest', 'Stonhendž, Engleska': 'Stonehenge, England', 'Viktorijini vodopadi': 'Victoria Falls',
+  'Materhorn, Alpi': 'Matterhorn, Alps', 'Uluru, Australija': 'Uluru, Australia', 'Sveti Stefan, Crna Gora': 'Sveti Stefan, Montenegro', 'Perast, Crna Gora': 'Perast, Montenegro', 'Kotor, Crna Gora': 'Kotor, Montenegro',
+  'Most na Đurđevića Tari, Crna Gora': 'Đurđevića Tara Bridge, Montenegro', 'Manastir Ostrog, Crna Gora': 'Ostrog Monastery, Montenegro', 'Lovćen, Crna Gora': 'Lovćen, Montenegro', 'Durmitor, Crna Gora': 'Durmitor, Montenegro',
+  'Stari Bar, Crna Gora': 'Old Bar, Montenegro', 'Kalemegdan, Beograd': 'Kalemegdan, Belgrade', 'Hram Svetog Save, Beograd': 'Church of Saint Sava, Belgrade', 'Petrovaradin, Novi Sad': 'Petrovaradin, Novi Sad',
+  'Manastir Studenica, Srbija': 'Studenica Monastery, Serbia', 'Stari most, Mostar': 'Old Bridge, Mostar', 'Baščaršija, Sarajevo': 'Baščaršija, Sarajevo', 'Dubrovnik, Hrvatska': 'Dubrovnik, Croatia',
+  'Plitvička jezera, Hrvatska': 'Plitvice Lakes, Croatia', 'Bled, Slovenija': 'Bled, Slovenia', 'Ohridsko jezero': 'Lake Ohrid', 'Šta je na fotografiji?': 'What is in the photo?', 'Šta je na slici?': 'What is in the picture?',
+  'Pitanje je predložio igrač.': 'This question was suggested by a player.', 'Ovaj pregledač ne podržava zvuk.': 'This browser does not support sound.', 'Tapni „Pusti ponovo” da čuješ melodiju.': 'Tap “Play again” to hear the tune.',
+  'Nastavi': 'Continue', 'cilj': 'finish', 'Tapni na mapu, pa potvrdi.': 'Tap the map, then confirm.', 'Zapamti!': 'Memorize!', 'Tapni:': 'Tap:'
+});
+EN_RX.push(
+  [/^(\d+) bodova · još (\d+) do ranga (.+)$/, '$1 points · $2 to rank $3'], [/^(\d+) bodova · najviši rang$/, '$1 points · top rank'],
+  [/^Izabrano (\d+) od 3\.$/, '$1 of 3 selected.'], [/^Pitanja iz svih oblasti \((\d+)\)\.$/, 'Questions from all topics ($1).'],
+  [/^(.+) → (.+)$/, '$1 → $2'], [/^Trka počinje: (.+)\. Srećno!$/, 'The race starts in $1. Good luck!'], [/^Cilj: (.+) · (\d+) rundi$/, 'Finish: $1 · $2 rounds'],
+  [/^CILJ · (.+)$/, 'FINISH · $1'], [/^(.+) je prvi stigao$/, '$1 finished first'], [/^Ti si (\d+)\. na cilju\. Probaj ponovo!$/, 'You finished $1. Try again!'],
+  [/^(\d+)\/(\d+) dobrih · (\d+) novčića$/, '$1/$2 right · $3 coins'], [/^(\d+) do cilja$/, '$1 to go'], [/^Novi rang: (.+)!$/, 'New rank: $1!'], [/^Otključana mapa: (.+)$/, 'Map unlocked: $1'],
+  [/^(.+) · (\d+) novčića$/, (m, a, b) => toEn(a) + ' · ' + b + ' coins'], [/^(\d+) tačnih$/, '$1 correct'], [/^(\d+) matova(?: · (\d+) s)?$/, (m, a, b) => `${a} mates` + (b ? ` · ${b} s` : '')],
+  [/^(\d+)\/6 parova$/, '$1/6 pairs'], [/^(\d+)\/6 · (\d+) s$/, '$1/6 · $2 s'], [/^([\d.]+) bodova(?: · (\d+) s)?$/, (m, a, b) => `${a} points` + (b ? ` · ${b} s` : '')],
+  [/^(\d+) (zastava|gradova|mjesta|pogodaka)$/, (m, a, w) => `${a} ${{ zastava: 'flags', gradova: 'capitals', mjesta: 'places', pogodaka: 'hits' }[w]}`],
+  [/^(\d+) pogodaka, (\d+) promašaja$/, '$1 hits, $2 misses'], [/^Promašaj: ([\d.]+) km$/, 'Off by $1 km'], [/^Mat! (.+)$/, 'Mate! $1'], [/^Nije mat\. Tačno je bilo: (.+)$/, 'Not mate. The answer was $1'],
+  [/^Tapni (državu|grad|rijeku):$/, (m, w) => `Tap the ${{ državu: 'country', grad: 'city', rijeku: 'river' }[w]}:`], [/^Bonus runda · (.+)$/, (m, a) => 'Bonus round · ' + toEn(a)],
+  [/^(.+) je pobijedio u bonus rundi$/, '$1 won the bonus round'], [/^(\d+)\. mjesto$/, 'Place $1'], [/^Imaš: (\d+)$/, 'You have: $1'], [/^Isprobavaš: (.+)$/, 'Trying on: $1'],
+  [/^Majica: (.+)$/, 'Shirt: $1'], [/^Rang: (.+)$/, 'Rank: $1'], [/^Netačan odgovor (\d)$/, 'Wrong answer $1'], [/^\+(\d+) polje$/, '+$1 tile'],
+  [/^(.+) · prečica \+2$/, '$1 · shortcut +2'], [/^(.+) · usporen$/, '$1 · slowed'], [/^Tačno spojeno: (\d+) od (\d+)\. Isprekidano = tačan par\.$/, 'Matched correctly: $1 of $2. Dashed = correct pair.'],
+  [/^(\d+)% tačno$/, '$1% correct'], [/^(\d+)\/(\d+) parova$/, '$1/$2 pairs'], [/^(.+) na stanici: (.+) → \+(\d+) polja$/, '$1 at the station: $2 → +$3 tiles'], [/^(.+) na stanici: (.+) → bez skoka$/, '$1 at the station: $2 → no jump']
+);
+// nazivi država na engleskom (za mini igre)
+let EN_COUNTRY = {};
+export async function loadCountryNames() {
+  try {
+    const en = await (await fetch('data/en-drzave.json')).json();
+    const { COUNTRIES } = await import('./flags.js');
+    COUNTRIES.forEach(c => { if (en[c.code]) EN_COUNTRY[c.name] = en[c.code]; });
+  } catch { /* ostaju lokalni nazivi */ }
+}
+
 export function toEn(text) {
   const t = text.trim();
   if (!t) return text;
   if (EN_EXACT[t]) return text.replace(t, EN_EXACT[t]);
+  if (EN_COUNTRY[t]) return text.replace(t, EN_COUNTRY[t]);
   for (const [rx, rep] of EN_RX) if (rx.test(t)) return text.replace(t, t.replace(rx, rep));
+  // nazivi oblasti u čipovima, npr. „Geografija” unutar dužeg teksta ostaju
+  return text;
   return text;
 }
 
@@ -78,7 +173,7 @@ function translateNode(node) {
   if (mode === 'lat') return;
   if (node.nodeType === 3) {
     const p = node.parentElement;
-    if (!p || SKIP.has(p.tagName) || p.closest('[translate="no"]')) return;
+    if (!p || SKIP.has(p.tagName) || p.closest('[translate="no"], .st-name, .sum-name')) return;
     const v = L(node.nodeValue);
     if (v !== node.nodeValue) node.nodeValue = v;
   } else if (node.nodeType === 1 && !SKIP.has(node.tagName)) {

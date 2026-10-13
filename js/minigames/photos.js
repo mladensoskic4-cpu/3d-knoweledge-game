@@ -1,93 +1,63 @@
-// Mini igra: Gdje je ovo? Prikazuje fotografiju mjesta ili spomenika; biraš gdje se nalazi.
-// Fotografije i podaci su u data/mjesta.json i folderu slike/. Igra se uključuje tek kad ima bar 6 fotografija.
+// Mini igra: Gdje je ovo? Prava fotografija mjesta ili spomenika (Wikipedia), biraš gdje se nalazi.
+// Tvoje fotografije možeš dodati u data/mjesta.json (polja slika, odgovor, autor, licenca); one imaju prednost.
 import { h } from '../ui.js';
-import { clamp, gaussian, shuffle, sleep } from '../util.js';
+import { shuffle } from '../util.js';
+import { playChoiceRounds, simulate, pickOptions } from './kit.js';
+import { wikiImage, preloadImage } from '../media.js';
 
-const GOAL = 6;
+// [Wikipedia naslov (engleski), odgovor]
+const PLACES = [
+  ['Sveti_Stefan', 'Sveti Stefan, Crna Gora'], ['Our_Lady_of_the_Rocks', 'Perast, Crna Gora'], ['Kotor', 'Kotor, Crna Gora'],
+  ['Đurđevića_Tara_Bridge', 'Most na Đurđevića Tari, Crna Gora'], ['Ostrog_Monastery', 'Manastir Ostrog, Crna Gora'],
+  ['Njegoš_Mausoleum', 'Lovćen, Crna Gora'], ['Durmitor', 'Durmitor, Crna Gora'], ['Stari_Bar', 'Stari Bar, Crna Gora'],
+  ['Belgrade_Fortress', 'Kalemegdan, Beograd'], ['Church_of_Saint_Sava', 'Hram Svetog Save, Beograd'],
+  ['Petrovaradin_Fortress', 'Petrovaradin, Novi Sad'], ['Studenica_Monastery', 'Manastir Studenica, Srbija'],
+  ['Stari_Most', 'Stari most, Mostar'], ['Baščaršija', 'Baščaršija, Sarajevo'], ['Dubrovnik', 'Dubrovnik, Hrvatska'],
+  ['Plitvice_Lakes_National_Park', 'Plitvička jezera, Hrvatska'], ['Lake_Bled', 'Bled, Slovenija'], ['Lake_Ohrid', 'Ohridsko jezero'],
+  ['Eiffel_Tower', 'Ajfelova kula, Pariz'], ['Colosseum', 'Koloseum, Rim'], ['Leaning_Tower_of_Pisa', 'Krivi toranj, Piza'],
+  ['Acropolis_of_Athens', 'Akropolj, Atina'], ['Sagrada_Família', 'Sagrada Familija, Barselona'], ['Big_Ben', 'Big Ben, London'],
+  ['Tower_Bridge', 'Tauer bridž, London'], ['Brandenburg_Gate', 'Brandenburška kapija, Berlin'], ['Neuschwanstein_Castle', 'Nojšvanštajn, Njemačka'],
+  ['Saint_Basil\'s_Cathedral', 'Crkva Vasilija Blaženog, Moskva'], ['Hagia_Sophia', 'Aja Sofija, Istanbul'], ['Charles_Bridge', 'Karlov most, Prag'],
+  ['Statue_of_Liberty', 'Kip slobode, Njujork'], ['Golden_Gate_Bridge', 'Golden Gejt, San Francisko'], ['Grand_Canyon', 'Veliki kanjon, SAD'],
+  ['Niagara_Falls', 'Nijagarini vodopadi'], ['Christ_the_Redeemer_(statue)', 'Hrist Iskupitelj, Rio de Žaneiro'], ['Machu_Picchu', 'Maču Pikču, Peru'],
+  ['Chichen_Itza', 'Čičen Ica, Meksiko'], ['Great_Pyramid_of_Giza', 'Piramide u Gizi, Egipat'], ['Taj_Mahal', 'Tadž Mahal, Indija'],
+  ['Great_Wall_of_China', 'Kineski zid'], ['Mount_Fuji', 'Fudži, Japan'], ['Petra', 'Petra, Jordan'], ['Burj_Khalifa', 'Burdž Kalifa, Dubai'],
+  ['Sydney_Opera_House', 'Opera u Sidneju'], ['Angkor_Wat', 'Angkor Vat, Kambodža'], ['Mount_Everest', 'Mont Everest'],
+  ['Stonehenge', 'Stonhendž, Engleska'], ['Victoria_Falls', 'Viktorijini vodopadi'], ['Matterhorn', 'Materhorn, Alpi'], ['Uluru', 'Uluru, Australija']
+].map(([wiki, answer]) => ({ wiki, answer }));
 
-export default {
-  id: 'mjesta',
-  name: 'Gdje je ovo?',
-  intro: 'Pojavljuje se fotografija mjesta ili spomenika. Izaberi gdje se nalazi. Što više tačnih za 20 sekundi, greška oduzima pola boda.',
-  duration: 20,
-  ready: false,
-  entries: [],
-
+const game = {
+  id: 'mjesta', name: 'Gdje je ovo?', duration: 25, ready: false, own: [],
+  intro: 'Pojavljuje se fotografija mjesta ili spomenika. Izaberi gdje se nalazi. Što više tačnih za 25 sekundi.',
   async init() {
     try {
       const r = await fetch('data/mjesta.json');
-      if (!r.ok) return;
-      const d = await r.json();
-      this.entries = (d.mjesta || []).filter(e => e.slika && e.odgovor);
-      this.ready = this.entries.length >= 6;
-      // unaprijed učitaj prve slike
-      if (this.ready) this.entries.slice(0, 4).forEach(e => { const i = new Image(); i.src = e.slika; });
-    } catch { this.ready = false; }
+      if (r.ok) this.own = ((await r.json()).mjesta || []).filter(e => e.slika && e.odgovor);
+    } catch { /* bez sopstvenih fotografija */ }
+    // provjeri da li Wikipedia odgovara (npr. bez interneta igra se preskače)
+    this.ready = this.own.length >= 6;
+    wikiImage(PLACES[0].wiki).then(x => { if (x) this.ready = true; });
   },
-
   play(host, { rng = Math.random } = {}) {
-    const dur = this.duration * 1000;
-    const entries = this.entries;
-    return new Promise(resolve => {
-      const fill = h('i');
-      const status = h('span', { class: 'mg-status' }, '');
-      const img = h('img', { alt: 'Fotografija mjesta koje treba prepoznati', decoding: 'async' });
-      const credit = h('span', { class: 'photo-credit' });
-      const frame = h('div', { class: 'photo-frame' }, img, credit);
-      const grid = h('div', { class: 'cap-grid' });
-      host.append(h('div', { class: 'timer' }, h('div', { class: 'timer-track' }, fill), status), frame, grid);
-
-      let bag = shuffle([...entries], rng), hits = 0, misses = 0, done = false, busy = false;
-      function next() {
-        if (!bag.length) bag = shuffle([...entries], rng);
-        const e = bag.pop();
-        if (bag.length) { const pre = new Image(); pre.src = bag[bag.length - 1].slika; }
-        const others = [...new Set(entries.filter(x => x.odgovor !== e.odgovor).map(x => x.odgovor))];
-        const opts = shuffle([e.odgovor, ...shuffle(others, rng).slice(0, 3)], rng);
-        img.src = e.slika;
-        credit.textContent = [e.autor, e.licenca].filter(Boolean).join(' · ');
-        credit.hidden = !credit.textContent;
-        grid.replaceChildren(...opts.map((o, i) => {
-          const b = h('button', { type: 'button', class: 'mc-opt', id: `ph-${i}` }, h('span', { class: 'mc-key' }, String(i + 1)), h('span', { class: 'mc-txt' }, o));
-          b.addEventListener('click', async () => {
-            if (done || busy) return;
-            busy = true;
-            const ok = o === e.odgovor;
-            if (ok) { hits++; b.classList.add('is-right'); }
-            else {
-              misses++; b.classList.add('is-wrong');
-              grid.querySelectorAll('.mc-opt').forEach(x => { if (x.textContent.slice(1) === e.odgovor) x.classList.add('is-right'); });
-            }
-            await sleep(ok ? 300 : 800);
-            busy = false;
-            if (!done) next();
-          });
-          return b;
-        }));
-      }
-      const onKey = e => { const n = Number(e.key); if (n >= 1 && n <= 4) grid.children[n - 1]?.click(); };
-      window.addEventListener('keydown', onKey);
-      next();
-
-      const t0 = performance.now();
-      const tick = now => {
-        const left = Math.max(0, dur - (now - t0));
-        fill.style.transform = `scaleX(${left / dur})`;
-        status.textContent = `${hits} tačnih · ${Math.ceil(left / 1000)} s`;
-        if (left <= 0) {
-          done = true;
-          window.removeEventListener('keydown', onKey);
-          grid.querySelectorAll('button').forEach(b => (b.disabled = true));
-          return resolve({ score: clamp((hits - misses * 0.5) / GOAL, 0, 1), label: `${hits} mjesta` });
+    const all = [...this.own.map(o => ({ own: o, answer: o.odgovor })), ...PLACES];
+    const answers = all.map(x => x.answer);
+    let bag = shuffle([...all], rng);
+    return playChoiceRounds(host, {
+      duration: this.duration, goal: 6,
+      next: async () => {
+        for (let k = 0; k < 6; k++) {
+          if (!bag.length) bag = shuffle([...all], rng);
+          const it = bag.pop();
+          const img = it.own ? { src: it.own.slika, credit: [it.own.autor, it.own.licenca].filter(Boolean).join(' · ') } : await wikiImage(it.wiki);
+          if (!img || !(await preloadImage(img.src))) continue;
+          const stage = h('div', { class: 'photo-frame' }, h('img', { src: img.src, alt: 'Fotografija mjesta koje treba prepoznati' }),
+            img.credit ? (img.page ? h('a', { class: 'photo-credit', href: img.page, target: '_blank', rel: 'noopener' }, img.credit) : h('span', { class: 'photo-credit' }, img.credit)) : null);
+          return { stage, options: pickOptions(rng, it.answer, answers), answer: it.answer };
         }
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
+        return { stage: h('p', { class: 'lede small' }, 'Fotografije trenutno nisu dostupne.'), options: pickOptions(rng, answers[0], answers), answer: answers[0] };
+      }
     });
   },
-
-  simulateBot(skill, rng = Math.random) {
-    const score = clamp(skill * 0.95 + gaussian(rng) * 0.15, 0, 1);
-    return { score, label: `${Math.round(score * GOAL)} mjesta` };
-  }
+  simulateBot: simulate(6, 'tačnih')
 };
+export default game;

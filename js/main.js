@@ -12,9 +12,20 @@ import { profile, save, RANKS, rankOf, rankProgress, rankIndex, AGES, awardRace,
 import { randomBotLook } from './models.js';
 import { openGarage } from './garage.js';
 import { loadFlags } from './flags.js';
-import { LANGS, setLang } from './i18n.js';
+import { LANGS, setLang, loadCountryNames } from './i18n.js';
 import { initNet, isOnline, pushProfile, submitResult, submitSuggestion, approvedQuestions } from './net.js';
 import { openLeaderboard, openSuggest } from './social.js';
+import { musicEnabled, startMusic, setMusic, isPlaying, duck } from './music.js';
+
+// Muzika: kreće na prvi klik (pregledači ne dozvoljavaju zvuk prije toga); dugme u uglu je pali i gasi.
+const musicBtn = h('button', { type: 'button', id: 'muzika', class: 'music-btn', 'aria-label': 'Muzika' });
+const syncMusicBtn = () => { musicBtn.classList.toggle('off', !isPlaying()); musicBtn.title = isPlaying() ? 'Isključi muziku' : 'Uključi muziku'; };
+musicBtn.addEventListener('click', e => { e.stopPropagation(); setMusic(!isPlaying()); syncMusicBtn(); });
+document.getElementById('app').append(musicBtn);
+syncMusicBtn();
+window.addEventListener('pointerdown', () => { if (musicEnabled() && !isPlaying()) { startMusic(); syncMusicBtn(); } }, { once: true });
+// tiša muzika dok se sluša melodija ili zvuk
+new MutationObserver(() => duck(!!document.querySelector('.mel-stage'))).observe(document.getElementById('layer'), { childList: true, subtree: true });
 
 const rng = Math.random;
 const world = createWorld(document.getElementById('scene'));
@@ -149,7 +160,8 @@ async function showMenu() {
       h('div', { class: 'menu-sec' }, h('h3', {}, h('label', { for: 'skola' }, 'Škola (opciono)')), schoolIn)),
     h('div', { class: 'menu-sec' }, h('h3', {}, 'Protivnici'), roster),
     S.jezik === 'en' ? h('p', { class: 'hint' }, 'Pitanja su na našem jeziku, prevod na engleski stiže uskoro.') : null,
-    h('div', { class: 'menu-go' }, lbBtn, sgBtn, garageBtn, startBtn)
+    h('div', { class: 'menu-go' }, lbBtn, sgBtn, garageBtn, startBtn),
+    h('p', { class: 'credits', translate: 'no' }, 'Zastave: flag-icons (MIT) · Mape: Natural Earth · Zvuci instrumenata: FluidR3 GM, Frank Wen (CC BY 3.0) · Fotografije i zvuci životinja: Wikipedia / Wikimedia Commons · Ilustracije: Microsoft Fluent Emoji (MIT)')
   );
   const ageNote = card.querySelector('#age-note'), lenNote = card.querySelector('#len-note');
   refresh();
@@ -251,6 +263,7 @@ async function raceLoop(deck, timeBonus) {
 
     const atStation = moves.filter(m => m.cp && m.p.pos < track.last).map(m => m.p);
     if (atStation.length) await handleStations(atStation);
+    if (BONUS_ROUNDS.includes(round) && players.every(p => p.pos < track.last)) await bonusRound();
 
     const finishers = players.filter(p => p.pos >= track.last);
     if (finishers.length) {
@@ -259,6 +272,45 @@ async function raceLoop(deck, timeBonus) {
     }
     await sleep(250);
   }
+}
+
+// Bonus runda: svi igrači, bez obzira gdje su na stazi, igraju istu mini igru. Pobjednik dobija nagradu.
+const BONUS_ROUNDS = [4, 10, 16];
+async function bonusRound() {
+  const mg = pickMinigame(rng);
+  const card = openCard('mg-card-wrap bonus');
+  const startBtn = h('button', { class: 'btn btn-primary', type: 'button', id: 'bonus-start' }, 'Počni');
+  card.append(
+    h('header', { class: 'q-head' }, h('span', { class: 'chip', style: { '--chip': '#9b4bd6' } }, 'Bonus runda · svi igraju'), h('span', { class: 'chip ghost' }, `${mg.duration} s`)),
+    h('h2', { class: 'q-text' }, mg.name),
+    h('p', { class: 'lede small' }, mg.intro),
+    h('p', { class: 'hint' }, 'Sva četiri igrača igraju istu mini igru. Pobjednik ide 3 polja naprijed i dobija 50 novčića, drugi ide 1 polje.'),
+    h('div', { class: 'row-bar end' }, startBtn));
+  await waitButton(startBtn);
+  card.replaceChildren(h('header', { class: 'q-head' }, h('span', { class: 'chip', style: { '--chip': '#9b4bd6' } }, `Bonus runda · ${mg.name}`)));
+  const host = h('div', { class: 'mg-host' });
+  card.append(host);
+  const me = human();
+  const mine = await mg.play(host, { rng });
+  const results = players.map(p => ({ p, ...(p.human ? mine : mg.simulateBot(botMinigameSkill(p), rng)) }))
+    .sort((a, b) => b.score - a.score);
+  const prize = [{ jump: 3, coins: 50 }, { jump: 1, coins: 20 }, { jump: 0, coins: 10 }, { jump: 0, coins: 0 }];
+  results.forEach((r, i) => { r.jump = prize[i].jump; r.coins = prize[i].coins; r.p.coins += r.coins; });
+  const cont = h('button', { class: 'btn btn-primary', type: 'button', id: 'bonus-cont' }, 'Nastavi');
+  card.append(
+    h('p', { class: 'rank-up', style: { '--rc': results[0].p.color } }, results[0].p.human ? 'Pobijedio si u bonus rundi!' : `${results[0].p.name} je pobijedio u bonus rundi`),
+    h('ol', { class: 'sum-list' }, results.map((r, i) => h('li', { class: r.p.human ? 'me' : '' },
+      h('i', { class: 'dot', style: { background: r.p.color } }),
+      h('span', { class: 'sum-name' }, `${i + 1}. ${r.p.name}`),
+      h('span', { class: 'sum-text' }, `${r.label} · ${r.coins} novčića`),
+      h('span', { class: 'sum-time' }, ''),
+      h('b', { class: `sum-tiles t${r.jump}` }, r.jump ? `+${r.jump}` : '0')))),
+    h('div', { class: 'row-bar end' }, cont));
+  await waitButton(cont);
+  clearLayer();
+  await moveAll(results.map(r => ({ p: r.p, target: Math.min(track.last, r.p.pos + r.jump) })));
+  renderHud(players, track.last, round);
+  void me;
 }
 
 async function handleStations(list) {
@@ -350,7 +402,7 @@ function showResults() {
 // ---------------- pokretanje ----------------
 Promise.all([
   fetch('data/questions.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-  loadFlags(), preloadBorders()
+  loadFlags(), preloadBorders(), loadCountryNames()
 ])
   .then(async ([d]) => {
     QUESTIONS = d.pitanja;
