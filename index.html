@@ -178,6 +178,24 @@ h1, h2, h3 { margin: 0; text-wrap: balance; }
 
 /* zasluge */
 .credits { margin: 12px 0 0; font-size: 11px; color: var(--muted); line-height: 1.4; }
+.link-btn { border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--ink); text-decoration: underline; cursor: pointer; }
+.card.credits-card { align-self: center; width: min(640px, 100%); }
+.cr-sec { border: 2px solid var(--ink); border-radius: 12px; margin: 8px 0; background: var(--paper); }
+.cr-sec summary { cursor: pointer; padding: 10px 12px; display: flex; justify-content: space-between; gap: 8px; }
+.cr-count { color: var(--muted); font-size: 13px; }
+.cr-list { list-style: none; margin: 0; padding: 0 10px 10px; display: grid; gap: 8px; }
+.cr-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; line-height: 1.35; }
+.cr-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; flex: none; background: var(--mist); }
+.cr-txt { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.cr-txt a { color: var(--ink); }
+.cr-other { margin: 0; padding: 0 14px 12px 30px; font-size: 13px; line-height: 1.5; }
+/* fotografije iz podaci.json: zadržavaju proporcije, staju na ekran */
+.pic-frame { position: relative; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; background: #14232e; border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; width: fit-content; max-width: 100%; }
+.pic-frame img { display: block; max-width: 100%; max-height: min(42vh, 380px); width: auto; height: auto; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+.pic-frame.small img { max-height: min(26vh, 220px); }
+.pic-credit { position: absolute; right: 6px; bottom: 6px; background: rgba(20,35,46,.72); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; max-width: 85%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fm-layout { display: grid; gap: 8px; }
+@media (min-width: 900px) { .fm-layout { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: center; } .fm-layout .pic-frame.small img { max-height: min(46vh, 380px); } }
 
 /* muzika */
 .music-btn { position: absolute; z-index: 25; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); box-shadow: 0 3px 0 var(--ink); cursor: pointer; font-size: 20px; line-height: 1; color: var(--ink); }

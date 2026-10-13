@@ -5,6 +5,7 @@ import { h } from '../ui.js';
 import { shuffle } from '../util.js';
 import { playChoiceRounds, simulate, pickOptions } from './kit.js';
 import { wikiImage, preloadImage, wikiSound, playInstrument, playUrl, stopSounds } from '../media.js';
+import { loadSlike, photoFrame, preload, optionsFor, imeStavke } from '../slike.js';
 
 // [naziv, folder sa zvukom, Wikipedia naslov, ključ ilustracije]
 export const INSTRUMENTS = [
@@ -71,11 +72,22 @@ async function photoStage(item, iluGroup) {
   return null;
 }
 
-function makeGame({ id, name, intro, list, iluGroup, playSound, canSound }) {
+function makeGame({ id, name, intro, list, iluGroup, playSound, canSound, category, key }) {
   return {
-    id, name, intro, duration: 25,
+    id, name, intro, duration: 25, local: [],
+    // fotografije iz <kategorija>/podaci.json imaju prednost nad slikama sa Wikipedije
+    async init() { this.local = (await loadSlike())[category] || []; },
     play(host, { rng = Math.random } = {}) {
-      let bag = shuffle([...list], rng), turn = 0;
+      const local = this.local.length >= 6 ? this.local : null;
+      let bag = shuffle([...list], rng), lbag = [], turn = 0;
+      async function localRound() {
+        for (let k = 0; k < 5; k++) {
+          if (!lbag.length) lbag = shuffle([...local], rng);
+          const it = lbag.pop();
+          if (await preload(it.slika)) return { stage: photoFrame(it), options: optionsFor(rng, it, local, key), answer: imeStavke(it) };
+        }
+        return null;
+      }
       return playChoiceRounds(host, {
         duration: this.duration, goal: 7,
         next: async () => {
@@ -91,6 +103,7 @@ function makeGame({ id, name, intro, list, iluGroup, playSound, canSound }) {
                 return { stage: soundStage(play), options: pickOptions(rng, it.name, pool), answer: it.name, onShow: play, onDone: stopSounds };
               }
             }
+            if (local) { const r = await localRound(); if (r) { turn++; return r; } }
             const stage = await photoStage(it, iluGroup);
             if (stage) { turn++; return { stage, options: pickOptions(rng, it.name, list.map(x => x.name)), answer: it.name }; }
           }
@@ -104,14 +117,14 @@ function makeGame({ id, name, intro, list, iluGroup, playSound, canSound }) {
 }
 
 export const instrumenti = makeGame({
-  id: 'instrumenti', name: 'Koji je ovo instrument?', list: INSTRUMENTS, iluGroup: 'instrumenti',
+  id: 'instrumenti', name: 'Koji je ovo instrument?', list: INSTRUMENTS, iluGroup: 'instrumenti', category: 'instrumenti', key: 'vrsta',
   intro: 'Naizmjenično čuješ zvuk instrumenta ili vidiš njegovu fotografiju. Izaberi koji je instrument. Što više tačnih za 25 sekundi.',
   canSound: () => true,
   playSound: async it => () => playInstrument(it.folder)
 });
 
 export const zivotinje = makeGame({
-  id: 'zivotinje', name: 'Koja je ovo životinja?', list: ANIMALS, iluGroup: 'zivotinje',
+  id: 'zivotinje', name: 'Koja je ovo životinja?', list: ANIMALS, iluGroup: 'zivotinje', category: 'zivotinje', key: 'grupa',
   intro: 'Naizmjenično čuješ glas životinje ili vidiš njenu fotografiju. Izaberi koja je životinja. Što više tačnih za 25 sekundi.',
   canSound: it => !!it.sound,
   playSound: async it => {

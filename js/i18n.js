@@ -34,6 +34,15 @@ export function toCyr(text) {
 
 // Engleski: prevod interfejsa. Pitanja su za sada na našem jeziku.
 const EN_EXACT = {
+  'Zasluge': 'Credits', 'Zasluge i licence': 'Credits and licences', 'Ostali materijali': 'Other materials',
+  'Poznata mjesta': 'Famous places', 'Ljudsko tijelo': 'Human body', 'Muzički instrumenti': 'Musical instruments',
+  'Fotografije još nisu dodate u igru.': 'Photos have not been added to the game yet.',
+  'Fotografije su sa Wikimedia Commonsa, pod slobodnim licencama. Tapni kategoriju da vidiš autora i licencu svake slike.': 'Photos are from Wikimedia Commons under free licences. Tap a category to see the author and licence of each photo.',
+  'Gdje je ova fotografija?': 'Where was this photo taken?', 'Tapni na mapu gdje je ovo mjesto.': 'Tap the map where this place is.',
+  'Vidiš fotografiju poznatog mjesta. Tapni na mapi svijeta gdje se nalazi. Što bliže, to više bodova (do 100 km je pun bod). Imaš 40 sekundi.': 'You see a photo of a famous place. Tap where it is on the world map. The closer, the more points (within 100 km is a full point). You have 40 seconds.',
+  'Koji je ovo dio tijela?': 'Which body part is this?',
+  'Pojavljuje se slika dijela ljudskog tijela. Izaberi koji je. Što više tačnih za 25 sekundi.': 'A picture of a human body part appears. Pick which one it is. As many as you can in 25 seconds.',
+  'Pojavljuje se fotografija poznatog mjesta ili spomenika. Izaberi koje je to mjesto. Što više tačnih za 25 sekundi.': 'A photo of a famous place or landmark appears. Pick which place it is. As many as you can in 25 seconds.',
   'Poništi': 'Clear', 'Tapni stavke redom: prva ide na mjesto 1.': 'Tap the items in order: the first goes to place 1.',
   'Strelica s brojem pokazuje tačno mjesto stavke.': 'The arrow and number show where each item belongs.',
   'Zvučni efekti': 'Sound effects', 'Isključi zvučne efekte': 'Turn off sound effects', 'Uključi zvučne efekte': 'Turn on sound effects',

@@ -15,6 +15,7 @@ import { loadFlags } from './flags.js';
 import { LANGS, setLang, loadCountryNames, L } from './i18n.js';
 import { initNet, isOnline, pushProfile, submitResult, submitSuggestion, approvedQuestions } from './net.js';
 import { openLeaderboard, openSuggest } from './social.js';
+import { openCredits } from './zasluge.js';
 import { musicEnabled, startMusic, setMusic, isPlaying, duck } from './music.js';
 import { sfxEnabled, setSfx, installClicks } from './sfx.js';
 
@@ -170,13 +171,14 @@ async function showMenu() {
     h('div', { class: 'menu-sec' }, h('h3', {}, 'Protivnici'), roster),
     S.jezik === 'en' ? h('p', { class: 'hint' }, 'Pitanja su na našem jeziku, prevod na engleski stiže uskoro.') : null,
     h('div', { class: 'menu-go' }, lbBtn, sgBtn, garageBtn, startBtn),
-    h('p', { class: 'credits', translate: 'no' }, 'Zastave: flag-icons (MIT) · Mape: Natural Earth · Zvuci instrumenata: FluidR3 GM, Frank Wen (CC BY 3.0) · Fotografije i zvuci životinja: Wikipedia / Wikimedia Commons · Ilustracije: Microsoft Fluent Emoji (MIT)')
+    h('p', { class: 'credits' }, 'Fotografije: Wikimedia Commons (slobodne licence) · Zastave: flag-icons · Mape: Natural Earth · ', h('button', { type: 'button', class: 'link-btn', id: 'zasluge' }, 'Zasluge i licence'))
   );
   const ageNote = card.querySelector('#age-note'), lenNote = card.querySelector('#len-note');
   refresh();
   garageBtn.addEventListener('click', () => openGarage(showMenu));
   lbBtn.addEventListener('click', () => openLeaderboard(showMenu));
   sgBtn.addEventListener('click', () => openSuggest(showMenu));
+  card.querySelector('#zasluge').addEventListener('click', () => openCredits(showMenu));
   startBtn.addEventListener('click', () => {
     P.ime = nameIn.value.trim();
     Object.assign(S, { miks: mix, oblasti: mix ? null : [...picked] });

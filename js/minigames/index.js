@@ -8,7 +8,8 @@
 //   simulateBot(skill, rng) -> { score 0..1, label }
 import zastave from './flags.js';
 import gradovi from './capitals.js';
-import mjesta from './photos.js';
+import mjesta, { tijelo } from './photos.js';
+import fotoMapa from './fotomapa.js';
 import { instrumenti, zivotinje } from './recognize.js';
 import memorija from './memory.js';
 import sah from './chess.js';
@@ -17,7 +18,7 @@ import mapaSvijeta from './worldmap.js';
 
 const REGISTRY = [];
 export function registerMinigame(m) { REGISTRY.push(m); }
-[zastave, gradovi, instrumenti, zivotinje, mjesta, memorija, sah, oblik, mapaSvijeta].forEach(registerMinigame);
+[zastave, gradovi, instrumenti, zivotinje, mjesta, fotoMapa, tijelo, memorija, sah, oblik, mapaSvijeta].forEach(registerMinigame);
 
 export async function initMinigames() {
   await Promise.all(REGISTRY.map(m => m.init?.().catch(() => {})));
