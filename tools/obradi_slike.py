@@ -102,6 +102,8 @@ def main():
                 gotova = stara.endswith(".jpg") and im.format == "JPEG" and im.width <= SIRINA
             if not gotova:
                 s["slika"] = obradi_sliku(stara).replace(os.sep, "/")
+                if os.path.normpath(s["slika"]) != os.path.normpath(stara):
+                    os.remove(stara)  # original (PNG/GIF/JPEG) više ne treba
             if kat == "mjesta" and s.get("lat") is None and s.get("wikipedia") in KOORDINATE:
                 s["lat"], s["lon"] = KOORDINATE[s["wikipedia"]]
             razlog = ISKLJUCI.get(s.get("izvor", "").rsplit("/", 1)[-1])
