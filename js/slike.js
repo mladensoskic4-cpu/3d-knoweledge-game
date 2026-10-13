@@ -17,7 +17,7 @@ export function loadSlike() {
   job ||= Promise.all(Object.keys(KATEGORIJE).map(k =>
     fetch(`${k}/podaci.json`).then(r => (r.ok ? r.json() : [])).catch(() => [])))
     .then(all => Object.fromEntries(Object.keys(KATEGORIJE).map((k, i) =>
-      [k, (Array.isArray(all[i]) ? all[i] : []).filter(x => x && x.slika && x.naziv)])));
+      [k, (Array.isArray(all[i]) ? all[i] : []).filter(x => x && x.slika && x.naziv && !x.iskljuceno)])));
   return job;
 }
 
