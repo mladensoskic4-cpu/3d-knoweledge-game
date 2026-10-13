@@ -1,0 +1,1166 @@
+[
+ {
+  "kod": "rs",
+  "naziv": "Srbija",
+  "grad": "Beograd",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "me",
+  "naziv": "Crna Gora",
+  "grad": "Podgorica",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "hr",
+  "naziv": "Hrvatska",
+  "grad": "Zagreb",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ba",
+  "naziv": "Bosna i Hercegovina",
+  "grad": "Sarajevo",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "si",
+  "naziv": "Slovenija",
+  "grad": "Ljubljana",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "mk",
+  "naziv": "Sjeverna Makedonija",
+  "grad": "Skoplje",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "al",
+  "naziv": "Albanija",
+  "grad": "Tirana",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "bg",
+  "naziv": "Bugarska",
+  "grad": "Sofija",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ro",
+  "naziv": "Rumunija",
+  "grad": "Bukurešt",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "gr",
+  "naziv": "Grčka",
+  "grad": "Atina",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "hu",
+  "naziv": "Mađarska",
+  "grad": "Budimpešta",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "it",
+  "naziv": "Italija",
+  "grad": "Rim",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "at",
+  "naziv": "Austrija",
+  "grad": "Beč",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "de",
+  "naziv": "Njemačka",
+  "grad": "Berlin",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "fr",
+  "naziv": "Francuska",
+  "grad": "Pariz",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "es",
+  "naziv": "Španija",
+  "grad": "Madrid",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "pt",
+  "naziv": "Portugal",
+  "grad": "Lisabon",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "gb",
+  "naziv": "Velika Britanija",
+  "grad": "London",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ie",
+  "naziv": "Irska",
+  "grad": "Dablin",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "nl",
+  "naziv": "Holandija",
+  "grad": "Amsterdam",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "be",
+  "naziv": "Belgija",
+  "grad": "Brisel",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "lu",
+  "naziv": "Luksemburg",
+  "grad": "Luksemburg",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ch",
+  "naziv": "Švajcarska",
+  "grad": "Bern",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "li",
+  "naziv": "Lihtenštajn",
+  "grad": "Vaduc",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "mc",
+  "naziv": "Monako",
+  "grad": "Monako",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ad",
+  "naziv": "Andora",
+  "grad": "Andora la Velja",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "sm",
+  "naziv": "San Marino",
+  "grad": "San Marino",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "va",
+  "naziv": "Vatikan",
+  "grad": "Vatikan",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "mt",
+  "naziv": "Malta",
+  "grad": "Valeta",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "cy",
+  "naziv": "Kipar",
+  "grad": "Nikozija",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "dk",
+  "naziv": "Danska",
+  "grad": "Kopenhagen",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "no",
+  "naziv": "Norveška",
+  "grad": "Oslo",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "se",
+  "naziv": "Švedska",
+  "grad": "Stokholm",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "fi",
+  "naziv": "Finska",
+  "grad": "Helsinki",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "is",
+  "naziv": "Island",
+  "grad": "Rejkjavik",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ee",
+  "naziv": "Estonija",
+  "grad": "Talin",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "lv",
+  "naziv": "Letonija",
+  "grad": "Riga",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "lt",
+  "naziv": "Litvanija",
+  "grad": "Viljnus",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "pl",
+  "naziv": "Poljska",
+  "grad": "Varšava",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "cz",
+  "naziv": "Češka",
+  "grad": "Prag",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "sk",
+  "naziv": "Slovačka",
+  "grad": "Bratislava",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ua",
+  "naziv": "Ukrajina",
+  "grad": "Kijev",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "by",
+  "naziv": "Bjelorusija",
+  "grad": "Minsk",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "md",
+  "naziv": "Moldavija",
+  "grad": "Kišinjev",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "ru",
+  "naziv": "Rusija",
+  "grad": "Moskva",
+  "kontinent": "Evropa"
+ },
+ {
+  "kod": "tr",
+  "naziv": "Turska",
+  "grad": "Ankara",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "ge",
+  "naziv": "Gruzija",
+  "grad": "Tbilisi",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "am",
+  "naziv": "Jermenija",
+  "grad": "Jerevan",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "az",
+  "naziv": "Azerbejdžan",
+  "grad": "Baku",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "cn",
+  "naziv": "Kina",
+  "grad": "Peking",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "jp",
+  "naziv": "Japan",
+  "grad": "Tokio",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "kr",
+  "naziv": "Južna Koreja",
+  "grad": "Seul",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "kp",
+  "naziv": "Sjeverna Koreja",
+  "grad": "Pjongjang",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "mn",
+  "naziv": "Mongolija",
+  "grad": "Ulan Bator",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "in",
+  "naziv": "Indija",
+  "grad": "Nju Delhi",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "pk",
+  "naziv": "Pakistan",
+  "grad": "Islamabad",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "bd",
+  "naziv": "Bangladeš",
+  "grad": "Daka",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "np",
+  "naziv": "Nepal",
+  "grad": "Katmandu",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "bt",
+  "naziv": "Butan",
+  "grad": "Timpu",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "lk",
+  "naziv": "Šri Lanka",
+  "grad": "Šri Džajavardenepura Kote",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "mv",
+  "naziv": "Maldivi",
+  "grad": "Male",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "af",
+  "naziv": "Avganistan",
+  "grad": "Kabul",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "ir",
+  "naziv": "Iran",
+  "grad": "Teheran",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "iq",
+  "naziv": "Irak",
+  "grad": "Bagdad",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "sy",
+  "naziv": "Sirija",
+  "grad": "Damask",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "lb",
+  "naziv": "Liban",
+  "grad": "Bejrut",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "jo",
+  "naziv": "Jordan",
+  "grad": "Aman",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "il",
+  "naziv": "Izrael",
+  "grad": null,
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "sa",
+  "naziv": "Saudijska Arabija",
+  "grad": "Rijad",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "ye",
+  "naziv": "Jemen",
+  "grad": "Sana",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "om",
+  "naziv": "Oman",
+  "grad": "Maskat",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "ae",
+  "naziv": "Ujedinjeni Arapski Emirati",
+  "grad": "Abu Dabi",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "qa",
+  "naziv": "Katar",
+  "grad": "Doha",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "bh",
+  "naziv": "Bahrein",
+  "grad": "Manama",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "kw",
+  "naziv": "Kuvajt",
+  "grad": "Kuvajt",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "kz",
+  "naziv": "Kazahstan",
+  "grad": "Astana",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "uz",
+  "naziv": "Uzbekistan",
+  "grad": "Taškent",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "kg",
+  "naziv": "Kirgistan",
+  "grad": "Biškek",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "tj",
+  "naziv": "Tadžikistan",
+  "grad": "Dušanbe",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "tm",
+  "naziv": "Turkmenistan",
+  "grad": "Ašhabad",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "th",
+  "naziv": "Tajland",
+  "grad": "Bangkok",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "vn",
+  "naziv": "Vijetnam",
+  "grad": "Hanoj",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "kh",
+  "naziv": "Kambodža",
+  "grad": "Pnom Pen",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "la",
+  "naziv": "Laos",
+  "grad": "Vijentijan",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "mm",
+  "naziv": "Mjanmar",
+  "grad": "Nejpjido",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "my",
+  "naziv": "Malezija",
+  "grad": "Kuala Lumpur",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "sg",
+  "naziv": "Singapur",
+  "grad": "Singapur",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "id",
+  "naziv": "Indonezija",
+  "grad": "Džakarta",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "ph",
+  "naziv": "Filipini",
+  "grad": "Manila",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "bn",
+  "naziv": "Brunej",
+  "grad": "Bandar Seri Begavan",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "tl",
+  "naziv": "Istočni Timor",
+  "grad": "Dili",
+  "kontinent": "Azija"
+ },
+ {
+  "kod": "eg",
+  "naziv": "Egipat",
+  "grad": "Kairo",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ly",
+  "naziv": "Libija",
+  "grad": "Tripoli",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "tn",
+  "naziv": "Tunis",
+  "grad": "Tunis",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "dz",
+  "naziv": "Alžir",
+  "grad": "Alžir",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ma",
+  "naziv": "Maroko",
+  "grad": "Rabat",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "mr",
+  "naziv": "Mauritanija",
+  "grad": "Nuakšot",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ml",
+  "naziv": "Mali",
+  "grad": "Bamako",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ne",
+  "naziv": "Niger",
+  "grad": "Nijamej",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "td",
+  "naziv": "Čad",
+  "grad": "Ndžamena",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "sd",
+  "naziv": "Sudan",
+  "grad": "Kartum",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ss",
+  "naziv": "Južni Sudan",
+  "grad": "Džuba",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "er",
+  "naziv": "Eritreja",
+  "grad": "Asmara",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "dj",
+  "naziv": "Džibuti",
+  "grad": "Džibuti",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "et",
+  "naziv": "Etiopija",
+  "grad": "Adis Abeba",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "so",
+  "naziv": "Somalija",
+  "grad": "Mogadiš",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ke",
+  "naziv": "Kenija",
+  "grad": "Najrobi",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ug",
+  "naziv": "Uganda",
+  "grad": "Kampala",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "rw",
+  "naziv": "Ruanda",
+  "grad": "Kigali",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "bi",
+  "naziv": "Burundi",
+  "grad": "Gitega",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "tz",
+  "naziv": "Tanzanija",
+  "grad": "Dodoma",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "sn",
+  "naziv": "Senegal",
+  "grad": "Dakar",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "gm",
+  "naziv": "Gambija",
+  "grad": "Bandžul",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "gw",
+  "naziv": "Gvineja Bisao",
+  "grad": "Bisao",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "gn",
+  "naziv": "Gvineja",
+  "grad": "Konakri",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "sl",
+  "naziv": "Sijera Leone",
+  "grad": "Fritaun",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "lr",
+  "naziv": "Liberija",
+  "grad": "Monrovija",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ci",
+  "naziv": "Obala Slonovače",
+  "grad": "Jamusukro",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "bf",
+  "naziv": "Burkina Faso",
+  "grad": "Uagadugu",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "gh",
+  "naziv": "Gana",
+  "grad": "Akra",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "tg",
+  "naziv": "Togo",
+  "grad": "Lome",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "bj",
+  "naziv": "Benin",
+  "grad": "Porto Novo",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ng",
+  "naziv": "Nigerija",
+  "grad": "Abudža",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "cm",
+  "naziv": "Kamerun",
+  "grad": "Jaunde",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "cf",
+  "naziv": "Centralnoafrička Republika",
+  "grad": "Bangi",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "gq",
+  "naziv": "Ekvatorijalna Gvineja",
+  "grad": "Malabo",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ga",
+  "naziv": "Gabon",
+  "grad": "Librvil",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "cg",
+  "naziv": "Republika Kongo",
+  "grad": "Brazavil",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "cd",
+  "naziv": "DR Kongo",
+  "grad": "Kinšasa",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ao",
+  "naziv": "Angola",
+  "grad": "Luanda",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "zm",
+  "naziv": "Zambija",
+  "grad": "Lusaka",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "mw",
+  "naziv": "Malavi",
+  "grad": "Lilongve",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "mz",
+  "naziv": "Mozambik",
+  "grad": "Maputo",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "zw",
+  "naziv": "Zimbabve",
+  "grad": "Harare",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "bw",
+  "naziv": "Bocvana",
+  "grad": "Gaborone",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "na",
+  "naziv": "Namibija",
+  "grad": "Vindhuk",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "za",
+  "naziv": "Južna Afrika",
+  "grad": "Pretorija",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "ls",
+  "naziv": "Lesoto",
+  "grad": "Maseru",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "sz",
+  "naziv": "Esvatini",
+  "grad": "Mbabane",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "mg",
+  "naziv": "Madagaskar",
+  "grad": "Antananarivo",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "mu",
+  "naziv": "Mauricijus",
+  "grad": "Port Luj",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "sc",
+  "naziv": "Sejšeli",
+  "grad": "Viktorija",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "km",
+  "naziv": "Komori",
+  "grad": "Moroni",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "cv",
+  "naziv": "Zelenortska Ostrva",
+  "grad": "Praja",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "st",
+  "naziv": "Sao Tome i Prinsipe",
+  "grad": "Sao Tome",
+  "kontinent": "Afrika"
+ },
+ {
+  "kod": "us",
+  "naziv": "SAD",
+  "grad": "Vašington",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ca",
+  "naziv": "Kanada",
+  "grad": "Otava",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "mx",
+  "naziv": "Meksiko",
+  "grad": "Meksiko Siti",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "gt",
+  "naziv": "Gvatemala",
+  "grad": "Gvatemala",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "bz",
+  "naziv": "Beliz",
+  "grad": "Belmopan",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "sv",
+  "naziv": "Salvador",
+  "grad": "San Salvador",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "hn",
+  "naziv": "Honduras",
+  "grad": "Tegusigalpa",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ni",
+  "naziv": "Nikaragva",
+  "grad": "Managva",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "cr",
+  "naziv": "Kostarika",
+  "grad": "San Hose",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "pa",
+  "naziv": "Panama",
+  "grad": "Panama",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "cu",
+  "naziv": "Kuba",
+  "grad": "Havana",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "jm",
+  "naziv": "Jamajka",
+  "grad": "Kingston",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ht",
+  "naziv": "Haiti",
+  "grad": "Port o Prens",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "do",
+  "naziv": "Dominikanska Republika",
+  "grad": "Santo Domingo",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "bs",
+  "naziv": "Bahami",
+  "grad": "Nasau",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "bb",
+  "naziv": "Barbados",
+  "grad": "Bridžtaun",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "tt",
+  "naziv": "Trinidad i Tobago",
+  "grad": "Port of Spejn",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ag",
+  "naziv": "Antigva i Barbuda",
+  "grad": "Sent Džons",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "dm",
+  "naziv": "Dominika",
+  "grad": "Roso",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "gd",
+  "naziv": "Grenada",
+  "grad": "Sent Džordžes",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "kn",
+  "naziv": "Sent Kits i Nevis",
+  "grad": "Baster",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "lc",
+  "naziv": "Sveta Lucija",
+  "grad": "Kastri",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "vc",
+  "naziv": "Sent Vinsent i Grenadini",
+  "grad": "Kingstaun",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "co",
+  "naziv": "Kolumbija",
+  "grad": "Bogota",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ve",
+  "naziv": "Venecuela",
+  "grad": "Karakas",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ec",
+  "naziv": "Ekvador",
+  "grad": "Kito",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "pe",
+  "naziv": "Peru",
+  "grad": "Lima",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "bo",
+  "naziv": "Bolivija",
+  "grad": "Sukre",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "br",
+  "naziv": "Brazil",
+  "grad": "Brazilija",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "py",
+  "naziv": "Paragvaj",
+  "grad": "Asunsion",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "uy",
+  "naziv": "Urugvaj",
+  "grad": "Montevideo",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "ar",
+  "naziv": "Argentina",
+  "grad": "Buenos Ajres",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "cl",
+  "naziv": "Čile",
+  "grad": "Santijago",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "gy",
+  "naziv": "Gvajana",
+  "grad": "Džordžtaun",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "sr",
+  "naziv": "Surinam",
+  "grad": "Paramaribo",
+  "kontinent": "Amerika"
+ },
+ {
+  "kod": "au",
+  "naziv": "Australija",
+  "grad": "Kanbera",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "nz",
+  "naziv": "Novi Zeland",
+  "grad": "Velington",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "pg",
+  "naziv": "Papua Nova Gvineja",
+  "grad": "Port Morsbi",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "fj",
+  "naziv": "Fidži",
+  "grad": "Suva",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "sb",
+  "naziv": "Solomonska Ostrva",
+  "grad": "Honijara",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "vu",
+  "naziv": "Vanuatu",
+  "grad": "Port Vila",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "ws",
+  "naziv": "Samoa",
+  "grad": "Apija",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "to",
+  "naziv": "Tonga",
+  "grad": "Nukualofa",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "ki",
+  "naziv": "Kiribati",
+  "grad": "Tarava",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "tv",
+  "naziv": "Tuvalu",
+  "grad": "Funafuti",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "nr",
+  "naziv": "Nauru",
+  "grad": null,
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "mh",
+  "naziv": "Maršalska Ostrva",
+  "grad": "Madžuro",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "fm",
+  "naziv": "Mikronezija",
+  "grad": "Palikir",
+  "kontinent": "Okeanija"
+ },
+ {
+  "kod": "pw",
+  "naziv": "Palau",
+  "grad": "Ngerulmud",
+  "kontinent": "Okeanija"
+ }
+]

@@ -1,0 +1,3 @@
+Ovdje stavi prave CC0 zvukove (npr. sa kenney.nl), .ogg ili .wav, sa ovim imenima:
+klik, tacno, netacno, novcic, fanfara, vatromet, muzika, vozilo-auto, vozilo-motor, vozilo-kamion ...
+Ako zvuka nema, igra ga sama sintetiše.

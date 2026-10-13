@@ -14,11 +14,17 @@
 - Rangovi, mape od Crne Gore do svijeta, garaža, power-upovi, rang-lista (Supabase), latinica / ćirilica / engleski,
   pozadinska muzika (dugme ♫).
 
+## Unity verzija (Trka znanja)
+U folderu `unity/` je nova verzija u Unity 6 (URP, 3D grafika, Android / iOS / PC / Web). Kako se otvara i testira:
+vidi **`unity/PROCITAJ.md`**. Pitanja ostaju u `data/questions.json`; `python tools/pripremi_unity.py` ih kopira u Unity.
+
 ## Folderi
 - `index.html` – stranica igre i stilovi
 - `js/` – kod (scena, staza, kviz-engine, tipovi pitanja, mini igre, botovi, garaža, profil, mreža, muzika)
 - `data/` – pitanja, zastave, mape, šah problemi, zvuci instrumenata
 - `supabase/schema.sql` – šema baze
+- `unity/` – Unity verzija igre (vidi `unity/PROCITAJ.md`)
+- `tools/unity-core-tests`, `tools/unity-compile-check`, `tools/unity-stubs` – testovi Unity koda bez Unity-ja (.NET)
 
 ## Licence za sadržaj
 - Zastave: flag-icons (MIT)

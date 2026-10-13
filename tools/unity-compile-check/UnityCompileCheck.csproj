@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Provjera da se sav Unity kod igre kompajlira (sa zamjenskim Unity bibliotekama iz tools/unity-stubs). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <DefineConstants>UNITY_INCLUDE_TESTS;UNITY_EDITOR_STUB</DefineConstants>
+    <NoWarn>CS8632;CS0162;CS0618</NoWarn>
+    <StartupObject>TrkaZnanja.LocalRunner.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../unity/Assets/TrkaZnanja/**/*.cs" />
+    <Compile Include="../unity-stubs/*.cs" />
+    <Compile Include="../unity-core-tests/NUnitShim.cs" />
+
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pokreće Core testove bez Unity-ja (dotnet run, vidi PROCITAJ u unity folderu) -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>CS8632</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../unity/Assets/TrkaZnanja/Core/**/*.cs" />
+    <Compile Include="../../unity/Assets/TrkaZnanja/Tests/EditMode/**/*.cs" />
+  </ItemGroup>
+</Project>

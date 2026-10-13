@@ -1,0 +1,18 @@
+# Unity (generiše se pri otvaranju projekta, ne ide u repo)
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+unity/[Ll]ogs/
+unity/[Uu]serSettings/
+unity/MemoryCaptures/
+unity/*.csproj
+unity/*.sln
+unity/*.user
+unity/.vs/
+unity/.idea/
+# .NET alati za testove
+tools/**/bin/
+tools/**/obj/
+__pycache__/

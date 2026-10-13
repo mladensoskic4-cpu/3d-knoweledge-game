@@ -1,0 +1,65 @@
+# Testovi Unity verzije „Trka znanja”.
+# 1) Core logika i kompajliranje svog C# koda: radi odmah, bez Unity licence (.NET na GitHub-u).
+# 2) Pravi Unity testovi (EditMode + PlayMode, cijela trka sama sebe igra): uključuju se kad u
+#    Settings → Secrets and variables → Actions dodaš UNITY_LICENSE, UNITY_EMAIL i UNITY_PASSWORD
+#    i kad je u repou unity/ProjectSettings/ProjectVersion.txt (Unity ga napravi pri prvom otvaranju).
+name: Unity testovi
+
+on:
+  push:
+    paths: ["unity/**", "tools/unity-**", "tools/pripremi_unity.py", "data/**", ".github/workflows/unity.yml"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core:
+    name: Logika i kompajliranje (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Core testovi (logika igre)
+        run: dotnet run --project tools/unity-core-tests
+      - name: Kompajliranje svog Unity koda (zamjenske Unity biblioteke)
+        run: dotnet build tools/unity-compile-check
+
+  unity:
+    name: Unity EditMode + PlayMode
+    needs: core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ima li licence i verzije projekta?
+        id: spremno
+        run: |
+          if [ -n "${{ secrets.UNITY_LICENSE }}" ] && [ -f unity/ProjectSettings/ProjectVersion.txt ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "Preskačem Unity testove: dodaj UNITY_LICENSE/UNITY_EMAIL/UNITY_PASSWORD i commituj unity/ProjectSettings (vidi unity/PROCITAJ.md)."
+          fi
+      - uses: actions/cache@v4
+        if: steps.spremno.outputs.ok == 'true'
+        with:
+          path: unity/Library
+          key: Library-${{ hashFiles('unity/Packages/**', 'unity/ProjectSettings/**') }}
+          restore-keys: Library-
+      - uses: game-ci/unity-test-runner@v4
+        if: steps.spremno.outputs.ok == 'true'
+        id: testovi
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity
+          testMode: all
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity rezultati testova
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.spremno.outputs.ok == 'true'
+        with:
+          name: unity-rezultati
+          path: ${{ steps.testovi.outputs.artifactsPath }}
