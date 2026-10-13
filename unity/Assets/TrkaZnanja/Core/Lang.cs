@@ -36,7 +36,9 @@ namespace TrkaZnanja.Core
                 case "Slovenian":
                 case "Macedonian":
                     return Lat;
-                default: return En;
+                // Pitanja su zasad samo na našem jeziku, pa i engleski Windows/telefon dobija latinicu.
+                // Engleski se bira ručno u podešavanjima (kad stignu prevodi pitanja, vraćamo En za strane jezike).
+                default: return Lat;
             }
         }
 

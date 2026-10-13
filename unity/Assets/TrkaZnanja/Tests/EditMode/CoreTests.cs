@@ -331,7 +331,7 @@ namespace TrkaZnanja.Tests
             Assert.AreEqual("Round 3", Lang.ToEn("Runda 3"));
             Assert.AreEqual("Tap the river:", Lang.ToEn("Tapni rijeku:"));
             Assert.AreEqual("Wolf · 12 coins", Lang.ToEn("Vuk · 12 novčića"));
-            Assert.AreEqual("en", Lang.FromSystemLanguage("German"));
+            Assert.AreEqual("lat", Lang.FromSystemLanguage("English"));
             Assert.AreEqual("lat", Lang.FromSystemLanguage("Serbian"));
         }
     }

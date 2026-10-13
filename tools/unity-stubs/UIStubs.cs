@@ -203,7 +203,7 @@ namespace UnityEditor
     }
     public enum ScriptingImplementation { Mono2x, IL2CPP }
     [Flags] public enum AndroidArchitecture { None = 0, ARMv7 = 1, ARM64 = 2 }
-    public enum AndroidSdkVersions { AndroidApiLevel23 = 23, AndroidApiLevel24 = 24 }
+    public enum AndroidSdkVersions { AndroidApiLevel23 = 23, AndroidApiLevel24 = 24, AndroidApiLevel26 = 26 }
     public static class PlayerSettings
     {
         public static string companyName { get; set; }

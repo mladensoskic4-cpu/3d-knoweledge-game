@@ -109,7 +109,7 @@ namespace TrkaZnanja.EditorTools
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, AppId);
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
             PlayerSettings.runInBackground = false;
             PlayerSettings.bundleVersion = "0.1.0";
         }
