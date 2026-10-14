@@ -199,6 +199,7 @@ namespace UnityEditor
     {
         public static bool DisplayDialog(string t, string m, string ok) => true;
         public static void SetDirty(UnityEngine.Object o) { }
+        public static void RevealInFinder(string p) { }
     }
     public class SerializedProperty { public bool boolValue { get; set; } public int intValue { get; set; } }
     public class SerializedObject
@@ -232,6 +233,7 @@ namespace UnityEditor
         {
             public static AndroidArchitecture targetArchitectures { get; set; }
             public static AndroidSdkVersions minSdkVersion { get; set; }
+            public static bool useCustomKeystore { get; set; }
         }
     }
     public sealed class EditorBuildSettingsScene { public EditorBuildSettingsScene(string p, bool e) { } }
@@ -253,6 +255,28 @@ namespace UnityEditor
     public enum TextureImporterType { Default, NormalMap, GUI, Sprite }
     public sealed class TrueTypeFontImporter : AssetImporter { public bool includeFontData { get; set; } public string[] fontNames { get; set; } }
     public class AssetPostprocessor { public virtual uint GetVersion() => 0; public string assetPath => ""; public AssetImporter assetImporter => null; }
+}
+
+namespace UnityEditor
+{
+    public enum BuildTarget { StandaloneWindows64, Android, iOS, WebGL }
+    public enum BuildTargetGroup { Standalone, Android, iOS, WebGL }
+    [System.Flags] public enum BuildOptions { None = 0, Development = 1 }
+    public struct BuildPlayerOptions { public string[] scenes; public string locationPathName; public BuildTarget target; public BuildOptions options; }
+    public static class EditorUserBuildSettings
+    {
+        public static BuildTarget activeBuildTarget { get; set; }
+        public static bool buildAppBundle { get; set; }
+        public static bool SwitchActiveBuildTarget(BuildTargetGroup g, BuildTarget t) => true;
+    }
+    public static class BuildPipeline { public static UnityEditor.Build.Reporting.BuildReport BuildPlayer(BuildPlayerOptions o) => new UnityEditor.Build.Reporting.BuildReport(); }
+}
+
+namespace UnityEditor.Build.Reporting
+{
+    public enum BuildResult { Unknown, Succeeded, Failed, Cancelled }
+    public struct BuildSummary { public BuildResult result; public ulong totalSize; public System.TimeSpan totalTime; public int totalErrors; }
+    public class BuildReport { public BuildSummary summary; }
 }
 
 namespace UnityEditor.Build
