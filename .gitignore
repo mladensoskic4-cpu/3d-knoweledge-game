@@ -16,3 +16,4 @@ unity/.idea/
 tools/**/bin/
 tools/**/obj/
 __pycache__/
+tools/.cache/

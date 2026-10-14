@@ -180,6 +180,16 @@ namespace TrkaZnanja.Game
             return (score, $"{System.Math.Round(score * 3)} matova");
         }
 
+        // figure se crtaju jednom (ChessArt) i čuvaju kao teksture
+        static readonly Dictionary<char, Texture2D> pieceTex = new Dictionary<char, Texture2D>();
+        static Texture2D PieceTex(char piece)
+        {
+            if (pieceTex.TryGetValue(piece, out var t) && t != null) return t;
+            t = MinigameData.ToTexture(ChessArt.Draw(piece, 128), "Figura " + piece);
+            pieceTex[piece] = t;
+            return t;
+        }
+
         // potez našim slovima (Dh7#), a na engleskom originalni zapis (Qh7#)
         static string San(ChessPuzzle p) => Lang.Mode == Lang.En ? p.San : ChessPuzzle.LocalSan(p.San);
 
@@ -208,7 +218,7 @@ namespace TrkaZnanja.Game
             side.childForceExpandHeight = false;
             var info = UIKit.Label(side.transform, "Bijeli na potezu: mat u 1", 36, Theme.Ink, TextAnchor.UpperLeft, true);
             info.Size(-1, 110);
-            var legend = UIKit.Label(side.transform, "K kralj · D dama · T top · L lovac · S skakač · p pješak\nBijele figure su svijetle, crne tamne.", 24, Theme.InkSoft);
+            var legend = UIKit.Label(side.transform, "Oznake poteza: K kralj · D dama · T top · L lovac · S skakač", 24, Theme.InkSoft);
             legend.FitHeight();
 
             var squares = new Dictionary<string, Image>();
@@ -251,16 +261,10 @@ namespace TrkaZnanja.Game
                 pieces.Clear();
                 foreach (var kv in pos)
                 {
-                    bool white = ChessPuzzle.IsWhite(kv.Value);
-                    var disc = UIKit.Box(squares[kv.Key].transform, white ? Color.white : Col.Hex("#26313b"), UIKit.Circle, "Figura");
-                    disc.rectTransform.Stretch(7, 7, 7, 7);
-                    disc.raycastTarget = false;
-                    var o = disc.gameObject.AddComponent<Outline>(); o.effectColor = white ? Col.Hex("#26313b") : Color.white; o.effectDistance = new Vector2(2, -2);
-                    bool king = char.ToUpperInvariant(kv.Value) == 'K';
-                    var l = UIKit.Label(disc.transform, ChessPuzzle.Letter(kv.Value), king ? 32 : 30, white ? Col.Hex("#26313b") : Color.white, TextAnchor.MiddleCenter, true);
-                    l.rectTransform.Stretch();
-                    if (king) l.fontStyle = FontStyle.Bold;
-                    pieces[kv.Key] = disc.gameObject;
+                    var img = UIKit.Raw(squares[kv.Key].transform, PieceTex(kv.Value), "Figura " + kv.Value);
+                    img.rectTransform.Stretch(2, 2, 2, 2);
+                    img.raycastTarget = false;
+                    pieces[kv.Key] = img.gameObject;
                 }
             }
 

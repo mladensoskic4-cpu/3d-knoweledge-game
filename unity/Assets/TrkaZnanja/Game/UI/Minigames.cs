@@ -107,7 +107,7 @@ namespace TrkaZnanja.Game
                 var rt = img.rectTransform;
                 rt.anchorMin = rt.anchorMax = new Vector2(0, 1);
                 rt.pivot = new Vector2(0, 0.5f);
-                rt.sizeDelta = new Vector2(150, 100);
+                rt.sizeDelta = new Vector2(152, 114);   // zastave su 4:3
                 img.gameObject.AddComponent<Outline>().effectColor = new Color(0, 0, 0, 0.25f);
                 int dir = rng.Chance(0.5) ? 1 : -1;
                 var f = new Flyer { Rt = rt, C = c, Dir = dir, X = dir > 0 ? -160 : w + 10, Y = -(lane + 0.5f) * (h / lanes), Speed = (w + 160) / (3.6f + (float)rng.Next() * 1.4f) * speedK };

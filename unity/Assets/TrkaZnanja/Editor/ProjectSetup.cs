@@ -133,17 +133,22 @@ namespace TrkaZnanja.EditorTools
     // Uvoz: zastave sa mipmapama (za zamućenje), fontovi sa rezervnim fontovima sistema.
     public sealed class TrkaImport : AssetPostprocessor
     {
+        // povećaj broj kad se pravila uvoza promijene, pa Unity ponovo uveze slike
+        public override uint GetVersion() => 2;
+
         void OnPreprocessTexture()
         {
             if (assetPath.Contains("/Resources/Slike/"))
             {
-                // fotografije za mini igre: bez mipmapa, najviše 512 px (pripremi_unity.py ih već smanji)
+                // fotografije za mini igre: prava veličina (bez razvlačenja na stepen dvojke), visok kvalitet
                 var pi = (TextureImporter)assetImporter;
                 pi.textureType = TextureImporterType.Default;
-                pi.mipmapEnabled = false;
+                pi.npotScale = TextureImporterNPOTScale.None;
+                pi.mipmapEnabled = true;
                 pi.wrapMode = TextureWrapMode.Clamp;
-                pi.filterMode = FilterMode.Bilinear;
-                pi.maxTextureSize = 512;
+                pi.filterMode = FilterMode.Trilinear;
+                pi.maxTextureSize = 1024;
+                pi.textureCompression = TextureImporterCompression.CompressedHQ;
                 return;
             }
             if (!assetPath.Contains("/Resources/Zastave/")) return;
@@ -152,7 +157,9 @@ namespace TrkaZnanja.EditorTools
             ti.mipmapEnabled = true;
             ti.wrapMode = TextureWrapMode.Clamp;
             ti.filterMode = FilterMode.Trilinear;
-            ti.maxTextureSize = 256;
+            ti.maxTextureSize = 512;
+            ti.npotScale = TextureImporterNPOTScale.None;     // zastave zadržavaju svoje proporcije (3:2, 2:1…)
+            ti.textureCompression = TextureImporterCompression.CompressedHQ;
             ti.alphaIsTransparency = true;
         }
 

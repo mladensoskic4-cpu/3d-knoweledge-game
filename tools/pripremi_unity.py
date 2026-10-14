@@ -8,7 +8,7 @@ Pokreće se iz glavnog foldera igre poslije svake izmjene pitanja, mapa ili zast
 Pitanja ostaju na jednom mjestu (data/questions.json), a Unity dobija svoju kopiju.
 Zastave su u web verziji WebP slike; Unity ne čita WebP, pa ih pretvaramo u PNG.
 
-Potrebno: Pillow (pip install pillow).
+Potrebno: Pillow (pip install pillow). Za oštre zastave i gradove/rijeke još: pip install cairosvg i Node.js.
 """
 import base64
 import io
@@ -29,6 +29,30 @@ def kopiraj(izvor, odrediste):
     shutil.copyfile(izvor, odrediste)
 
 
+def flag_icons_svg():
+    """Skine paket flag-icons (MIT) preko npm-a u tools/.cache i vrati folder sa 4×3 SVG zastavama (ili None)."""
+    import subprocess
+    import tarfile
+    try:
+        import cairosvg  # noqa: F401
+    except ImportError:
+        return None
+    cache = os.path.join(KORIJEN, "tools", ".cache")
+    folder = os.path.join(cache, "package", "flags", "4x3")
+    if os.path.isdir(folder):
+        return folder
+    os.makedirs(cache, exist_ok=True)
+    try:
+        npm = "npm.cmd" if os.name == "nt" else "npm"
+        ime = subprocess.run([npm, "pack", "flag-icons@7.5.0"], cwd=cache, capture_output=True, text=True, check=True).stdout.strip().splitlines()[-1]
+        with tarfile.open(os.path.join(cache, ime)) as t:
+            t.extractall(cache, filter="data") if hasattr(tarfile, "data_filter") else t.extractall(cache)
+    except (OSError, subprocess.CalledProcessError, tarfile.TarError) as e:
+        print("Napomena: flag-icons nije skinut:", e)
+        return None
+    return folder if os.path.isdir(folder) else None
+
+
 def main():
     data = os.path.join(KORIJEN, "data")
     kopiraj(os.path.join(data, "questions.json"), os.path.join(CILJ, "pitanja.json"))
@@ -41,17 +65,31 @@ def main():
     os.makedirs(zastave, exist_ok=True)
     with open(os.path.join(data, "flags.json"), encoding="utf-8") as f:
         flags = json.load(f)
+    svg_dir = flag_icons_svg()
+    ostro = 0
     for kod, uri in flags.items():
+        cilj = os.path.join(zastave, kod + ".png")
+        svg = os.path.join(svg_dir, kod + ".svg") if svg_dir else None
+        if svg and os.path.exists(svg):
+            # oštra zastava 480×360 iz originalnog SVG crteža (flag-icons, MIT)
+            import cairosvg
+            cairosvg.svg2png(url=svg, write_to=cilj, output_width=480, output_height=360)
+            ostro += 1
+            continue
         b64 = uri.split(",", 1)[1]
         with Image.open(io.BytesIO(base64.b64decode(b64))) as im:
-            im.convert("RGBA").save(os.path.join(zastave, kod + ".png"), optimize=True)
+            im.convert("RGBA").save(cilj, optimize=True)
+    if ostro:
+        print(f"{ostro} zastava nacrtano iz SVG-a (480×360).")
+    else:
+        print("Napomena: zastave su iz web verzije (160×120). Za oštrije: pip install cairosvg i Node.js (npm).")
     # istorijska zastava SFRJ (nema je u flag-icons), crtamo je kao u web verziji
-    sfrj = Image.new("RGBA", (300, 200), "#ffffff")
+    sfrj = Image.new("RGBA", (480, 360), "#ffffff")   # 4:3 kao ostale zastave
     from PIL import ImageDraw
     import math
     d = ImageDraw.Draw(sfrj)
-    d.rectangle([0, 0, 300, 67], fill="#003893")
-    d.rectangle([0, 133, 300, 200], fill="#de0000")
+    d.rectangle([0, 0, 480, 120], fill="#003893")
+    d.rectangle([0, 240, 480, 360], fill="#de0000")
 
     def zvijezda(cx, cy, r, boja):
         pts = []
@@ -61,8 +99,8 @@ def main():
             pts.append((cx + math.cos(a) * rr, cy + math.sin(a) * rr))
         d.polygon(pts, fill=boja)
 
-    zvijezda(150, 100, 46, "#fcd116")
-    zvijezda(150, 100, 39, "#de0000")
+    zvijezda(240, 180, 82, "#fcd116")
+    zvijezda(240, 180, 70, "#de0000")
     sfrj.save(os.path.join(zastave, "sfrj.png"), optimize=True)
 
     # države (kod, naziv, glavni grad, kontinent) iz js/countries.js → drzave-lista.json
@@ -81,7 +119,7 @@ def main():
     kopiraj(os.path.join(data, "sah.json"), os.path.join(CILJ, "sah.json"))
 
     # fotografije za mini igre: <kategorija>/podaci.json + slike → Resources/Slike/<kategorija>/<id>.jpg
-    # (smanjene na najviše 512 px, bez isključenih), a spisak u Resources/Data/slike-<kategorija>.json
+    # (smanjene na najviše 1024 px, bez isključenih), a spisak u Resources/Data/slike-<kategorija>.json
     slike_cilj = os.path.join(os.path.dirname(CILJ), "Slike")
     ukupno = 0
     for kat in ("mjesta", "zivotinje", "tijelo", "instrumenti"):
@@ -104,8 +142,8 @@ def main():
             if not os.path.exists(odr) or os.path.getmtime(odr) < os.path.getmtime(izvor):
                 with Image.open(izvor) as im:
                     im = im.convert("RGB")
-                    im.thumbnail((512, 512), Image.LANCZOS)
-                    im.save(odr, "JPEG", quality=72, optimize=True, progressive=False)
+                    im.thumbnail((1024, 1024), Image.LANCZOS)
+                    im.save(odr, "JPEG", quality=82, optimize=True, progressive=False)
             y = {k: v for k, v in x.items() if k not in ("slika", "licenca_url", "izvor", "iskljuceno")}
             y["slika"] = f"Slike/{kat}/{ime}"
             izlaz.append(y)

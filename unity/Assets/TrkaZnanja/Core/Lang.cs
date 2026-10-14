@@ -110,7 +110,7 @@ namespace TrkaZnanja.Core
                 ["Prvi na cilju pobjeđuje!"] = "First to the finish wins!", ["Bez interneta: igraš protiv botova, rezultati se šalju kasnije."] = "Offline: you play against bots, results are sent later.",
                 ["Atmosfera"] = "Weather", ["dan"] = "day", ["zalazak"] = "sunset", ["noć"] = "night", ["kiša"] = "rain", ["snijeg"] = "snow",
                 ["Mat!"] = "Mate!", ["Nije mat. Tačno je bilo:"] = "Not mate. The answer was:",
-                ["K kralj · D dama · T top · L lovac · S skakač · p pješak\nBijele figure su svijetle, crne tamne."] = "K king · D queen · T rook · L bishop · S knight · p pawn\nWhite pieces are light, black pieces are dark.",
+                ["Oznake poteza: K kralj · D dama · T top · L lovac · S skakač"] = "Move notation: K king · Q queen · R rook · B bishop · N knight",
                 ["Pojavljuje se fotografija životinje. Izaberi koja je. Što više tačnih za 25 sekundi, greška oduzima pola boda."] = "A photo of an animal appears. Pick which one it is. As many correct as you can in 25 seconds; a mistake costs half a point.",
                 ["Nasumično"] = "Random", ["Slijedeća runda"] = "Next round", ["Runda"] = "Round", ["Ti"] = "You", ["Garaža stiže uskoro."] = "Garage is coming soon.",
             };

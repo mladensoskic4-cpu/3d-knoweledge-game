@@ -91,7 +91,7 @@ namespace TrkaZnanja.Game
                 arf.aspectRatio = flag.texture != null ? flag.texture.width / (float)flag.texture.height : 1.5f;
                 flag.rectTransform.Stretch(16, 16, 16, 16);
                 blurMat = new Material(Mats.UIBlur);
-                blurMat.SetFloat("_Blur", 6);
+                blurMat.SetFloat("_Blur", 7);   // zastave su 480 px, pa jedan nivo više
                 blurMat.SetFloat("_Desat", 0.7f);
                 flag.material = blurMat;
             }
@@ -142,7 +142,7 @@ namespace TrkaZnanja.Game
             if (blurMat != null && !Locked)
             {
                 var k = Mathf.Clamp01(elapsed / (limit * 0.85f));
-                blurMat.SetFloat("_Blur", (1 - k) * 6);
+                blurMat.SetFloat("_Blur", (1 - k) * 7);
                 blurMat.SetFloat("_Desat", (1 - k) * 0.7f);
                 flag.rectTransform.localScale = Vector3.one * (1.15f - 0.15f * k);
             }

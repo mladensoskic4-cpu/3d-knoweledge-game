@@ -240,10 +240,14 @@ namespace UnityEditor
         public UnityEngine.FilterMode filterMode { get; set; }
         public int maxTextureSize { get; set; }
         public bool alphaIsTransparency { get; set; }
+        public TextureImporterNPOTScale npotScale { get; set; }
+        public TextureImporterCompression textureCompression { get; set; }
     }
+    public enum TextureImporterNPOTScale { None, ToNearest, ToLarger, ToSmaller }
+    public enum TextureImporterCompression { Uncompressed, Compressed, CompressedHQ, CompressedLQ }
     public enum TextureImporterType { Default, NormalMap, GUI, Sprite }
     public sealed class TrueTypeFontImporter : AssetImporter { public bool includeFontData { get; set; } public string[] fontNames { get; set; } }
-    public class AssetPostprocessor { public string assetPath => ""; public AssetImporter assetImporter => null; }
+    public class AssetPostprocessor { public virtual uint GetVersion() => 0; public string assetPath => ""; public AssetImporter assetImporter => null; }
 }
 
 namespace UnityEditor.Build

@@ -484,6 +484,15 @@ namespace TrkaZnanja.Tests
             Assert.AreEqual("2 mates", Lang.ToEn("2 matova"));
             Assert.AreEqual("Mate!", Lang.ToEn("Mat!"));
             Assert.AreEqual("S", ChessPuzzle.Letter('n'));
+            foreach (var pc in "KQRBNPkqrbnp")
+            {
+                var img = ChessArt.Draw(pc, 64);
+                int filled = 0; double light = 0;
+                for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++) { var c = img.Get(x, y); if (c.A > 200) { filled++; light += c.R; } }
+                Assert.That((double)filled, Is.InRange(64 * 64 * 0.12, 64 * 64 * 0.6), pc + " zauzima razuman dio polja");
+                Assert.IsTrue(char.IsUpper(pc) ? light / filled > 150 : light / filled < 110, pc + " bijele su svijetle, crne tamne");
+                Assert.AreEqual(0, (int)img.Get(1, 1).A, pc + " ugao je providan");
+            }
         }
 
         [Test]
