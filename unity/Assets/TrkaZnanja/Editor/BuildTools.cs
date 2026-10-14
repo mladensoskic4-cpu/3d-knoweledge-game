@@ -18,6 +18,7 @@ namespace TrkaZnanja.EditorTools
             ProjectSetup.Run(false);
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+            ClearNativeLibCache();
             EditorUserBuildSettings.buildAppBundle = false;     // .apk (ne .aab), da se instalira direktno
             PlayerSettings.Android.useCustomKeystore = false;    // testni potpis (debug)
             Directory.CreateDirectory("Build/Android");
@@ -42,6 +43,20 @@ namespace TrkaZnanja.EditorTools
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None,
             });
+        }
+
+        // Gradle međufajlovi sa .so bibliotekama: ako ih OneDrive (ili stari Gradle proces) drži zaključane,
+        // drugi build pada sa AccessDeniedException. Brišemo ih prije builda (Gradle ih napravi ponovo).
+        static void ClearNativeLibCache()
+        {
+            const string dir = "Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/merged_native_libs";
+            if (!Directory.Exists(dir)) return;
+            try { Directory.Delete(dir, true); }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("Trka znanja: ne mogu da obrišem stari Gradle keš (" + e.Message + "). " +
+                    "Projekat je u OneDrive folderu: pauziraj OneDrive sinhronizaciju dok traje build, pa pokušaj ponovo.");
+            }
         }
 
         static void Run(BuildPlayerOptions o)
