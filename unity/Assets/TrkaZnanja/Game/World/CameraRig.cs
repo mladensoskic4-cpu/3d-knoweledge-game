@@ -14,6 +14,7 @@ namespace TrkaZnanja.Game
         Vector3 center, fixedPos, fixedLook;
         float extent = 40, t, orbitAngle;
         Vector3 look;
+        public float FixedRate = 2f;     // koliko brzo kamera stiže u zadatu tačku (Fixed/Showroom); garaža traži brže
 
         public static CameraRig Create(Transform parent)
         {
@@ -59,7 +60,8 @@ namespace TrkaZnanja.Game
             float dt = Time.unscaledDeltaTime;
             t += dt;
             ComputeDesired(out var desired, out var desiredLook);
-            float k = 1 - Mathf.Exp(-dt * (Current == Mode.Follow ? 3.2f : 2.0f));
+            float rate = Current == Mode.Follow ? 3.2f : Current == Mode.Fixed || Current == Mode.Showroom ? FixedRate : 2.0f;
+            float k = 1 - Mathf.Exp(-dt * rate);
             transform.position = Vector3.Lerp(transform.position, desired, k);
             look = Vector3.Lerp(look, desiredLook, k);
             transform.LookAt(look);

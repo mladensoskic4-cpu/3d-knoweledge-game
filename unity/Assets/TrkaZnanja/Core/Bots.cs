@@ -101,6 +101,10 @@ namespace TrkaZnanja.Core
                     Bot = archetypes[i % archetypes.Count],
                     Look = new Look { Zivotinja = animals[i % animals.Count], Vozilo = vehicle.Id, Boja = color, Kapa = rng.Chance(0.3) ? rng.Pick(new[] { "kacket", "sesir", "kapa" }) : "nema", Naocare = rng.Chance(0.2) },
                 });
+                // i botovi imaju ukrase (šara, nalijepnica), da staza bude šarenija
+                var look = list[list.Count - 1].Look;
+                if (rng.Chance(0.5)) { look.Sara = rng.Pick(new[] { "pruge", "tacke", "plamen", "sah" }); look.Boja2 = rng.Pick(new[] { "#ffffff", "#14232e", "#ffd23f" }); }
+                if (rng.Chance(0.4)) look.Nalijepnica = rng.Pick(new[] { "zvijezda", "srce", "munja", "broj", "cvijet", "smajli" });
             }
             return list;
         }

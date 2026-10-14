@@ -13,10 +13,10 @@ namespace TrkaZnanja.Game
     public static class MultiplayerScreen
     {
         public static void Open(RectTransform parent, Profile p, MonoBehaviour runner, Func<MpSession, RaceSetup> makeSetup,
-            Action<MpSession, RaceSetup> onStart, Action back)
+            Action<MpSession, RaceSetup> onStart, Action back, string start = null)
         {
             UIKit.Clear(parent);
-            var face = UIKit.Card(parent, "Sa drugima");
+            var face = UIKit.GlassCard(parent, "Sa drugima", new Color(1, 1, 1, 0.86f));
             ((RectTransform)face.rectTransform.parent).Anchor(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100, 820));
             var col = UIKit.VStack(face.transform, 20, "Sadržaj", TextAnchor.UpperLeft, new RectOffset(48, 48, 40, 40));
             ((RectTransform)col.transform).Stretch();
@@ -169,7 +169,8 @@ namespace TrkaZnanja.Game
                 }
             }
 
-            Choice();
+            if (start == "soba" && RealtimeChannel.Supported) Room(RoomCode.New(new Rng()), true);
+            else Choice();
         }
     }
 }

@@ -131,6 +131,7 @@ namespace UnityEngine.UI
     {
         public enum MovementType { Unrestricted, Elastic, Clamped }
         public bool horizontal { get; set; }
+        public bool vertical { get; set; }
         public MovementType movementType { get; set; }
         public float scrollSensitivity { get; set; }
         public RectTransform content { get; set; }

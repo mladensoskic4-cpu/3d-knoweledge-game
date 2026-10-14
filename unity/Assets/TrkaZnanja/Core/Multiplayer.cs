@@ -88,7 +88,11 @@ namespace TrkaZnanja.Core
         public Dictionary<string, object> ToJson() => new Dictionary<string, object>
         {
             ["id"] = Id, ["name"] = Name,
-            ["look"] = new Dictionary<string, object> { ["z"] = Look.Zivotinja, ["v"] = Look.Vozilo, ["b"] = Look.Boja, ["k"] = Look.Kapa, ["n"] = Look.Naocare },
+            ["look"] = new Dictionary<string, object>
+                {
+                    ["z"] = Look.Zivotinja, ["v"] = Look.Vozilo, ["b"] = Look.Boja, ["k"] = Look.Kapa, ["n"] = Look.Naocare,
+                    ["s"] = Look.Sara, ["c2"] = Look.Boja2, ["l"] = Look.Nalijepnica, ["t"] = Look.Trag,
+                },
         };
 
         public static MpPlayer FromJson(object o)
@@ -101,7 +105,11 @@ namespace TrkaZnanja.Core
             return new MpPlayer
             {
                 Id = Json.Str(d, "id"), Name = name,
-                Look = l == null ? new Look() : new Look { Zivotinja = Json.Str(l, "z", "vuk"), Vozilo = Json.Str(l, "v", "auto"), Boja = Json.Str(l, "b", "#e0312f"), Kapa = Json.Str(l, "k", "nema"), Naocare = Json.Bool(l, "n") },
+                Look = l == null ? new Look() : new Look
+                {
+                    Zivotinja = Json.Str(l, "z", "vuk"), Vozilo = Json.Str(l, "v", "auto"), Boja = Json.Str(l, "b", "#e0312f"), Kapa = Json.Str(l, "k", "nema"), Naocare = Json.Bool(l, "n"),
+                    Sara = Json.Str(l, "s", "nema"), Boja2 = Json.Str(l, "c2", "#ffffff"), Nalijepnica = Json.Str(l, "l", "nema"), Trag = Json.Str(l, "t", "nema"),
+                },
             };
         }
     }

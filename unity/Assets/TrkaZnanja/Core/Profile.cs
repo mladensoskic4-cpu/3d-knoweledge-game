@@ -9,6 +9,8 @@ namespace TrkaZnanja.Core
     {
         public string Zivotinja = "vuk", Vozilo = "auto", Boja = "#e0312f", Kapa = "nema";
         public bool Naocare;
+        // ukrasi vozila: šara (i njena boja), nalijepnica i trag koji ostavlja u vožnji
+        public string Sara = "nema", Boja2 = "#ffffff", Nalijepnica = "nema", Trag = "nema";
         public Look Clone() => (Look)MemberwiseClone();
     }
 
@@ -74,6 +76,10 @@ namespace TrkaZnanja.Core
                 case "boja": return Izgled.Boja == item.Value;
                 case "kapa": return Izgled.Kapa == item.Value;
                 case "naocare": return Izgled.Naocare == (item.Value == "da");
+                case "sara": return Izgled.Sara == item.Value;
+                case "boja2": return Izgled.Boja2 == item.Value;
+                case "nalijepnica": return Izgled.Nalijepnica == item.Value;
+                case "trag": return Izgled.Trag == item.Value;
                 default: return false;
             }
         }
@@ -88,6 +94,10 @@ namespace TrkaZnanja.Core
                 case "boja": l.Boja = item.Value; break;
                 case "kapa": l.Kapa = item.Value; break;
                 case "naocare": l.Naocare = item.Value == "da"; break;
+                case "sara": l.Sara = item.Value; break;
+                case "boja2": l.Boja2 = item.Value; break;
+                case "nalijepnica": l.Nalijepnica = item.Value; break;
+                case "trag": l.Trag = item.Value; break;
             }
             return l;
         }
@@ -179,6 +189,7 @@ namespace TrkaZnanja.Core
         public static Dictionary<string, object> LookToDict(Look l) => new Dictionary<string, object>
         {
             ["zivotinja"] = l.Zivotinja, ["vozilo"] = l.Vozilo, ["boja"] = l.Boja, ["kapa"] = l.Kapa, ["naocare"] = l.Naocare,
+            ["sara"] = l.Sara, ["boja2"] = l.Boja2, ["nalijepnica"] = l.Nalijepnica, ["trag"] = l.Trag,
         };
 
         // Nepoznata ili pokvarena polja se preskaču, pa stari profil uvijek može da se učita.
@@ -208,6 +219,10 @@ namespace TrkaZnanja.Core
                 p.Izgled.Boja = Json.Str(iz, "boja", p.Izgled.Boja);
                 p.Izgled.Kapa = Json.Str(iz, "kapa", p.Izgled.Kapa);
                 p.Izgled.Naocare = Json.Bool(iz, "naocare");
+                p.Izgled.Sara = Json.Str(iz, "sara", p.Izgled.Sara);
+                p.Izgled.Boja2 = Json.Str(iz, "boja2", p.Izgled.Boja2);
+                p.Izgled.Nalijepnica = Json.Str(iz, "nalijepnica", p.Izgled.Nalijepnica);
+                p.Izgled.Trag = Json.Str(iz, "trag", p.Izgled.Trag);
             }
             // oprema mora biti kupljena (zaštita od ručno izmijenjenog fajla)
             if (!p.Owns("z-" + p.Izgled.Zivotinja)) p.Izgled.Zivotinja = "vuk";
@@ -215,6 +230,10 @@ namespace TrkaZnanja.Core
             if (!p.Owns("b-" + p.Izgled.Boja)) p.Izgled.Boja = "#e0312f";
             if (!p.Owns("h-" + p.Izgled.Kapa)) p.Izgled.Kapa = "nema";
             if (p.Izgled.Naocare && !p.Owns("n-da")) p.Izgled.Naocare = false;
+            if (!p.Owns("s-" + p.Izgled.Sara)) p.Izgled.Sara = "nema";
+            if (!p.Owns("c-" + p.Izgled.Boja2)) p.Izgled.Boja2 = "#ffffff";
+            if (!p.Owns("l-" + p.Izgled.Nalijepnica)) p.Izgled.Nalijepnica = "nema";
+            if (!p.Owns("t-" + p.Izgled.Trag)) p.Izgled.Trag = "nema";
 
             if (Json.Obj(Json.Get(d, "podesavanja")) is Dictionary<string, object> s)
             {

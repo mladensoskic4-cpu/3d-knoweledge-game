@@ -240,6 +240,7 @@ namespace UnityEngine
     {
         public const float PI = (float)Math.PI;
         public const float Deg2Rad = PI / 180f, Rad2Deg = 180f / PI;
+        public static float Tan(float f) => (float)System.Math.Tan(f);
         public static float Sin(float f) => (float)Math.Sin(f);
         public static float Cos(float f) => (float)Math.Cos(f);
         public static float Atan2(float y, float x) => (float)Math.Atan2(y, x);
@@ -286,6 +287,8 @@ namespace UnityEngine
         public Vector3 min => center - size * 0.5f;
         public Vector3 max => center + size * 0.5f;
         public bool Contains(Vector3 p) => p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y && p.z >= min.z && p.z <= max.z;
+        public Vector3 extents => size * 0.5f;
+        public void Encapsulate(Bounds b) { }
     }
 
     public class Object
@@ -586,6 +589,7 @@ namespace UnityEngine
     public class Renderer : Component
     {
         public Material sharedMaterial { get; set; }
+        public Bounds bounds => new Bounds();
         public Rendering.ShadowCastingMode shadowCastingMode { get; set; }
         public bool receiveShadows { get; set; }
     }
@@ -605,7 +609,7 @@ namespace UnityEngine
         public float shadowNormalBias { get; set; }
     }
 
-    public enum CameraClearFlags { Skybox = 1, SolidColor = 2 }
+    public enum CameraClearFlags { Skybox = 1, SolidColor = 2, Depth, Nothing }
     public sealed class Camera : Behaviour
     {
         public static Camera main => null;
@@ -615,6 +619,7 @@ namespace UnityEngine
         public RenderTexture targetTexture { get; set; }
         public void Render() { }
         public float fieldOfView { get; set; }
+        public void ResetAspect() { }
         public float nearClipPlane { get; set; }
         public float farClipPlane { get; set; }
         public CameraClearFlags clearFlags { get; set; }
@@ -691,6 +696,7 @@ namespace UnityEngine
     public sealed class AnimationCurve
     {
         public static AnimationCurve Linear(float t0, float v0, float t1, float v1) => new AnimationCurve();
+        public static AnimationCurve EaseInOut(float t0, float v0, float t1, float v1) => new AnimationCurve();
     }
 
     public struct GradientColorKey { public GradientColorKey(Color c, float t) { } }
@@ -759,6 +765,8 @@ namespace UnityEngine
         public ShapeModule shape => default;
         public NoiseModule noise => default;
         public SizeOverLifetimeModule sizeOverLifetime => default;
+        public struct VelocityOverLifetimeModule { public bool enabled { get; set; } public ParticleSystemSimulationSpace space { get; set; } public MinMaxCurve x { get; set; } public MinMaxCurve y { get; set; } public MinMaxCurve z { get; set; } }
+        public VelocityOverLifetimeModule velocityOverLifetime => default;
         public ColorOverLifetimeModule colorOverLifetime => default;
         public RotationOverLifetimeModule rotationOverLifetime => default;
         public TrailModule trails => default;

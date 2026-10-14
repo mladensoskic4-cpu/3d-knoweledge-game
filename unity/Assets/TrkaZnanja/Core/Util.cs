@@ -69,6 +69,16 @@ namespace TrkaZnanja.Core
 
     public static class Fmt
     {
+        // Množina u našem jeziku: 1 runda, 2–4 runde, 5+ rundi (11–14 uvijek „rundi”).
+        public static string Plural(long n, string one, string few, string many)
+        {
+            long a = Math.Abs(n) % 100, b = a % 10;
+            if (a >= 11 && a <= 14) return many;
+            if (b == 1) return one;
+            if (b >= 2 && b <= 4) return few;
+            return many;
+        }
+
         // 1234.5 → "1.234,5"; godine se pišu bez tačke za hiljade.
         public static string Num(double v, int? decimals = null, bool group = true)
         {

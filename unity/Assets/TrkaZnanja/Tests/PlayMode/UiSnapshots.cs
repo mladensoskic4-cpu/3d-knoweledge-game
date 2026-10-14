@@ -80,16 +80,36 @@ namespace TrkaZnanja.Tests
             p.Novcici = 1250;
             var rng = new Rng(5);
 
-            // meni
-            var counts = new Dictionary<string, int>();
-            foreach (var q in GameData.Questions) counts[q.Oblast] = counts.TryGetValue(q.Oblast, out var c) ? c + 1 : 1;
-            MenuScreen.Build(ui.Screen, p, counts, _ => { });
+            // meni: lik na postolju u sredini, izbor oblasti, prijatelji
+            App.I.ShowHero();
+            MenuScreen.Build(ui.Screen, p, App.AreaCounts(), _ => { });
             yield return Snap("01-meni");
+            ClickLabel(ui, Lang.L("Miks · sve oblasti").Split(' ')[0]);
+            yield return Snap("01b-oblasti");
+            MenuScreen.Build(ui.Screen, p, App.AreaCounts(), _ => { });
+            ClickLabel(ui, Lang.L("Prijatelji"));
+            yield return Snap("01c-prijatelji");
+            p.Ime = "";
+            MenuScreen.Build(ui.Screen, p, App.AreaCounts(), _ => { });
+            yield return Snap("01d-dobrodoslica");
+            p.Ime = "Aleksandra";
             SettingsScreen.Build(ui.Screen, p, _ => { }, () => { });
             yield return Snap("02-podesavanja");
             ui.ClearScreen();
-            GarageScreen.Open(ui.Screen, App.I.transform, p, () => { }, () => { });
+
+            // garaža: okretanje, šare, nalijepnice, trag
+            p.Bodovi = 1200;
+            App.I.ShowHero(true);
+            GarageScreen.Open(ui.Screen, App.I.Hero, App.I.World, p, () => { }, () => { });
             yield return Snap("03-garaza");
+            foreach (var (slotId, itemId, shot) in new[] { ("vozilo", "v-kamion", "03b-garaza-vozilo"), ("sara", "s-plamen", "03c-garaza-sara"), ("nalijepnica", "l-zvijezda", "03d-garaza-nalijepnica"), ("trag", "t-duga", "03e-garaza-trag") })
+            {
+                ClickTag(ui, slotId);
+                yield return null;
+                ClickTag(ui, itemId);
+                for (int i = 0; i < 20; i++) yield return null;
+                yield return Snap(shot);
+            }
             ui.ClearScreen();
 
             // sa drugima: izbor i soba (lokalna veza, bez interneta)
@@ -185,6 +205,18 @@ namespace TrkaZnanja.Tests
             UIKit.Clear(ui.Hud);
         }
 
+        static void ClickLabel(UIRoot ui, string startsWith)
+        {
+            var b = ui.Screen.GetComponentsInChildren<GameButton>().FirstOrDefault(x => x.Label != null && x.Label.text.StartsWith(startsWith));
+            if (b != null) b.Click(); else Debug.Log("Trka znanja · snimci: nema dugmeta " + startsWith);
+        }
+
+        static void ClickTag(UIRoot ui, string tag)
+        {
+            var b = ui.Screen.GetComponentsInChildren<GameButton>().FirstOrDefault(x => x.Tag == tag);
+            if (b != null) b.Click(); else Debug.Log("Trka znanja · snimci: nema dugmeta " + tag);
+        }
+
         static void MultiplayerScreenTestRoom(UIRoot ui, Profile p)
         {
             // rezerva ako dugme nije nađeno: obična soba sa jednim gostom
@@ -213,8 +245,31 @@ namespace TrkaZnanja.Tests
             cam.farClipPlane = 300;
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = Col.Hex("#7fb2d9");
-            cam.targetTexture = rtex;
-            cam.Render();
+            // 3D svijet i UI zajedno: platno se za trenutak postavi ispred glavne kamere (kao ekran),
+            // pa jedan snimak pokaže i providnost kartica i lik iza njih
+            var main = App.I != null && App.I.Camera != null ? App.I.Camera.Cam : null;
+            if (main != null)
+            {
+                App.I.Camera.Snap();
+                main.targetTexture = rtex;
+                main.aspect = w / (float)h;
+                var ct = ui.transform;
+                Vector3 p0 = ct.position, s0 = ct.localScale; Quaternion r0 = ct.rotation;
+                const float d = 1f;
+                float viewH = 2 * d * Mathf.Tan(main.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                ct.position = main.transform.position + main.transform.forward * d;
+                ct.rotation = main.transform.rotation;
+                ct.localScale = Vector3.one * (viewH / size.y);
+                main.Render();
+                ct.position = p0; ct.rotation = r0; ct.localScale = s0;
+                main.targetTexture = null;
+                main.ResetAspect();
+            }
+            else
+            {
+                cam.targetTexture = rtex;
+                cam.Render();
+            }
             var prev = RenderTexture.active;
             RenderTexture.active = rtex;
             var img = new Texture2D(w, h, TextureFormat.RGB24, false);
@@ -294,7 +349,10 @@ namespace TrkaZnanja.Tests
             var ui = UIRoot.I;
             var safe = RectOf(ui.Safe);
             int before = report.Length;
-            var buttons = ui.GetComponentsInChildren<GameButton>().Where(b => b.isActiveAndEnabled).ToList();
+            // ako je otvoren prozor preko ekrana (zatamnjenje), provjerava se samo taj prozor
+            var dim = ui.Screen.GetComponentsInChildren<Image>().LastOrDefault(x => x.name == "Zatamnjenje" && x.isActiveAndEnabled);
+            Component scope = dim != null ? (Component)dim.transform.parent : ui;
+            var buttons = scope.GetComponentsInChildren<GameButton>().Where(b => b.isActiveAndEnabled).ToList();
             // vidljivi dio dugmeta: ono što je u listi sa klizanjem se odsijeca na rubu liste
             var rects = buttons.Select(b => Visible(b.transform, RectOf((RectTransform)b.transform))).ToList();
             var keep = rects.Select(r => r.width > 1 && r.height > 1).ToList();
@@ -317,7 +375,7 @@ namespace TrkaZnanja.Tests
                 }
             }
             // tekst koji ne staje u svoj prostor ili izlazi iz kartice
-            foreach (var t in ui.GetComponentsInChildren<Text>().Where(x => x.isActiveAndEnabled && !string.IsNullOrEmpty(x.text)))
+            foreach (var t in scope.GetComponentsInChildren<Text>().Where(x => x.isActiveAndEnabled && !string.IsNullOrEmpty(x.text)))
             {
                 if (t.resizeTextForBestFit || t.GetComponentInParent<WorldLabels>() != null || t.GetComponent<ContentSizeFitter>() != null) continue;
                 if (t.GetComponentInParent<InputField>() != null) continue;
@@ -333,7 +391,7 @@ namespace TrkaZnanja.Tests
                     Problem(screen, $"{Who(t)} ima sitna slova ({t.fontSize})", false);
             }
             // kartice koje se preklapaju (npr. pitanje preko poretka)
-            var cards = ui.GetComponentsInChildren<Image>().Where(x => IsCard(x.transform) && x.isActiveAndEnabled && !Clipped(x.transform.parent)).ToList();
+            var cards = scope.GetComponentsInChildren<Image>().Where(x => IsCard(x.transform) && x.isActiveAndEnabled && !Clipped(x.transform.parent)).ToList();
             for (int i = 0; i < cards.Count; i++)
                 for (int j = i + 1; j < cards.Count; j++)
                 {

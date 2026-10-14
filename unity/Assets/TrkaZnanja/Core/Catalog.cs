@@ -191,12 +191,42 @@ namespace TrkaZnanja.Core
             ("#e0312f", "Crvena", 0, null), ("#2b7de9", "Plava", 0, null), ("#16a36a", "Zelena", 40, null), ("#f08a1c", "Narandžasta", 40, null),
             ("#9b4bd6", "Ljubičasta", 80, null), ("#14232e", "Crna", 100, null), ("#f4f4f4", "Bijela", 100, null), ("#ff6fae", "Roze", 60, null),
             ("#e3b23c", "Zlatna", 400, "zlato"), ("#5b7cfa", "Dijamantska", 800, "dijamant"),
+            ("#00b8d4", "Tirkizna", 60, null), ("#ffd23f", "Limun žuta", 60, null), ("#7cc6fe", "Nebo plava", 60, null),
+            ("#3ddc97", "Nana zelena", 80, null), ("#ff5d8f", "Malina", 80, null), ("#8b1e3f", "Bordo", 100, null),
+            ("#c6ef3c", "Neon limeta", 150, "srebro"), ("#b388ff", "Lavanda", 120, null),
         };
 
         public static readonly (string id, string label, int price, string rank)[] Hats =
         {
             ("nema", "Bez kape", 0, null), ("kacket", "Kačket", 60, null), ("sesir", "Šešir", 120, null),
             ("kapa", "Tradicionalna kapa", 150, null), ("kaciga", "Kaciga", 200, "srebro"), ("kruna", "Kruna", 1000, "dijamant"),
+        };
+
+        // Ukrasi vozila (garaža): šare, boje šara, nalijepnice i tragovi u vožnji.
+        public static readonly (string id, string label, int price, string rank)[] Patterns =
+        {
+            ("nema", "Bez šare", 0, null), ("pruge", "Trkačke pruge", 80, null), ("tacke", "Tačkice", 100, null),
+            ("plamen", "Plamen", 150, null), ("sah", "Šahovnica", 150, null), ("munje", "Munje", 200, "srebro"), ("zvijezde", "Zvjezdice", 250, "srebro"),
+        };
+
+        public static readonly (string color, string label, int price, string rank)[] Accents =
+        {
+            ("#ffffff", "Bijela", 0, null), ("#14232e", "Crna", 0, null), ("#ffd23f", "Žuta", 40, null), ("#e0312f", "Crvena", 40, null),
+            ("#2b7de9", "Plava", 40, null), ("#3ddc97", "Zelena", 40, null), ("#ff6fae", "Roze", 40, null), ("#9b4bd6", "Ljubičasta", 40, null),
+            ("#ff8a1c", "Narandžasta", 40, null), ("#e3b23c", "Zlatna", 300, "zlato"),
+        };
+
+        public static readonly (string id, string label, int price, string rank)[] Stickers =
+        {
+            ("nema", "Bez nalijepnice", 0, null), ("zvijezda", "Zvijezda", 60, null), ("srce", "Srce", 60, null), ("munja", "Munja", 80, null),
+            ("broj", "Broj 7", 80, null), ("cvijet", "Cvijet", 80, null), ("smajli", "Smajli", 100, null), ("cg", "Zastava Crne Gore", 120, null),
+            ("kruna", "Krunica", 250, "srebro"),
+        };
+
+        public static readonly (string id, string label, int price, string rank)[] Trails =
+        {
+            ("nema", "Bez traga", 0, null), ("iskre", "Iskrice", 120, null), ("srca", "Srca", 150, null),
+            ("duga", "Duga", 250, "srebro"), ("zvijezde", "Zvijezde", 300, "zlato"),
         };
 
         public static readonly Powerup[] Powerups =
@@ -207,7 +237,7 @@ namespace TrkaZnanja.Core
             new Powerup { Id = "uspori", Kind = "slow", Label = "Uspori protivnike", Price = 70, Opis = "U ovoj rundi svaki protivnik ide polje manje." },
         };
 
-        // Sve što se kupuje u garaži (životinje, vozila, boje, kape, naočare).
+        // Sve što se kupuje u garaži (životinje, vozila, boje, kape, naočare, šare, nalijepnice, tragovi).
         public static readonly List<ShopItem> Shop = BuildShop();
         static List<ShopItem> BuildShop()
         {
@@ -218,6 +248,10 @@ namespace TrkaZnanja.Core
             foreach (var h in Hats) s.Add(new ShopItem { Id = "h-" + h.id, Slot = "kapa", Value = h.id, Label = h.label, Price = h.price, Rank = h.rank });
             s.Add(new ShopItem { Id = "n-ne", Slot = "naocare", Value = "ne", Label = "Bez naočara", Price = 0 });
             s.Add(new ShopItem { Id = "n-da", Slot = "naocare", Value = "da", Label = "Naočare za sunce", Price = 80 });
+            foreach (var p in Patterns) s.Add(new ShopItem { Id = "s-" + p.id, Slot = "sara", Value = p.id, Label = p.label, Price = p.price, Rank = p.rank });
+            foreach (var c in Accents) s.Add(new ShopItem { Id = "c-" + c.color, Slot = "boja2", Value = c.color, Label = c.label, Price = c.price, Rank = c.rank, Swatch = c.color });
+            foreach (var l in Stickers) s.Add(new ShopItem { Id = "l-" + l.id, Slot = "nalijepnica", Value = l.id, Label = l.label, Price = l.price, Rank = l.rank });
+            foreach (var t in Trails) s.Add(new ShopItem { Id = "t-" + t.id, Slot = "trag", Value = t.id, Label = t.label, Price = t.price, Rank = t.rank });
             return s;
         }
         public static ShopItem ShopItemOf(string id) => Shop.FirstOrDefault(i => i.Id == id);

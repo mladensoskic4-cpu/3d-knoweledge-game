@@ -10,7 +10,7 @@ namespace TrkaZnanja.Game
     public static class MapPainter
     {
         static readonly Dictionary<string, Texture2D> cache = new Dictionary<string, Texture2D>();
-        public const int Width = 1400;
+        public const int Width = 2048;    // dovoljno oštro i kad se mapa uveća
 
         static readonly Color32 Sea = Col.Hex("#bfe3f2"), Grid = Col.Hex("#a6d4e8"), Land = Col.Hex("#e8f1df"), Edge = Col.Hex("#a9c49a"),
             Focus = Col.Hex("#9fd07e"), FocusEdge = Col.Hex("#3f7a3a"), Lake = Col.Hex("#8fcbe8");

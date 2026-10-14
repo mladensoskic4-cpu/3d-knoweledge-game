@@ -779,3 +779,124 @@ namespace TrkaZnanja.Tests
         }
     }
 }
+
+namespace TrkaZnanja.Tests
+{
+    using System;
+    using System.IO;
+    using System.Linq;
+    using NUnit.Framework;
+    using TrkaZnanja.Core;
+
+    public class LookAndIconTests
+    {
+        [Test]
+        public void EveryIconDrawsSomething()
+        {
+            foreach (var name in Icons.All)
+            {
+                var cv = Icons.Draw(name, 96);
+                int filled = 0;
+                for (int i = 3; i < cv.Data.Length; i += 4) if (cv.Data[i] > 128) filled++;
+                Assert.Greater(filled, 96 * 96 / 40, name);
+                Assert.Less(filled, 96 * 96 * 9 / 10, name);
+                // za pregled ikonica (alat): TRKA_IKONE=folder sačuva sirove RGBA slike
+                var dir = Environment.GetEnvironmentVariable("TRKA_IKONE");
+                if (!string.IsNullOrEmpty(dir)) File.WriteAllBytes(Path.Combine(dir, name + ".rgba"), cv.Data);
+            }
+        }
+
+        [Test]
+        public void DecorationsAreInShopAndSurviveJson()
+        {
+            foreach (var slot in new[] { "sara", "boja2", "nalijepnica", "trag" })
+            {
+                Assert.Greater(Catalog.Shop.Count(i => i.Slot == slot), 3, slot);
+                Assert.IsTrue(Catalog.Shop.Any(i => i.Slot == slot && i.Price == 0), slot + " ima besplatnu opciju");
+            }
+            Assert.AreEqual(Catalog.Shop.Count, Catalog.Shop.Select(i => i.Id).Distinct().Count(), "id-jevi u prodavnici su jedinstveni");
+            var p = new Profile { Novcici = 5000, Bodovi = 100000 };
+            foreach (var id in new[] { "s-plamen", "c-#ffd23f", "l-zvijezda", "t-duga" })
+            {
+                var item = Catalog.ShopItemOf(id);
+                Assert.IsNotNull(item, id);
+                Assert.IsTrue(p.Buy(item), id);
+                Assert.IsTrue(p.Equip(item), id);
+                Assert.IsTrue(p.IsEquipped(item), id);
+            }
+            var back = Profile.FromJson(p.ToJson());
+            Assert.AreEqual("plamen", back.Izgled.Sara);
+            Assert.AreEqual("#ffd23f", back.Izgled.Boja2);
+            Assert.AreEqual("zvijezda", back.Izgled.Nalijepnica);
+            Assert.AreEqual("duga", back.Izgled.Trag);
+
+            // ukras koji nije kupljen se ne učitava
+            var json = p.ToJson().Replace("\"t-duga\",", "").Replace(",\"t-duga\"", "");
+            Assert.AreEqual("nema", Profile.FromJson(json).Izgled.Trag);
+
+            // stari profil (bez ukrasa) daje podrazumijevane vrijednosti
+            var old = Profile.FromJson("{\"izgled\":{\"zivotinja\":\"zec\"}}");
+            Assert.AreEqual("nema", old.Izgled.Sara);
+            Assert.AreEqual("#ffffff", old.Izgled.Boja2);
+
+            // ukrasi idu i preko multiplayera
+            var mp = MpPlayer.FromJson(new MpPlayer { Id = "a", Name = "A", Look = back.Izgled }.ToJson());
+            Assert.AreEqual("plamen", mp.Look.Sara);
+            Assert.AreEqual("duga", mp.Look.Trag);
+        }
+    }
+}
+
+namespace TrkaZnanja.Tests
+{
+    using System.Collections.Generic;
+    using NUnit.Framework;
+    using TrkaZnanja.Core;
+
+    public class TriangulatorTests
+    {
+        [Test]
+        public void TrianglesCoverPolygonArea()
+        {
+            var shapes = new List<List<Vec2d>>
+            {
+                Icons.Star(0.5, 0.5, 0.4, 0.15, 5),
+                Icons.Heart(0.5, 0.5, 0.4),
+                Icons.Flame(0.5, 0.5, 0.4),
+                new List<Vec2d> { new Vec2d(0.58, 0.06), new Vec2d(0.2, 0.56), new Vec2d(0.46, 0.56), new Vec2d(0.38, 0.94), new Vec2d(0.8, 0.4), new Vec2d(0.53, 0.4), new Vec2d(0.66, 0.06) },
+            };
+            foreach (var s in shapes)
+            {
+                var tris = Triangulator.Triangulate(s);
+                Assert.AreEqual(0, tris.Count % 3);
+                Assert.AreEqual(s.Count - 2, tris.Count / 3);
+                double sum = 0;
+                for (int i = 0; i < tris.Count; i += 3)
+                    sum += System.Math.Abs(Triangulator.Area(new[] { s[tris[i]], s[tris[i + 1]], s[tris[i + 2]] }));
+                Assert.AreEqual(System.Math.Abs(Triangulator.Area(s)), sum, 1e-6);
+            }
+        }
+    }
+}
+
+namespace TrkaZnanja.Tests
+{
+    using NUnit.Framework;
+    using TrkaZnanja.Core;
+
+    public class PluralTests
+    {
+        [Test]
+        public void PluralFormsFollowOurGrammar()
+        {
+            string R(int n) => Fmt.Plural(n, "runda", "runde", "rundi");
+            Assert.AreEqual("runda", R(1));
+            Assert.AreEqual("runde", R(3));
+            Assert.AreEqual("rundi", R(5));
+            Assert.AreEqual("rundi", R(12));
+            Assert.AreEqual("runda", R(21));
+            Assert.AreEqual("runde", R(24));
+            Assert.AreEqual("rundi", R(111));
+        }
+    }
+}

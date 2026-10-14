@@ -12,10 +12,10 @@ namespace TrkaZnanja.Game
 {
     public sealed class Capitals : Minigame
     {
-        const int Goal = 9;
+        const int Goal = 11;
         public override string Id => "gradovi";
         public override string Name => "Glavni gradovi";
-        public override int Duration => 20;
+        public override int Duration => 25;
         public override string Intro(int s) => $"Pojavljuje se država, a ti biraš njen glavni grad. Odgovori na što više za {s} sekundi. Greška oduzima pola boda.";
         public override bool Ready => GameData.Countries.Count(c => !string.IsNullOrEmpty(c.Capital)) >= 8;
         public override (double score, string label) SimulateBot(double skill, Rng rng) => Simulate(skill, rng, Goal, "gradova");
@@ -65,9 +65,9 @@ namespace TrkaZnanja.Game
         { this.id = id; this.name = name; this.intro = intro; this.kat = kat; this.goal = goal; this.duration = duration; this.unit = unit; }
 
         public static PhotoChoiceGame Places() => new PhotoChoiceGame("mjesta", "Gdje je ovo?",
-            "Pojavljuje se fotografija poznatog mjesta ili spomenika. Izaberi koje je to mjesto. Što više tačnih za {0} sekundi.", "mjesta", 6);
+            "Pojavljuje se fotografija poznatog mjesta ili spomenika. Izaberi koje je to mjesto. Ako ne znaš, preskoči (bez kazne). Što više tačnih za {0} sekundi.", "mjesta", 10, 45);
         public static PhotoChoiceGame Body() => new PhotoChoiceGame("tijelo", "Koji je ovo dio tijela?",
-            "Pojavljuje se slika dijela ljudskog tijela. Izaberi koji je. Što više tačnih za {0} sekundi.", "tijelo", 7);
+            "Pojavljuje se slika dijela ljudskog tijela. Izaberi koji je. Što više tačnih za {0} sekundi.", "tijelo", 9, 35);
 
         public override string Id => id;
         public override string Name => name;
@@ -108,14 +108,14 @@ namespace TrkaZnanja.Game
     public sealed class AnimalsGame : PhotoChoiceGame
     {
         public AnimalsGame() : base("zivotinje", "Koja je ovo životinja?",
-            "Pojavljuje se fotografija životinje. Izaberi koja je. Što više tačnih za {0} sekundi, greška oduzima pola boda.", "zivotinje", 7) { }
+            "Pojavljuje se fotografija životinje. Izaberi koja je. Što više tačnih za {0} sekundi, greška oduzima pola boda.", "zivotinje", 9, 32) { }
     }
 
     // Naizmjenično zvuk instrumenta (4 note, FluidR3 GM, CC BY 3.0) i fotografija instrumenta.
     public sealed class InstrumentsGame : PhotoChoiceGame
     {
         public InstrumentsGame() : base("instrumenti", "Koji je ovo instrument?",
-            "Naizmjenično čuješ zvuk instrumenta ili vidiš njegovu fotografiju. Izaberi koji je instrument. Što više tačnih za {0} sekundi.", "instrumenti", 7) { }
+            "Naizmjenično čuješ zvuk instrumenta ili vidiš njegovu fotografiju. Izaberi koji je instrument. Što više tačnih za {0} sekundi.", "instrumenti", 8, 32) { }
 
         public override bool Ready => MinigameData.Instruments.Count >= 6 || base.Ready;
 
@@ -186,10 +186,10 @@ namespace TrkaZnanja.Game
     // Država zeleno, susjedi blijedo i more oko nje; sljedeći obris se crta unaprijed u pozadini.
     public sealed class ShapeGame : Minigame
     {
-        const int Goal = 7, TexW = 680, TexH = 500;
+        const int Goal = 9, TexW = 680, TexH = 500;
         public override string Id => "oblik";
         public override string Name => "Pogodi državu po obliku";
-        public override int Duration => 20;
+        public override int Duration => 28;
         public override string Intro(int s) => $"Pojavljuje se država (zeleno) sa susjedima i morem oko nje. Izaberi koja je to država. Što više tačnih za {s} sekundi, greška oduzima pola boda.";
         public override bool Ready => MinigameData.World.Count > 20;
         public override (double score, string label) SimulateBot(double skill, Rng rng) => Simulate(skill, rng, Goal, "tačnih");

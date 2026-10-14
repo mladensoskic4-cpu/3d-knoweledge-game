@@ -34,6 +34,9 @@ namespace TrkaZnanja.Game
         public MpSession Multi { get; private set; }
         string worldKey;
         Transform worldRoot;
+        Showcase hero;                            // tvoj lik na postolju (meni i garaža)
+        public Showcase Hero => hero;
+        public WorldView World => world;
 
         public static App Boot()
         {
@@ -118,6 +121,7 @@ namespace TrkaZnanja.Game
             if (key == worldKey && world != null) return;
             worldKey = key;
             if (world != null) Destroy(world.gameObject);
+            hero = null;
             labels?.Clear();
             var seed = rng.Range(1, 100000);
             world = WorldView.Build(worldRoot, map, tiles, atmosphere, seed);
@@ -168,12 +172,45 @@ namespace TrkaZnanja.Game
             ui.ClearScreen();
             UIKit.Clear(ui.Hud);
             ShowWorld(Profile.Podesavanja.Mapa, null);
-            Camera.MapOrbit();
+            ShowHero();
             fx.BlurBackground(false);
+            MenuScreen.Build(ui.Screen, Profile, AreaCounts(), OnMenu);
+            if (AutoPlay) StartCoroutine(AutoStart());
+        }
+
+        public static Dictionary<string, int> AreaCounts()
+        {
             var counts = new Dictionary<string, int>();
             foreach (var q in GameData.Questions) counts[q.Oblast] = counts.TryGetValue(q.Oblast, out var c) ? c + 1 : 1;
-            MenuScreen.Build(ui.Screen, Profile, counts, OnMenu);
-            if (AutoPlay) StartCoroutine(AutoStart());
+            return counts;
+        }
+
+        // Lik na postolju na početku staze; kamera ga snima sa staze prije starta (iza njega se vidi put kroz svijet).
+        public void ShowHero(bool garage = false)
+        {
+            if (world == null || track == null) return;
+            if (hero == null)
+            {
+                // malo dalje od starta, da kapija starta ostane iza kamere
+                track.PoseAt(Mathf.Min(4.2f, track.TotalArc * 0.25f), out var pos, out var fwd);
+                hero = Showcase.Create(world.transform, pos, fwd);
+            }
+            hero.SetLook(Profile.Izgled);
+            ui.Labels.gameObject.SetActive(false);    // nazivi gradova bi se preklapali sa menijem
+            if (garage) return;
+            hero.AutoSpin = false;
+            hero.Yaw = -32;
+            Camera.FixedRate = 2;
+            hero.CameraAt(0, 10, 2.7f, -0.07f, world, out var cp, out var cl, 0.04f);
+            Camera.Fixed(cp, cl);
+        }
+
+        void HideHero()
+        {
+            if (hero != null) Destroy(hero.gameObject);
+            hero = null;
+            ui.Labels.gameObject.SetActive(true);
+            Camera.FixedRate = 2;
         }
 
         IEnumerator AutoStart()
@@ -185,12 +222,13 @@ namespace TrkaZnanja.Game
         void OnMenu(MenuChoice c)
         {
             Save();
-            if (c.MapChanged != null) { ShowWorld(c.MapChanged, null); return; }
+            if (c.LookChanged) { hero?.SetLook(Profile.Izgled); return; }
+            if (c.MapChanged != null) { ShowWorld(c.MapChanged, null); ShowHero(); return; }
             if (c.Start) { StartCoroutine(RunRace(false)); return; }
             if (c.Settings) { SettingsScreen.Build(ui.Screen, Profile, OnSetting, () => { Save(); ShowMenu(); }); return; }
-            if (c.Garage) { GarageScreen.Open(ui.Screen, worldRoot, Profile, Save, ShowMenu); return; }
-            if (c.Multiplayer) { OpenMultiplayer(); return; }
-            if (c.Leaderboard) ui.Toast("Rang-lista sa drugim igračima stiže sa multiplayerom.", Theme.Gold);
+            if (c.Garage) { ShowHero(true); GarageScreen.Open(ui.Screen, hero, world, Profile, Save, ShowMenu); return; }
+            if (c.Multiplayer) { OpenMultiplayer(c.Friends); return; }
+            if (c.Leaderboard) ui.Toast("Rang-liste (prijatelji, grad, škola, cijela država) stižu uskoro.", Theme.Gold);
         }
 
         void OnSetting(string what)
@@ -211,11 +249,11 @@ namespace TrkaZnanja.Game
         }
 
         // ---------- igra sa drugima ----------
-        void OpenMultiplayer()
+        void OpenMultiplayer(string start = null)
         {
             ui.ClearScreen();
             UIKit.Clear(ui.Hud);
-            MultiplayerScreen.Open(ui.Screen, Profile, this, MultiSetup, (mp, setup) => StartCoroutine(RunRace(false, setup, mp)), ShowMenu);
+            MultiplayerScreen.Open(ui.Screen, Profile, this, MultiSetup, (mp, setup) => StartCoroutine(RunRace(false, setup, mp)), ShowMenu, start);
         }
 
         // Domaćin pravi postavu: njegova mapa, dužina i oblasti; ljudi po redu (domaćin prvi), ostalo botovi.
@@ -273,6 +311,7 @@ namespace TrkaZnanja.Game
         {
             InRace = true;
             ui.ClearScreen();
+            HideHero();
             var S = Profile.Podesavanja;
             var localId = mp != null ? mp.LocalId : "ti";
             setup ??= SoloSetup(tutorial, localId);

@@ -260,7 +260,7 @@ namespace TrkaZnanja.Game
         void Build()
         {
             // gore: traka do cilja
-            var top = UIKit.Card(transform, "Traka do cilja");
+            var top = UIKit.GlassCard(transform, "Traka do cilja", new Color(1, 1, 1, 0.78f));
             top.rectTransform.parent.GetComponent<RectTransform>().Anchor(new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(1000, 86));
             bar = UIKit.Rect(top.transform, "Put").Stretch(70, 30, 70, 30);
             var line = UIKit.Box(bar, Theme.Line, UIKit.Pill, "Linija", 1f);
@@ -293,7 +293,7 @@ namespace TrkaZnanja.Game
             }
 
             // desno: poredak
-            var card = UIKit.Card(transform, "Poredak", new Color(1, 1, 1, 0.92f));
+            var card = UIKit.GlassCard(transform, "Poredak", new Color(1, 1, 1, 0.78f));
             side = card.rectTransform.parent.GetComponent<RectTransform>();
             side.Anchor(new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-18, -18), new Vector2(380, 310));
             roundText = UIKit.Label(card.transform, "Runda 1", 28, Theme.InkSoft, TextAnchor.MiddleLeft, true);

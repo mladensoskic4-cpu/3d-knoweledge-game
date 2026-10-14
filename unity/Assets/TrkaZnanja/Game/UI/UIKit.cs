@@ -25,6 +25,10 @@ namespace TrkaZnanja.Game
         public static readonly Color Right = Col.Hex("#1fae5b");
         public static readonly Color Wrong = Col.Hex("#e2283e");
         public static readonly Color Dim = new Color(0.05f, 0.09f, 0.14f, 0.55f);
+        // staklo: providna bijela kartica kroz koju se vidi (zamućena) trka
+        public static readonly Color Glass = new Color(1, 1, 1, 0.56f);
+        public static readonly Color GlassSoft = new Color(1, 1, 1, 0.5f);
+        public static readonly Color GlassEdge = new Color(1, 1, 1, 0.85f);
     }
 
     public static class UIKit
@@ -100,6 +104,53 @@ namespace TrkaZnanja.Game
             img.pixelsPerUnitMultiplier = ppu;
             img.color = color;
             return img;
+        }
+
+        // ---- ikonice (Core/Icons, bijele; boja se daje preko Image.color) ----
+        static readonly Dictionary<string, Sprite> icons = new Dictionary<string, Sprite>();
+
+        public static Sprite IconSprite(string name)
+        {
+            if (icons.TryGetValue(name, out var s) && s != null) return s;
+            var tex = MinigameData.ToTexture(Icons.Draw(name, 128), "Ikona " + name, true);
+            tex.wrapMode = TextureWrapMode.Clamp;
+            s = Sprite.Create(tex, new Rect(0, 0, 128, 128), new Vector2(0.5f, 0.5f));
+            icons[name] = s;
+            return s;
+        }
+
+        public static Image IconImage(Transform parent, string name, Color color, float size)
+        {
+            var rt = Rect(parent, "Ikona " + name);
+            var img = rt.gameObject.AddComponent<Image>();
+            img.sprite = IconSprite(name);
+            img.type = Image.Type.Simple;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+            img.color = color;
+            img.Size(size, size);
+            rt.sizeDelta = new Vector2(size, size);
+            return img;
+        }
+
+        // Staklena kartica: providna, sa svijetlim rubom i mekom sjenkom (iza se vidi zamućena 3D scena).
+        public static Image GlassCard(Transform parent, string name = "Kartica", Color? color = null)
+        {
+            var holder = Rect(parent, name);
+            var sh = Box(holder, new Color(0.03f, 0.08f, 0.16f, 0.2f), Shadow, "Sjenka", 0.5f);
+            sh.rectTransform.Stretch(-22, -14, -22, -34);
+            sh.raycastTarget = false;
+            var edge = Box(holder, Theme.GlassEdge, Round, "Rub", 0.7f);
+            edge.rectTransform.Stretch(-3, -3, -3, -3);
+            edge.raycastTarget = false;
+            var face = Box(holder, color ?? Theme.Glass, Round, "Lice", 0.7f);
+            face.rectTransform.Stretch();
+            // odsjaj: gornji dio stakla malo svjetliji
+            var hl = Box(face.transform, new Color(1, 1, 1, 0.22f), Round, "Odsjaj", 0.7f);
+            hl.rectTransform.anchorMin = new Vector2(0, 0.62f); hl.rectTransform.anchorMax = Vector2.one;
+            hl.rectTransform.offsetMin = Vector2.zero; hl.rectTransform.offsetMax = Vector2.zero;
+            hl.raycastTarget = false;
+            return face;
         }
 
         // Kartica: bijela, zaobljena, sa mekom sjenkom.
@@ -318,6 +369,7 @@ namespace TrkaZnanja.Game
         public string Tag;
         public Text Label { get; private set; }
         public Image Face { get; private set; }
+        public Image Icon { get; private set; }
         Image under;
         RectTransform faceRt;
         Color color;
@@ -350,6 +402,38 @@ namespace TrkaZnanja.Game
 
         public void SetText(string text) => Label.text = Lang.L(text);
 
+        // Ikonica lijevo od teksta (ili u sredini, ako nema teksta; ili iznad teksta za velika kvadratna dugmad).
+        public GameButton SetIcon(string name, float size = 0, bool above = false)
+        {
+            if (Icon == null)
+            {
+                Icon = UIKit.Box(faceRt, Color.white, UIKit.IconSprite(name), "Ikona", 1f);
+                Icon.type = Image.Type.Simple;
+                Icon.preserveAspect = true;
+                Icon.raycastTarget = false;
+                var sh = Icon.gameObject.AddComponent<Shadow>();
+                sh.effectColor = Darker(color, 0.5f).WithA(0.6f);
+                sh.effectDistance = new Vector2(0, -2);
+            }
+            else Icon.sprite = UIKit.IconSprite(name);
+            float s = size > 0 ? size : Mathf.Round(Label.fontSize * 1.2f);
+            var irt = Icon.rectTransform;
+            if (above)
+            {
+                irt.Anchor(new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(s, s));
+                Label.rectTransform.Stretch(10, 14 + s, 10, 6);
+            }
+            else if (string.IsNullOrEmpty(Label.text))
+                irt.Anchor(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(s, s));
+            else
+            {
+                irt.Anchor(new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(Mathf.Max(18, s * 0.45f), 0), new Vector2(s, s));
+                Label.rectTransform.Stretch(Mathf.Max(18, s * 0.45f) + s + 8, 4, 18, 4);
+            }
+            if (selectable) SetSelected(selected);
+            return this;
+        }
+
         public void SetColor(Color c)
         {
             color = c;
@@ -374,12 +458,14 @@ namespace TrkaZnanja.Game
             {
                 Face.color = color; under.color = Darker(color);
                 Label.color = Color.white;
+                if (Icon != null) Icon.color = Color.white;
                 foreach (var e in Label.GetComponents<Shadow>()) e.enabled = true;   // Outline je takođe Shadow
             }
             else
             {
                 Face.color = Theme.Paper; under.color = Theme.Line;
                 Label.color = Darker(color, 0.85f);
+                if (Icon != null) Icon.color = Darker(color, 0.85f);
                 foreach (var e in Label.GetComponents<Shadow>()) e.enabled = false;
             }
         }

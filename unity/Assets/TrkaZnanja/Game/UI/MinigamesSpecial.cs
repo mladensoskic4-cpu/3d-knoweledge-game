@@ -332,20 +332,23 @@ namespace TrkaZnanja.Game
     {
         public override string Id => "mapa-svijeta";
         public override string Name => "Pronađi na mapi svijeta";
-        public override int Duration => 35;
-        public override string Intro(int s) => $"Na mapi svijeta tapni traženu državu, grad ili rijeku. Mapu možeš uvećati (+, točkić ili dva prsta) i pomjerati prevlačenjem. Što bliže, to više bodova. Imaš {s} sekundi.";
+        public override int Duration => 60;
+        const double Goal = 11;
+        public override string Intro(int s) => $"Na mapi svijeta tapni traženu državu, grad ili rijeku. Mapu možeš uvećati (+, točkić ili dva prsta) i pomjerati prevlačenjem. Što bliže, to više bodova. Ako ne znaš, preskoči. Imaš {s} sekundi.";
         public override bool Ready => MinigameData.World.Count > 20;
         public override void Prepare() => MinigameData.WarmWorldMap();
 
         public override (double score, string label) SimulateBot(double skill, Rng rng)
         {
             var score = Mathx.Clamp(skill * 0.95 + rng.Gaussian() * 0.15, 0, 1);
-            return (score, $"{Fmt.Num(score * 7, 1)} bodova");
+            return (score, $"{Fmt.Num(score * Goal, 1)} bodova");
         }
 
         sealed class MapTask { public string Kind, Label; public WorldCountry D; public WorldPlace C; public WorldRiver R; }
 
         static string Show(string name, string en) => Lang.Mode == Lang.En && !string.IsNullOrEmpty(en) ? en : name;
+
+        public static List<Vec2d> Around(Vec2d c, double deg) => new List<Vec2d> { new Vec2d(c.X - deg, c.Y - deg * 0.6), new Vec2d(c.X + deg, c.Y + deg * 0.6) };
 
         public override IEnumerator Play(RectTransform host, Rng rng, int seconds)
         {
@@ -374,6 +377,7 @@ namespace TrkaZnanja.Game
                 prompt.text = Lang.L($"Tapni {task.Kind}:") + "  " + Lang.L(task.Label);
                 note.text = Lang.L("Tapni na mapu. Prevuci za pomjeranje.");
                 map.ClearMarks();
+                map.ResetView();
             }
 
             void Answer(double lon, double lat)
@@ -397,12 +401,31 @@ namespace TrkaZnanja.Game
                 waitUntil = t + (ok ? 0.7f : 1.4f);
             }
 
+            // preskoči: pokaži gdje je i idi dalje (bez bodova i bez kazne)
+            void Skip()
+            {
+                if (busy || t >= seconds) return;
+                var task = tasks[ti % tasks.Count];
+                if (task.D != null) { map.HighlightCountry(task.D, Rgba.Hex("#1d8a4e", 170)); map.Focus(Around(task.D.Center, 12)); }
+                if (task.R != null) { map.DrawLine(task.R.Points, 4, Rgba.Hex("#1f5fd1")); map.Focus(task.R.Points); }
+                map.ApplyMarks();
+                if (task.C != null) { map.Pin(task.C.Lon, task.C.Lat, Theme.Right, 30); map.Focus(Around(new Vec2d(task.C.Lon, task.C.Lat), 8)); }
+                note.text = Lang.L("Preskočeno: evo gdje je.");
+                busy = true;
+                waitUntil = t + 1.3f;
+            }
+
             // mapa se crta u pozadini dok igrač čita uputstvo; ovdje sačekamo ako još nije gotova
             while (!MinigameData.WorldMapReady) { MinigameData.WarmWorldMap(); yield return null; }
             map = WorldMapView.Create(col.transform, Answer);
             map.Frame.Size(-1, -1, 1, 1);
-            note = UIKit.Label(col.transform, "", 26, Theme.InkSoft, TextAnchor.MiddleCenter);
-            note.Size(-1, 36);
+            var bottom = UIKit.HStack(col.transform, 14, "Dolje", TextAnchor.MiddleCenter);
+            bottom.Size(-1, 70);
+            note = UIKit.Label(bottom.transform, "", 26, Theme.InkSoft, TextAnchor.MiddleCenter);
+            note.Size(-1, 66, 1);
+            var skip = UIKit.Button(bottom.transform, "Preskoči", Theme.InkSoft, Skip, 30);
+            skip.SetIcon("preskoci", 34);
+            skip.Size(250, 66);
             yield return null;
             ShowTask();
             float botWait = 0;
@@ -425,7 +448,7 @@ namespace TrkaZnanja.Game
                 }
                 yield return null;
             }
-            Score = Mathx.Clamp(score / 7 * Duration / seconds, 0, 1);
+            Score = Mathx.Clamp(score / Goal * Duration / seconds, 0, 1);
             ResultLabel = $"{Fmt.Num(score, 1)} bodova";
         }
     }
@@ -433,11 +456,11 @@ namespace TrkaZnanja.Game
     // ---------- Gdje je ova fotografija? ----------
     public sealed class WorldPhotoMap : Minigame
     {
-        const int Goal = 5;
+        const int Goal = 7;
         public override string Id => "foto-mapa";
         public override string Name => "Gdje je ova fotografija?";
-        public override int Duration => 40;
-        public override string Intro(int s) => $"Vidiš fotografiju poznatog mjesta. Tapni na mapi svijeta gdje se nalazi. Što bliže, to više bodova (do 100 km je pun bod). Imaš {s} sekundi.";
+        public override int Duration => 60;
+        public override string Intro(int s) => $"Vidiš fotografiju poznatog mjesta. Tapni na mapi svijeta gdje se nalazi. Što bliže, to više bodova (do 100 km je pun bod). Ako ne znaš, preskoči. Imaš {s} sekundi.";
         public override bool Ready => MinigameData.Photos("mjesta").Count(p => p.HasPlace) >= 6;
         public override void Prepare() => MinigameData.WarmWorldMap();
 
@@ -459,8 +482,11 @@ namespace TrkaZnanja.Game
             row.Size(-1, -1, 1, 1);
             row.childForceExpandHeight = true; row.childControlHeight = true;
             var photo = UIKit.Rect(row.transform, "Fotografija");
-            photo.Size(400, -1, 0, 1);
-            var note = UIKit.Label(col.transform, "", 26, Theme.InkSoft, TextAnchor.MiddleCenter);
+            photo.Size(440, -1, 0, 1);
+            var bottom = UIKit.HStack(col.transform, 14, "Dolje", TextAnchor.MiddleCenter);
+            bottom.Size(-1, 70);
+            var note = UIKit.Label(bottom.transform, "", 26, Theme.InkSoft, TextAnchor.MiddleCenter);
+            note.Size(-1, 66, 1);
 
             PhotoItem cur = null;
             double score = 0;
@@ -504,11 +530,23 @@ namespace TrkaZnanja.Game
                 waitUntil = t + 1.8f;
             }
 
+            void Skip()
+            {
+                if (busy || cur == null || t >= seconds) return;
+                var it = cur;
+                map.Pin(it.Lon, it.Lat, Theme.Right, 32);
+                map.Focus(WorldMapGame.Around(new Vec2d(it.Lon, it.Lat), 10));
+                note.text = $"<b>{Lang.L(it.Display)}{(string.IsNullOrEmpty(it.Country) ? "" : ", " + Lang.L(it.Country))}</b> · " + Lang.L("preskočeno");
+                busy = true;
+                waitUntil = t + 1.6f;
+            }
+
             while (!MinigameData.WorldMapReady) { MinigameData.WarmWorldMap(); yield return null; }
             map = WorldMapView.Create(row.transform, Answer);
             map.Frame.Size(-1, -1, 1, 1);
-            note.Size(-1, 36);
-            note.transform.SetAsLastSibling();
+            var skip = UIKit.Button(bottom.transform, "Preskoči", Theme.InkSoft, Skip, 30);
+            skip.SetIcon("preskoci", 34);
+            skip.Size(250, 66);
             yield return null;
             Next();
             float botWait = 0;

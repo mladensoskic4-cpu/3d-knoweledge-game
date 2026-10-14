@@ -85,10 +85,14 @@ namespace TrkaZnanja.Game
             body.childControlHeight = true;
             var stage = UIKit.Rect(body.transform, "Scena");
             stage.Size(-1, -1, 1, 1);
-            var opts = UIKit.VStack(body.transform, 16, "Odgovori", TextAnchor.MiddleCenter);
-            opts.Size(470, -1, 0, 1);
+            var right = UIKit.VStack(body.transform, 14, "Desno", TextAnchor.MiddleCenter);
+            right.Size(480, -1, 0, 1);
+            right.childForceExpandHeight = false;
+            var opts = UIKit.VStack(right.transform, 14, "Odgovori", TextAnchor.MiddleCenter);
+            opts.Size(-1, -1, 1, 1);
             opts.childForceExpandHeight = true;
             opts.childControlHeight = true;
+            GameButton skip = null;
 
             int hits = 0, misses = 0;
             float t = 0, nextAt = -1;
@@ -112,6 +116,15 @@ namespace TrkaZnanja.Game
                 cur.OnShow?.Invoke();
             }
 
+            // preskoči: pokaži tačan odgovor i idi dalje (bez bodova i bez kazne)
+            void Skip()
+            {
+                if (busy || t >= seconds || cur == null) return;
+                busy = true;
+                for (int j = 0; j < buttons.Count; j++) buttons[j].SetColor(cur.Options[j] == cur.Answer ? Theme.Right : Col.Hex("#b8c4ce"));
+                nextAt = t + 0.8f;
+            }
+
             void Pick(int i)
             {
                 if (busy || t >= seconds || cur == null || i >= cur.Options.Count) return;
@@ -128,6 +141,9 @@ namespace TrkaZnanja.Game
                 nextAt = t + (ok ? 0.35f : 0.9f);
             }
 
+            skip = UIKit.Button(right.transform, "Preskoči", Theme.InkSoft, Skip, 28);
+            skip.SetIcon("preskoci", 32);
+            skip.Size(-1, 66);
             yield return null;    // raspored
             Show();
             float botWait = 0;
@@ -148,6 +164,7 @@ namespace TrkaZnanja.Game
             }
             cur?.OnDone?.Invoke();
             foreach (var b in buttons) b.Interactable = false;
+            if (skip != null) skip.Interactable = false;
             Score = Mathx.Clamp((hits - misses * 0.5) / (goal * seconds / (double)Duration), 0, 1);
             ResultLabel = $"{hits} {unit}";
         }

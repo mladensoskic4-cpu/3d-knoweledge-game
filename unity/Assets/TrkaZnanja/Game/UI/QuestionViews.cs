@@ -79,11 +79,12 @@ namespace TrkaZnanja.Game
             var col = UIKit.VStack(Body, 18, "Izbor", TextAnchor.UpperCenter);
             ((RectTransform)col.transform).Stretch();
             col.childForceExpandHeight = false;
+            if (!Blur && !Melody) col.childAlignment = TextAnchor.MiddleCenter;
 
             if (Blur)
             {
-                var frame = UIKit.Box(col.transform, Theme.PaperSoft, UIKit.Round, "Okvir", 0.8f);
-                frame.Size(-1, 260, 1, 1);
+                var frame = UIKit.Box(col.transform, new Color(1, 1, 1, 0.45f), UIKit.Round, "Okvir", 0.8f);
+                frame.Size(-1, 230, 1, 1);
                 flag = UIKit.Raw(frame.transform, GameData.Flag(Q.Zastava), "Zastava");
                 FitAspect.Add(flag.rectTransform, flag.texture != null ? flag.texture.width / (float)flag.texture.height : 1.5f, 16);
                 blurMat = new Material(Mats.UIBlur);
@@ -109,13 +110,21 @@ namespace TrkaZnanja.Game
                 Play();
             }
 
-            var grid = UIKit.Grid(col.transform, new Vector2(520, 116), new Vector2(22, 20), 2, "Odgovori");
-            grid.childAlignment = TextAnchor.UpperCenter;
-            grid.Size(-1, 252);
+            // odgovori: po dva u redu, šire se na cijelu karticu
+            bool tall = !Blur && !Melody;
+            float h = tall ? 150 : 112;
+            HorizontalLayoutGroup row = null;
             for (int i = 0; i < opts.Count; i++)
             {
+                if (i % 2 == 0)
+                {
+                    row = UIKit.HStack(col.transform, 20, "Odgovori", TextAnchor.MiddleCenter);
+                    row.Size(-1, h);
+                    row.childForceExpandWidth = true;
+                }
                 var o = opts[i];
-                var b = UIKit.Button(grid.transform, $"{i + 1}   {o}", Colors[i % Colors.Length], () => Pick(o), 34);
+                var b = UIKit.Button(row.transform, $"{i + 1}   {o}", Colors[i % Colors.Length], () => Pick(o), tall ? 42 : 36);
+                b.Size(-1, h, 1);
                 buttons.Add(b);
             }
         }
@@ -579,12 +588,12 @@ namespace TrkaZnanja.Game
     }
 
     // ---------- tapni na mapi ----------
+    // Mapa zauzima cijelu karticu i može se uvećati (točkić, dva prsta, +/−) i pomjerati prevlačenjem.
     public sealed class MapTapView : QuestionView
     {
         GeoMap cfg;
         Geo.Projector proj;
-        RawImage map;
-        RectTransform pins;
+        ZoomMap map;
         Vec2d? pick;
         GameButton ok;
         Text hint;
@@ -599,85 +608,81 @@ namespace TrkaZnanja.Game
 
             var col = UIKit.VStack(Body, 10, "Mapa", TextAnchor.UpperCenter);
             ((RectTransform)col.transform).Stretch();
-            var holder = UIKit.Rect(col.transform, "Okvir mape");
-            holder.Size(-1, -1, 1, 1);
-            map = UIKit.Raw(holder, tex, "Mapa");
-            FitAspect.Add(map.rectTransform, texW / (float)texH);
-            var tap = map.gameObject.AddComponent<TapArea>();
-            tap.OnTap = OnTap;
-            pins = UIKit.Rect(map.rectTransform, "Oznake").Stretch();
+            col.childForceExpandHeight = false;
+            map = ZoomMap.Create(col.transform, tex, Col.Hex("#bfe3f2"), OnTap);
+            map.Frame.Size(-1, -1, 1, 1);
+            map.MaxZoom = 5;
             foreach (var lab in cfg.Labels)
             {
-                var t = UIKit.Label(pins, lab.Text.ToUpperInvariant(), 20, Col.Hex("#3b5361"), TextAnchor.MiddleCenter, true);
-                Place(t.rectTransform, lab.Lon, lab.Lat, new Vector2(260, 30));
+                var t = UIKit.Label(map.Marks, lab.Text.ToUpperInvariant(), 22, Col.Hex("#3b5361"), TextAnchor.MiddleCenter, true);
+                t.raycastTarget = false;
+                t.horizontalOverflow = HorizontalWrapMode.Overflow;
+                t.rectTransform.sizeDelta = new Vector2(260, 30);
+                t.name = "Naziv";
+                var uv = UV(lab.Lon, lab.Lat);
+                map.AddMark(t.rectTransform, uv.x, uv.y);
             }
 
-            var bar = UIKit.HStack(col.transform, 16, "Dugmad", TextAnchor.MiddleRight);
-            bar.Size(-1, 100);
-            hint = UIKit.Label(bar.transform, "Tapni na mapu, pa potvrdi.", 28, Theme.InkSoft, TextAnchor.MiddleLeft);
-            hint.Size(-1, 92, 1);
-            ok = Confirm(bar.transform, () => { if (!Locked && pick.HasValue) Submit(Evaluate()); });
+            // uputstvo i „Potvrdi” plutaju preko donjeg dijela mape (mapa dobija svu visinu)
+            var hintBox = UIKit.Box(map.Frame, new Color(1, 1, 1, 0.86f), UIKit.Pill, "Uputstvo", 1f);
+            hintBox.raycastTarget = false;
+            hintBox.rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 0), new Vector2(14, 14), new Vector2(-330, 64));
+            var hr = UIKit.HStack(hintBox.transform, 10, "Red", TextAnchor.MiddleLeft, new RectOffset(18, 18, 0, 0));
+            ((RectTransform)hr.transform).Stretch();
+            UIKit.IconImage(hr.transform, "lupa", Theme.InkSoft, 30);
+            hint = UIKit.Label(hr.transform, "Tapni na mapu, pa potvrdi. Uvećaj točkićem, dugmetom + ili sa dva prsta.", 24, Theme.Ink, TextAnchor.MiddleLeft);
+            hint.Size(-1, 60, 1);
+            hint.resizeTextForBestFit = true; hint.resizeTextMinSize = 16; hint.resizeTextMaxSize = 24; hint.verticalOverflow = VerticalWrapMode.Truncate;
+            ok = Confirm(map.Frame, () => { if (!Locked && pick.HasValue) Submit(Evaluate()); });
+            ((RectTransform)ok.transform).Anchor(new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-14, 12), new Vector2(290, 92));
             ok.Interactable = false;
         }
 
-        void Place(RectTransform rt, double lon, double lat, Vector2 size)
+        Vector2 UV(double lon, double lat)
         {
             var p = proj.ToXY(lon, lat);
-            rt.anchorMin = rt.anchorMax = new Vector2((float)(p.X / texW), 1 - (float)(p.Y / texH));
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = size;
+            return new Vector2((float)(p.X / texW), (float)(p.Y / texH));
         }
 
         void OnTap(Vector2 uv)
         {
             if (Locked) return;
-            pick = proj.ToLonLat(uv.x * texW, (1 - uv.y) * texH);
+            pick = proj.ToLonLat(uv.x * texW, uv.y * texH);
             ok.Interactable = true;
             hint.text = Lang.L("Možeš tapnuti ponovo da pomjeriš oznaku.");
             DrawPins(null);
         }
 
-        RectTransform Pin(double lon, double lat, Color c, string label)
+        void Pin(double lon, double lat, Color c, string label)
         {
-            var rt = UIKit.Rect(pins, "Igla");
-            Place(rt, lon, lat, new Vector2(46, 46));
+            var rt = UIKit.Rect(map.Marks, "Igla");
+            rt.sizeDelta = new Vector2(46, 46);
             rt.pivot = new Vector2(0.5f, 0);
             var head = UIKit.Box(rt, c, UIKit.Circle, "Glava");
+            head.raycastTarget = false;
             head.rectTransform.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 14), new Vector2(40, 40));
             var o = head.gameObject.AddComponent<Outline>(); o.effectColor = Color.white; o.effectDistance = new Vector2(3, -3);
             var stick = UIKit.Box(rt, c, UIKit.Pill, "Štap", 1f);
+            stick.raycastTarget = false;
             stick.rectTransform.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0), Vector2.zero, new Vector2(8, 20));
             if (label != null)
             {
-                var chip = UIKit.Chip(rt, label, c, 24);
-                chip.rectTransform.Anchor(new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 0), new Vector2(0, 8), new Vector2(300, 46));
+                var chip = UIKit.Chip(rt, label, c, 26);
+                chip.raycastTarget = false;
+                chip.rectTransform.Anchor(new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 0), new Vector2(0, 8), new Vector2(300, 48));
             }
-            return rt;
+            var uv = UV(lon, lat);
+            map.AddMark(rt, uv.x, uv.y);
         }
 
         void DrawPins(QuizResult r)
         {
-            for (int i = pins.childCount - 1; i >= 0; i--)
-                if (pins.GetChild(i).name == "Igla" || pins.GetChild(i).name == "Linija") UnityEngine.Object.Destroy(pins.GetChild(i).gameObject);
+            map.ClearMarks(m => m.name == "Igla");
             if (r != null && pick.HasValue)
             {
-                // isprekidana linija od tvog tapa do tačnog mjesta
-                var a = proj.ToXY(pick.Value.X, pick.Value.Y); var b = proj.ToXY(Q.Tacka.Lon, Q.Tacka.Lat);
-                for (int s = 0; s < 14; s += 2)
-                {
-                    double t0 = s / 14.0, t1 = (s + 1) / 14.0;
-                    var seg = UIKit.Box(pins, Theme.Ink, UIKit.Pill, "Linija", 1f);
-                    var rt = seg.rectTransform;
-                    double x0 = a.X + (b.X - a.X) * t0, y0 = a.Y + (b.Y - a.Y) * t0, x1 = a.X + (b.X - a.X) * t1, y1 = a.Y + (b.Y - a.Y) * t1;
-                    rt.anchorMin = rt.anchorMax = new Vector2((float)(x0 / texW), 1 - (float)(y0 / texH));
-                    rt.pivot = new Vector2(0, 0.5f);
-                    rt.anchoredPosition = Vector2.zero;
-                    var size = map.rectTransform.rect.size;
-                    var d = new Vector2((float)((x1 - x0) / texW * size.x), (float)(-(y1 - y0) / texH * size.y));
-                    rt.sizeDelta = new Vector2(d.magnitude, 6);
-                    rt.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg);
-                }
+                var a = UV(pick.Value.X, pick.Value.Y); var b = UV(Q.Tacka.Lon, Q.Tacka.Lat);
+                map.AddLine(a.x, a.y, b.x, b.y, Theme.Ink, 6, true);
+                map.Focus(new List<Vector2> { a, b });
             }
             if (pick.HasValue) Pin(pick.Value.X, pick.Value.Y, Theme.Red, null);
             if (r != null) Pin(Q.Tacka.Lon, Q.Tacka.Lat, Theme.Right, Q.Tacka.Naziv);

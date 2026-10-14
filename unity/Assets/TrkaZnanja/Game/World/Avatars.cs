@@ -23,8 +23,10 @@ namespace TrkaZnanja.Game
 
             var kit = new MeshKit();
             var wheels = new List<(Vector3 pos, float r, float w)>();
+            var spots = new List<DecoSpot>();
             Vector3 seat; float seatScale;
-            Vehicles.Draw(kit, vehicle.Id, paint, wheels, out seat, out seatScale, rig);
+            Vehicles.Draw(kit, vehicle.Id, paint, wheels, out seat, out seatScale, rig, spots);
+            Decor.Draw(kit, spots, look);
             kit.Push(seat, Quaternion.identity, Vector3.one * seatScale);
             Animals.Draw(kit, animal, look);
             kit.Pop();
@@ -44,6 +46,7 @@ namespace TrkaZnanja.Game
             rig.Flies = vehicle.Flies;
             rig.Floats = vehicle.Floats;
             rig.Bounce = (float)vehicle.Bounce;
+            Trails.Attach(rig, look.Trag);
             return root;
         }
     }
@@ -57,6 +60,8 @@ namespace TrkaZnanja.Game
         public float Bounce = 0.25f;
         public float Speed;            // trenutna brzina (jedinica/s), postavlja RacerView
         public bool Dancing;
+        public ParticleSystem Trail;   // trag u vožnji (ukras iz garaže)
+        public bool Preview;           // garaža i meni: trag se pušta lagano i kad vozilo stoji
         float phase, dance;
         Vector3 bodyBase;
 
@@ -69,6 +74,11 @@ namespace TrkaZnanja.Game
             for (int i = 0; i < Wheels.Count; i++)
                 Wheels[i].localRotation *= Quaternion.Euler(Speed * dt / Mathf.Max(0.02f, WheelRadius[i]) * Mathf.Rad2Deg, 0, 0);
             if (Propeller != null) Propeller.localRotation *= Quaternion.Euler(0, 0, (600 + Speed * 400) * dt);
+            if (Trail != null)
+            {
+                var em = Trail.emission;
+                em.rateOverTime = Speed > 0.1f ? 26 + Speed * 6 : Preview ? 7 : 0;
+            }
             if (Body == null) return;
 
             float lift = Flies ? 0.9f + Mathf.Sin(phase * 1.6f) * 0.06f : 0;
@@ -96,7 +106,7 @@ namespace TrkaZnanja.Game
         static Color32 P(Color c, float k = 1) => MeshKit.C(c * k);
 
         // seat = gdje sjedi životinja (dno trupa), seatScale = veličina životinje
-        public static void Draw(MeshKit k, string id, Color paint, List<(Vector3, float, float)> wheels, out Vector3 seat, out float seatScale, AvatarRig rig)
+        public static void Draw(MeshKit k, string id, Color paint, List<(Vector3, float, float)> wheels, out Vector3 seat, out float seatScale, AvatarRig rig, List<DecoSpot> spots)
         {
             var dark = C("#2b3038");
             var chrome = C("#dfe4ea");
@@ -116,6 +126,7 @@ namespace TrkaZnanja.Game
                         k.Box(new Vector3(0, 0.275f, -0.03f), new Vector3(0.05f, 0.015f, 0.08f), dark);
                         wheels.Add((new Vector3(0, 0.12f, -0.17f), 0.12f, 0.02f));
                         wheels.Add((new Vector3(0, 0.12f, 0.17f), 0.12f, 0.02f));
+                        DecoSpot.Sides(spots, 0.016f, 0.165f, 0.0f, 0.12f, 0.07f, true);
                         seat = new Vector3(0, 0.27f, -0.03f); seatScale = 0.95f;
                         return;
                     }
@@ -130,6 +141,8 @@ namespace TrkaZnanja.Game
                         Tube(k, new Vector3(0.05f, 0.1f, -0.05f), new Vector3(0.05f, 0.12f, -0.22f), 0.012f, chrome);
                         wheels.Add((new Vector3(0, 0.1f, -0.17f), 0.1f, 0.05f));
                         wheels.Add((new Vector3(0, 0.1f, 0.17f), 0.1f, 0.04f));
+                        DecoSpot.Sides(spots, 0.072f, 0.2f, 0.04f, 0.13f, 0.06f);
+                        DecoSpot.Top(spots, 0, 0.262f, 0.05f, 0.1f, 0.06f, true);
                         seat = new Vector3(0, 0.21f, -0.08f);
                         return;
                     }
@@ -144,6 +157,8 @@ namespace TrkaZnanja.Game
                         k.Sphere(new Vector3(0, 0.27f, 0.155f), 0.025f, lamp, 4, 6);
                         wheels.Add((new Vector3(0, 0.06f, -0.14f), 0.06f, 0.04f));
                         wheels.Add((new Vector3(0, 0.06f, 0.16f), 0.06f, 0.04f));
+                        DecoSpot.Front(spots, 0, 0.19f, 0.146f, 0.12f, 0.16f);
+                        DecoSpot.Sides(spots, 0.091f, 0.14f, -0.12f, 0.16f, 0.07f);
                         seat = new Vector3(0, 0.2f, -0.08f);
                         return;
                     }
@@ -159,6 +174,8 @@ namespace TrkaZnanja.Game
                         wheels.Add((new Vector3(0.15f, 0.05f, -0.15f), 0.055f, 0.06f));
                         wheels.Add((new Vector3(-0.14f, 0.045f, 0.15f), 0.045f, 0.05f));
                         wheels.Add((new Vector3(0.14f, 0.045f, 0.15f), 0.045f, 0.05f));
+                        DecoSpot.Sides(spots, 0.122f, 0.07f, 0.0f, 0.4f, 0.045f);
+                        DecoSpot.Top(spots, 0, 0.096f, 0.135f, 0.13f, 0.2f);
                         seat = new Vector3(0, 0.1f, -0.07f);
                         return;
                     }
@@ -175,6 +192,8 @@ namespace TrkaZnanja.Game
                         wheels.Add((new Vector3(0.14f, 0.12f, -0.12f), 0.12f, 0.06f));
                         wheels.Add((new Vector3(-0.1f, 0.06f, 0.15f), 0.06f, 0.04f));
                         wheels.Add((new Vector3(0.1f, 0.06f, 0.15f), 0.06f, 0.04f));
+                        DecoSpot.Sides(spots, 0.082f, 0.17f, 0.08f, 0.2f, 0.1f);
+                        DecoSpot.Top(spots, 0, 0.236f, 0.08f, 0.2f, 0.14f);
                         seat = new Vector3(0, 0.21f, -0.12f);
                         return;
                     }
@@ -192,6 +211,8 @@ namespace TrkaZnanja.Game
                         wheels.Add((new Vector3(0.13f, 0.06f, 0.14f), 0.06f, 0.05f));
                         wheels.Add((new Vector3(-0.13f, 0.06f, -0.15f), 0.06f, 0.05f));
                         wheels.Add((new Vector3(0.13f, 0.06f, -0.15f), 0.06f, 0.05f));
+                        DecoSpot.Sides(spots, 0.112f, 0.17f, -0.12f, 0.26f, 0.11f);
+                        DecoSpot.Top(spots, 0, 0.2435f, -0.12f, 0.27f, 0.2f);
                         seat = new Vector3(0, 0.26f, 0.12f); seatScale = 0.9f;   // vozač gleda kroz krovni otvor
                         return;
                     }
@@ -208,6 +229,7 @@ namespace TrkaZnanja.Game
                         wheels.Add((new Vector3(0.12f, 0.055f, -0.13f), 0.055f, 0.04f));
                         wheels.Add((new Vector3(-0.12f, 0.055f, 0.13f), 0.055f, 0.04f));
                         wheels.Add((new Vector3(0.12f, 0.055f, 0.13f), 0.055f, 0.04f));
+                        DecoSpot.Sides(spots, 0.122f, 0.11f, 0.0f, 0.36f, 0.055f);
                         seat = new Vector3(0, 0.15f, -0.03f); seatScale = 0.95f;
                         return;
                     }
@@ -222,6 +244,7 @@ namespace TrkaZnanja.Game
                         Tube(k, new Vector3(0.06f, 0.12f, 0.0f), new Vector3(0.05f, 0.14f, 0.2f), 0.008f, C("#7a5232"));
                         wheels.Add((new Vector3(-0.14f, 0.09f, -0.13f), 0.09f, 0.025f));
                         wheels.Add((new Vector3(0.14f, 0.09f, -0.13f), 0.09f, 0.025f));
+                        DecoSpot.Sides(spots, 0.122f, 0.17f, -0.12f, 0.24f, 0.055f);
                         seat = new Vector3(0, 0.15f, -0.14f); seatScale = 0.85f;
                         return;
                     }
@@ -236,6 +259,7 @@ namespace TrkaZnanja.Game
                         k.Box(new Vector3(0, 0.135f, -0.05f), new Vector3(0.2f, 0.01f, 0.3f), C("#c59a6a"));
                         k.Box(new Vector3(0, 0.2f, 0.06f), new Vector3(0.16f, 0.08f, 0.01f), C("#7fb8e0", 0.25f));
                         k.Sphere(new Vector3(0, 0.2f, -0.24f), new Vector3(0.04f, 0.05f, 0.04f), C("#3b3b3b"), 4, 6);
+                        DecoSpot.Sides(spots, 0.122f, 0.085f, -0.05f, 0.32f, 0.08f);
                         seat = new Vector3(0, 0.14f, -0.06f);
                         return;
                     }
@@ -260,6 +284,7 @@ namespace TrkaZnanja.Game
                         var go = bal.ToObject("Balon", rig.transform);
                         go.transform.localPosition = new Vector3(0, 0.82f, 0);
                         rig.Balloon = go.transform;
+                        DecoSpot.Sides(spots, 0.102f, 0.08f, 0, 0.18f, 0.12f);
                         seat = new Vector3(0, 0.12f, 0); seatScale = 0.85f;
                         return;
                     }
@@ -277,6 +302,8 @@ namespace TrkaZnanja.Game
                         var pg = prop.ToObject("Propeler", rig.transform);
                         pg.transform.localPosition = new Vector3(0, 0.15f, 0.27f);
                         rig.Propeller = pg.transform;
+                        DecoSpot.Top(spots, 0.18f, 0.141f, 0.03f, 0.11f, 0.16f);
+                        DecoSpot.Top(spots, -0.18f, 0.141f, 0.03f, 0.11f, 0.16f);
                         seat = new Vector3(0, 0.17f, -0.05f); seatScale = 0.9f;
                         return;
                     }
@@ -296,6 +323,8 @@ namespace TrkaZnanja.Game
                         wheels.Add((new Vector3(0.13f, 0.06f, -0.14f), 0.06f, 0.045f));
                         wheels.Add((new Vector3(-0.13f, 0.06f, 0.14f), 0.06f, 0.045f));
                         wheels.Add((new Vector3(0.13f, 0.06f, 0.14f), 0.06f, 0.045f));
+                        DecoSpot.Sides(spots, 0.132f, 0.1f, -0.01f, 0.36f, 0.055f);
+                        DecoSpot.Top(spots, 0, 0.176f, 0.12f, 0.14f, 0.2f);
                         seat = new Vector3(0, 0.13f, -0.04f);
                         return;
                     }

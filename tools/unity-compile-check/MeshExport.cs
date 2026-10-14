@@ -42,7 +42,8 @@ namespace TrkaZnanja.LocalTools
                 var look = new Look { Zivotinja = animal.Id, Vozilo = veh.Id, Boja = veh.DefaultPaint, Kapa = idx % 3 == 0 ? "kapa" : idx % 3 == 1 ? "kacket" : "nema", Naocare = idx % 4 == 0 };
                 var kit = new MeshKit();
                 var wheels = new List<(Vector3, float, float)>();
-                var args = new object[] { kit, veh.Id, Col.Hex(veh.DefaultPaint), wheels, null, null, new AvatarRig() };
+                var spots = new List<DecoSpot>();
+                var args = new object[] { kit, veh.Id, Col.Hex(veh.DefaultPaint), wheels, null, null, new AvatarRig(), spots };
                 draw.Invoke(null, args);
                 var seat = (Vector3)args[4]; var scale = (float)args[5];
                 kit.Push(seat, Quaternion.identity, Vector3.one * scale);
@@ -50,6 +51,24 @@ namespace TrkaZnanja.LocalTools
                 kit.Pop();
                 foreach (var (pos, r, w) in wheels) { kit.Push(pos); kit.Wheel(Vector3.zero, r, w, MeshKit.C("#23262c"), MeshKit.C("#d9dde2")); kit.Pop(); }
                 Obj(kit, Path.Combine(outDir, $"vozilo-{veh.Id}-{animal.Id}.obj"));
+            }
+            // ukrasi: svako vozilo sa drugom šarom i nalijepnicom
+            string[] pats = { "pruge", "plamen", "tacke", "sah", "munje", "zvijezde" };
+            string[] stk = { "zvijezda", "srce", "munja", "broj", "cvijet", "smajli", "cg", "kruna" };
+            string[] acc = { "#ffffff", "#ffd23f", "#14232e", "#ff6fae" };
+            int vi = 0;
+            foreach (var veh in Catalog.Vehicles)
+            {
+                var look = new Look { Zivotinja = "lisica", Vozilo = veh.Id, Boja = veh.DefaultPaint, Sara = pats[vi % pats.Length], Boja2 = acc[vi % acc.Length], Nalijepnica = stk[vi % stk.Length] };
+                vi++;
+                var kit = new MeshKit();
+                var wheels = new List<(Vector3, float, float)>();
+                var spots = new List<DecoSpot>();
+                var args = new object[] { kit, veh.Id, Col.Hex(veh.DefaultPaint), wheels, null, null, new AvatarRig(), spots };
+                draw.Invoke(null, args);
+                Decor.Draw(kit, spots, look);
+                foreach (var (pos, r, w) in wheels) { kit.Push(pos); kit.Wheel(Vector3.zero, r, w, MeshKit.C("#23262c"), MeshKit.C("#d9dde2")); kit.Pop(); }
+                Obj(kit, Path.Combine(outDir, $"ukras-{veh.Id}-{look.Sara}-{look.Nalijepnica}.obj"));
             }
             // sve životinje u autu
             foreach (var a in Catalog.Animals)
