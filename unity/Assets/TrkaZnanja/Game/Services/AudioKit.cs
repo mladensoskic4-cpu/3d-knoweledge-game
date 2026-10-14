@@ -1,6 +1,7 @@
 // Zvuk: muzika sa domaćim motivima, zvučni efekti, zvuk vozila po pređenom polju i melodije za pitanja.
 // Ako u Resources/Zvuk staviš pravi CC0 zvuk sa istim imenom (npr. "klik", "tacno", "muzika"), koristi se on
 // umjesto sintetizovanog. Vidi PROCITAJ.md (Kenney paketi).
+using System.Collections;
 using System.Collections.Generic;
 using TrkaZnanja.Core;
 using UnityEngine;
@@ -126,6 +127,44 @@ namespace TrkaZnanja.Game
         }
 
         public bool MelodyPlaying => melody.isPlaying;
+
+        // ---- zvuk instrumenta (mini igra): nekoliko nota jedna za drugom, npr. Instrumenti/violin/C4 ----
+        Coroutine notes;
+        readonly List<AudioSource> noteSources = new List<AudioSource>();
+
+        public void PlayNotes(IList<string> clipNames, float gap = 0.48f, float volume = 0.9f)
+        {
+            StopNotes();
+            notes = StartCoroutine(NotesRoutine(clipNames, gap, volume));
+        }
+
+        IEnumerator NotesRoutine(IList<string> clipNames, float gap, float volume)
+        {
+            Duck(true);
+            for (int i = 0; i < clipNames.Count; i++)
+            {
+                var c = Clip(clipNames[i]);
+                if (c != null)
+                {
+                    if (noteSources.Count <= i) { var src = gameObject.AddComponent<AudioSource>(); src.playOnAwake = false; noteSources.Add(src); }
+                    noteSources[i].clip = c;
+                    noteSources[i].volume = volume;
+                    noteSources[i].Play();
+                }
+                float t = 0;
+                while (t < gap) { t += Time.unscaledDeltaTime; yield return null; }
+            }
+            float rest = 0;
+            while (rest < 1.6f) { rest += Time.unscaledDeltaTime; yield return null; }
+            Duck(false);
+            notes = null;
+        }
+
+        public void StopNotes()
+        {
+            if (notes != null) { StopCoroutine(notes); notes = null; Duck(false); }
+            foreach (var s in noteSources) if (s.isPlaying) s.Stop();
+        }
     }
 
     public static class Haptics

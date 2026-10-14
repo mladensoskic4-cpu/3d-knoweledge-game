@@ -1,5 +1,5 @@
-// Mini igre na stanicama i u bonus rundama. Za sada: „Zastave u letu” (prva prebačena iz web verzije);
-// ostale stižu jedna po jedna. Svaka mini igra vraća rezultat 0..1 i kratak opis.
+// Mini igre na stanicama i u bonus rundama (11 igara, iste kao u web verziji). Svaka vraća rezultat 0..1 i kratak opis.
+// Ovdje je osnova i „Zastave u letu”; igre sa 4 ponuđena odgovora su u MinigamesChoice.cs, a ostale u MinigamesSpecial.cs.
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace TrkaZnanja.Game
 {
-    public abstract class Minigame
+    public abstract partial class Minigame
     {
         public abstract string Id { get; }
         public abstract string Name { get; }
@@ -22,16 +22,34 @@ namespace TrkaZnanja.Game
         public abstract IEnumerator Play(RectTransform host, Rng rng, int seconds);
         public abstract (double score, string label) SimulateBot(double skill, Rng rng);
 
-        public static readonly List<Minigame> All = new List<Minigame> { new FlyingFlags() };
+        // igra sama (AutoPlay trke ili test pojedinačne mini igre)
+        public static bool TestAuto;
+        protected static bool Auto => App.AutoPlay || TestAuto;
+
+        // false = nema podataka (npr. fotografija), pa se igra preskače
+        public virtual bool Ready => true;
+        // poziva se kad se pokaže uputstvo (npr. da se mapa svijeta nacrta unaprijed)
+        public virtual void Prepare() { }
+
+        public static readonly List<Minigame> All = new List<Minigame>
+        {
+            new FlyingFlags(), new Capitals(), new InstrumentsGame(), new AnimalsGame(),
+            PhotoChoiceGame.Places(), new WorldPhotoMap(), PhotoChoiceGame.Body(), new FlagMemory(), new MateInOne(),
+            new ShapeGame(), new WorldMapGame(),
+        };
         static readonly List<Minigame> queue = new List<Minigame>();
+
+        public static Minigame ById(string id) => All.FirstOrDefault(m => m.Id == id);
 
         // Smjenjivanje: svaka mini igra dođe na red prije nego što se neka ponovi.
         public static Minigame Pick(Rng rng)
         {
-            if (queue.Count == 0) queue.AddRange(rng.Shuffle(All.ToList()));
-            var m = queue[0];
+            var ready = All.Where(m => m.Ready).ToList();
+            queue.RemoveAll(m => !ready.Contains(m));
+            if (queue.Count == 0) queue.AddRange(rng.Shuffle(ready));
+            var pick = queue[0];
             queue.RemoveAt(0);
-            return m;
+            return pick;
         }
 
         protected static (double, string) Simulate(double skill, Rng rng, int goal, string unit)
@@ -155,7 +173,7 @@ namespace TrkaZnanja.Game
                 }
                 flyers.RemoveAll(f => f.Gone);
                 if (targetLeft) { misses++; NewTarget(); }
-                if (App.AutoPlay && rng.Chance(dt * 1.2)) Tap(targetFlyer);
+                if (Auto && rng.Chance(dt * 1.2)) Tap(targetFlyer);
                 yield return null;
             }
             foreach (var f in flyers) if (f.Rt != null) UnityEngine.Object.Destroy(f.Rt.gameObject);

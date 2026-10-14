@@ -359,6 +359,7 @@ namespace TrkaZnanja.Game
             Rng rng, List<StationOutcome> resultsOut, Func<double, string, List<StationOutcome>> computeResults)
         {
             UIKit.Clear(parent);
+            mg.Prepare();
             var face = UIKit.Card(parent, "Mini igra");
             ((RectTransform)face.rectTransform.parent).Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0.5f, 0.5f), new Vector2(-110, -40), new Vector2(1240, -150));
             var col = UIKit.VStack(face.transform, 18, "Sadržaj", TextAnchor.UpperLeft, new RectOffset(40, 40, 30, 30));

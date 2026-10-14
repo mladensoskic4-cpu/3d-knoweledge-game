@@ -135,6 +135,17 @@ namespace TrkaZnanja.EditorTools
     {
         void OnPreprocessTexture()
         {
+            if (assetPath.Contains("/Resources/Slike/"))
+            {
+                // fotografije za mini igre: bez mipmapa, najviše 512 px (pripremi_unity.py ih već smanji)
+                var pi = (TextureImporter)assetImporter;
+                pi.textureType = TextureImporterType.Default;
+                pi.mipmapEnabled = false;
+                pi.wrapMode = TextureWrapMode.Clamp;
+                pi.filterMode = FilterMode.Bilinear;
+                pi.maxTextureSize = 512;
+                return;
+            }
             if (!assetPath.Contains("/Resources/Zastave/")) return;
             var ti = (TextureImporter)assetImporter;
             ti.textureType = TextureImporterType.Default;

@@ -109,11 +109,15 @@ namespace TrkaZnanja.Core
                 ["Zlatna polja su stanice sa mini igrom."] = "Golden tiles are stations with a mini game.",
                 ["Prvi na cilju pobjeđuje!"] = "First to the finish wins!", ["Bez interneta: igraš protiv botova, rezultati se šalju kasnije."] = "Offline: you play against bots, results are sent later.",
                 ["Atmosfera"] = "Weather", ["dan"] = "day", ["zalazak"] = "sunset", ["noć"] = "night", ["kiša"] = "rain", ["snijeg"] = "snow",
+                ["Mat!"] = "Mate!", ["Nije mat. Tačno je bilo:"] = "Not mate. The answer was:",
+                ["K kralj · D dama · T top · L lovac · S skakač · p pješak\nBijele figure su svijetle, crne tamne."] = "K king · D queen · T rook · L bishop · S knight · p pawn\nWhite pieces are light, black pieces are dark.",
+                ["Pojavljuje se fotografija životinje. Izaberi koja je. Što više tačnih za 25 sekundi, greška oduzima pola boda."] = "A photo of an animal appears. Pick which one it is. As many correct as you can in 25 seconds; a mistake costs half a point.",
                 ["Nasumično"] = "Random", ["Slijedeća runda"] = "Next round", ["Runda"] = "Round", ["Ti"] = "You", ["Garaža stiže uskoro."] = "Garage is coming soon.",
             };
             foreach (var kv in extra) if (!exact.ContainsKey(kv.Key)) exact[kv.Key] = kv.Value;
             rules.Add((new Regex(@"^(.+) · (\d+) novčića$"), "\u0001coins"));
-            rules.Add((new Regex(@"^(\d+) (zastava|gradova|mjesta|pogodaka)$"), "\u0001count"));
+            rules.Add((new Regex(@"^([\d,]+) (zastava|gradova|mjesta|pogodaka|bodova|matova|tačnih)$"), "\u0001count"));
+            rules.Add((new Regex(@"^([\d,]+) (zastava|gradova|pogodaka|bodova|matova|tačnih) · (\d+) s$"), "\u0001countS"));
             rules.Add((new Regex(@"^Tapni (državu|grad|rijeku):$"), "\u0001tap"));
             rules.Add((new Regex(@"^Bonus runda · (.+)$"), "\u0001bonus"));
             rules.Add((new Regex(@"^(\d+) min$"), "$1 min"));
@@ -121,6 +125,9 @@ namespace TrkaZnanja.Core
             rules.Add((new Regex(@"^(\d+)\. mjesto$"), "Place $1"));
             rules.Add((new Regex(@"^Otključava se na rangu (.+)$"), "\u0001unlock"));
         }
+
+        static string Unit(string w) => w == "zastava" ? "flags" : w == "gradova" ? "capitals" : w == "mjesta" ? "places" : w == "bodova" ? "points"
+            : w == "matova" ? "mates" : w == "tačnih" ? "correct" : "hits";
 
         public static string ToEn(string text)
         {
@@ -137,8 +144,8 @@ namespace TrkaZnanja.Core
                 {
                     case "\u0001coins": res = ToEn(m.Groups[1].Value) + " · " + m.Groups[2].Value + " coins"; break;
                     case "\u0001count":
-                        var w = m.Groups[2].Value;
-                        res = m.Groups[1].Value + " " + (w == "zastava" ? "flags" : w == "gradova" ? "capitals" : w == "mjesta" ? "places" : "hits");
+                    case "\u0001countS":
+                        res = m.Groups[1].Value.Replace(',', '.') + " " + Unit(m.Groups[2].Value) + (rep == "\u0001countS" ? " · " + m.Groups[3].Value + " s" : "");
                         break;
                     case "\u0001tap":
                         var x = m.Groups[1].Value;

@@ -14,6 +14,7 @@ namespace UnityEngine
         public Vector2(float x, float y) { this.x = x; this.y = y; }
         public static Vector2 zero => new Vector2(0, 0);
         public static Vector2 one => new Vector2(1, 1);
+        public static float Distance(Vector2 a, Vector2 b) => (a - b).magnitude;
         public float magnitude => (float)Math.Sqrt(x * x + y * y);
         public float sqrMagnitude => x * x + y * y;
         public Vector2 normalized { get { var m = magnitude; return m > 1e-5f ? new Vector2(x / m, y / m) : zero; } }
@@ -480,7 +481,10 @@ namespace UnityEngine
         public static bool GetMouseButtonDown(int b) => false;
         public static bool GetMouseButtonUp(int b) => false;
         public static Vector3 mousePosition => Vector3.zero;
+        public static int touchCount => 0;
+        public static Touch GetTouch(int i) => default;
     }
+    public struct Touch { public Vector2 position { get; set; } }
 
     public static class Handheld { public static void Vibrate() { } }
 
@@ -502,13 +506,19 @@ namespace UnityEngine
         public int width { get; }
         public int height { get; }
         public TextureWrapMode wrapMode { get; set; }
+        public TextureWrapMode wrapModeU { get; set; }
+        public TextureWrapMode wrapModeV { get; set; }
         public FilterMode filterMode { get; set; }
+        public int anisoLevel { get; set; }
+        public int mipmapCount => 1;
     }
     public sealed class Texture2D : Texture
     {
         public Texture2D(int w, int h, TextureFormat f, bool mip) { }
         public void SetPixels32(Color32[] px) { }
         public void Apply() { }
+        public void Apply(bool updateMipmaps) { }
+        public void LoadRawTextureData(byte[] data) { }
     }
 
     public enum SpriteMeshType { FullRect, Tight }

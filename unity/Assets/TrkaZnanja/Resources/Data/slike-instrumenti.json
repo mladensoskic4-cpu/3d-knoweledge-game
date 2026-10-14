@@ -1,0 +1,452 @@
+[
+ {
+  "id": "instrument_001",
+  "naziv": "Gitara",
+  "vrsta": "Žičani",
+  "autor": "User:Martin Möller Talk",
+  "licenca": "CC BY-SA 2.0 de",
+  "wikipedia": "Guitar",
+  "slika": "Slike/instrumenti/instrument_001"
+ },
+ {
+  "id": "instrument_003",
+  "naziv": "Bas gitara",
+  "vrsta": "Žičani",
+  "autor": "nepoznat autor",
+  "licenca": "Public domain",
+  "wikipedia": "Bass guitar",
+  "slika": "Slike/instrumenti/instrument_003"
+ },
+ {
+  "id": "instrument_004",
+  "naziv": "Harfa",
+  "vrsta": "Žičani",
+  "autor": "nepoznat autor",
+  "licenca": "Public domain",
+  "wikipedia": "Harp",
+  "slika": "Slike/instrumenti/instrument_004"
+ },
+ {
+  "id": "instrument_006",
+  "naziv": "Mandolina",
+  "vrsta": "Žičani",
+  "autor": "Angelo Mannello",
+  "licenca": "CC0",
+  "wikipedia": "Mandolin",
+  "slika": "Slike/instrumenti/instrument_006"
+ },
+ {
+  "id": "instrument_007",
+  "naziv": "Ukulele",
+  "vrsta": "Žičani",
+  "autor": "St Cecilia's Hall: all things musical instruments",
+  "licenca": "CC BY 3.0",
+  "wikipedia": "Ukulele",
+  "slika": "Slike/instrumenti/instrument_007"
+ },
+ {
+  "id": "instrument_008",
+  "naziv": "Sitar",
+  "vrsta": "Žičani",
+  "autor": "unknown, MET museum",
+  "licenca": "CC0",
+  "wikipedia": "Sitar",
+  "slika": "Slike/instrumenti/instrument_008"
+ },
+ {
+  "id": "instrument_009",
+  "naziv": "Balalajka",
+  "vrsta": "Žičani",
+  "autor": "User:MaGz96",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Balalaika",
+  "slika": "Slike/instrumenti/instrument_009"
+ },
+ {
+  "id": "instrument_011",
+  "naziv": "Šargija",
+  "vrsta": "Žičani",
+  "autor": "Respubliko de Gvapolando",
+  "licenca": "CC0",
+  "wikipedia": "Šargija",
+  "slika": "Slike/instrumenti/instrument_011"
+ },
+ {
+  "id": "instrument_012",
+  "naziv": "Saz",
+  "vrsta": "Žičani",
+  "autor": "No machine-readable author provided. Arent assumed (based on copyright claims).",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Bağlama",
+  "slika": "Slike/instrumenti/instrument_012"
+ },
+ {
+  "id": "instrument_013",
+  "naziv": "Ud",
+  "vrsta": "Žičani",
+  "autor": "Creator:Manol (Emmanuel Venios)",
+  "licenca": "CC0",
+  "wikipedia": "Oud",
+  "slika": "Slike/instrumenti/instrument_013"
+ },
+ {
+  "id": "instrument_014",
+  "naziv": "Koto",
+  "vrsta": "Žičani",
+  "autor": "Original uploader and author was Smgregory at en.wikipedia",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Koto (instrument)",
+  "slika": "Slike/instrumenti/instrument_014"
+ },
+ {
+  "id": "instrument_015",
+  "naziv": "Violina",
+  "vrsta": "Gudački",
+  "autor": "Just plain Bill",
+  "licenca": "CC0",
+  "wikipedia": "Violin",
+  "slika": "Slike/instrumenti/instrument_015"
+ },
+ {
+  "id": "instrument_016",
+  "naziv": "Viola",
+  "vrsta": "Gudački",
+  "autor": "Just plain Bill",
+  "licenca": "Public domain",
+  "wikipedia": "Viola",
+  "slika": "Slike/instrumenti/instrument_016"
+ },
+ {
+  "id": "instrument_017",
+  "naziv": "Violončelo",
+  "vrsta": "Gudački",
+  "autor": "Georg Feitscher",
+  "licenca": "CC BY 3.0",
+  "wikipedia": "Cello",
+  "slika": "Slike/instrumenti/instrument_017"
+ },
+ {
+  "id": "instrument_018",
+  "naziv": "Kontrabas",
+  "vrsta": "Gudački",
+  "autor": "User:AndrewKepert",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Double bass",
+  "slika": "Slike/instrumenti/instrument_018"
+ },
+ {
+  "id": "instrument_020",
+  "naziv": "Erhu",
+  "vrsta": "Gudački",
+  "autor": "Unknown authorUnknown author",
+  "licenca": "CC0",
+  "wikipedia": "Erhu",
+  "slika": "Slike/instrumenti/instrument_020"
+ },
+ {
+  "id": "instrument_021",
+  "naziv": "Flauta",
+  "vrsta": "Drveni puhački",
+  "autor": "Tubamirum",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Western concert flute",
+  "slika": "Slike/instrumenti/instrument_021"
+ },
+ {
+  "id": "instrument_022",
+  "naziv": "Blok flauta",
+  "vrsta": "Drveni puhački",
+  "autor": "Mussklprozz",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Recorder (musical instrument)",
+  "slika": "Slike/instrumenti/instrument_022"
+ },
+ {
+  "id": "instrument_023",
+  "naziv": "Frula",
+  "vrsta": "Drveni puhački",
+  "autor": "Народни музеј Топлице",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Frula",
+  "slika": "Slike/instrumenti/instrument_023"
+ },
+ {
+  "id": "instrument_024",
+  "naziv": "Panova frula",
+  "vrsta": "Drveni puhački",
+  "autor": "Didier Descouens",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Pan flute",
+  "slika": "Slike/instrumenti/instrument_024"
+ },
+ {
+  "id": "instrument_025",
+  "naziv": "Klarinet",
+  "vrsta": "Drveni puhački",
+  "autor": "Leitner & Kraus GmbH, Neustadt/Aisch, Editor/Bearbeiter User:Gisbert K",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Clarinet",
+  "slika": "Slike/instrumenti/instrument_025"
+ },
+ {
+  "id": "instrument_026",
+  "naziv": "Oboa",
+  "vrsta": "Drveni puhački",
+  "autor": "Fratelli Patricola, Editor/Bearbeiter User:Gisbert K",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Oboe",
+  "slika": "Slike/instrumenti/instrument_026"
+ },
+ {
+  "id": "instrument_027",
+  "naziv": "Fagot",
+  "vrsta": "Drveni puhački",
+  "autor": "Gregory F. Maxwell <gmaxwell@gmail.com> PGP:0xB0413BFA",
+  "licenca": "GFDL 1.2",
+  "wikipedia": "Bassoon",
+  "slika": "Slike/instrumenti/instrument_027"
+ },
+ {
+  "id": "instrument_028",
+  "naziv": "Saksofon",
+  "vrsta": "Drveni puhački",
+  "autor": "Jonathanischoice",
+  "licenca": "CC BY 4.0",
+  "wikipedia": "Saxophone",
+  "slika": "Slike/instrumenti/instrument_028"
+ },
+ {
+  "id": "instrument_029",
+  "naziv": "Gajde",
+  "vrsta": "Drveni puhački",
+  "autor": "Lucas Kendall",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Bagpipes",
+  "slika": "Slike/instrumenti/instrument_029"
+ },
+ {
+  "id": "instrument_030",
+  "naziv": "Didžeridu",
+  "vrsta": "Drveni puhački",
+  "autor": "Hmarin",
+  "licenca": "Public domain",
+  "wikipedia": "Didgeridoo",
+  "slika": "Slike/instrumenti/instrument_030"
+ },
+ {
+  "id": "instrument_031",
+  "naziv": "Usna harmonika",
+  "vrsta": "Puhački",
+  "autor": "George Leung",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Harmonica",
+  "slika": "Slike/instrumenti/instrument_031"
+ },
+ {
+  "id": "instrument_032",
+  "naziv": "Truba",
+  "vrsta": "Limeni puhački",
+  "autor": "Yamaha Corporation",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Trumpet",
+  "slika": "Slike/instrumenti/instrument_032"
+ },
+ {
+  "id": "instrument_033",
+  "naziv": "Trombon",
+  "vrsta": "Limeni puhački",
+  "autor": "Yamaha Corporation",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Trombone",
+  "slika": "Slike/instrumenti/instrument_033"
+ },
+ {
+  "id": "instrument_034",
+  "naziv": "Horna",
+  "vrsta": "Limeni puhački",
+  "autor": "Yamaha Corporation",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "French horn",
+  "slika": "Slike/instrumenti/instrument_034"
+ },
+ {
+  "id": "instrument_035",
+  "naziv": "Tuba",
+  "vrsta": "Limeni puhački",
+  "autor": "Yamaha Corporation",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Tuba",
+  "slika": "Slike/instrumenti/instrument_035"
+ },
+ {
+  "id": "instrument_036",
+  "naziv": "Klavir",
+  "vrsta": "Klavijature",
+  "autor": "Gryffindor",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Piano",
+  "slika": "Slike/instrumenti/instrument_036"
+ },
+ {
+  "id": "instrument_037",
+  "naziv": "Orgulje",
+  "vrsta": "Klavijature",
+  "autor": "Ermell",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Pipe organ",
+  "slika": "Slike/instrumenti/instrument_037"
+ },
+ {
+  "id": "instrument_038",
+  "naziv": "Harmonika",
+  "vrsta": "Klavijature",
+  "autor": "Necz0r",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Accordion",
+  "slika": "Slike/instrumenti/instrument_038"
+ },
+ {
+  "id": "instrument_039",
+  "naziv": "Čembalo",
+  "vrsta": "Klavijature",
+  "autor": "Gérard Janot",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Harpsichord",
+  "slika": "Slike/instrumenti/instrument_039"
+ },
+ {
+  "id": "instrument_040",
+  "naziv": "Sintisajzer",
+  "vrsta": "Elektronski",
+  "autor": "glacial23",
+  "licenca": "CC BY-SA 2.0",
+  "wikipedia": "Synthesizer",
+  "slika": "Slike/instrumenti/instrument_040"
+ },
+ {
+  "id": "instrument_041",
+  "naziv": "Bubnjevi",
+  "vrsta": "Udaraljke",
+  "autor": "Syed Wamiq Ahmed Hashmi re-draw SVG FOX 52",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Drum kit",
+  "slika": "Slike/instrumenti/instrument_041"
+ },
+ {
+  "id": "instrument_042",
+  "naziv": "Timpani",
+  "vrsta": "Udaraljke",
+  "autor": "nepoznat autor",
+  "licenca": "Public domain",
+  "wikipedia": "Timpani",
+  "slika": "Slike/instrumenti/instrument_042"
+ },
+ {
+  "id": "instrument_043",
+  "naziv": "Ksilofon",
+  "vrsta": "Udaraljke",
+  "autor": "SweetCanadianMullet",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Xylophone",
+  "slika": "Slike/instrumenti/instrument_043"
+ },
+ {
+  "id": "instrument_044",
+  "naziv": "Triangl",
+  "vrsta": "Udaraljke",
+  "autor": "AnonymousUnknown author",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Triangle (musical instrument)",
+  "slika": "Slike/instrumenti/instrument_044"
+ },
+ {
+  "id": "instrument_045",
+  "naziv": "Činele",
+  "vrsta": "Udaraljke",
+  "autor": "Jdpaschal",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Cymbal",
+  "slika": "Slike/instrumenti/instrument_045"
+ },
+ {
+  "id": "instrument_046",
+  "naziv": "Tamburin",
+  "vrsta": "Udaraljke",
+  "autor": "Frenciscobcn",
+  "licenca": "CC BY-SA 1.0",
+  "wikipedia": "Tambourine",
+  "slika": "Slike/instrumenti/instrument_046"
+ },
+ {
+  "id": "instrument_047",
+  "naziv": "Marakas",
+  "vrsta": "Udaraljke",
+  "autor": "Axel Heymann",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Maraca",
+  "slika": "Slike/instrumenti/instrument_047"
+ },
+ {
+  "id": "instrument_048",
+  "naziv": "Kastanjete",
+  "vrsta": "Udaraljke",
+  "autor": "Rijksmuseum",
+  "licenca": "CC0",
+  "wikipedia": "Castanets",
+  "slika": "Slike/instrumenti/instrument_048"
+ },
+ {
+  "id": "instrument_049",
+  "naziv": "Bongo bubnjevi",
+  "vrsta": "Udaraljke",
+  "autor": "http://muzyczny.pl",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Bongo drum",
+  "slika": "Slike/instrumenti/instrument_049"
+ },
+ {
+  "id": "instrument_050",
+  "naziv": "Džembe",
+  "vrsta": "Udaraljke",
+  "autor": "Djembe Art",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Djembe",
+  "slika": "Slike/instrumenti/instrument_050"
+ },
+ {
+  "id": "instrument_051",
+  "naziv": "Kahon",
+  "vrsta": "Udaraljke",
+  "autor": "Luislema",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Cajón",
+  "slika": "Slike/instrumenti/instrument_051"
+ },
+ {
+  "id": "instrument_052",
+  "naziv": "Tabla",
+  "vrsta": "Udaraljke",
+  "autor": "nepoznat autor",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Tabla",
+  "slika": "Slike/instrumenti/instrument_052"
+ },
+ {
+  "id": "instrument_053",
+  "naziv": "Čelični bubanj",
+  "vrsta": "Udaraljke",
+  "autor": "Kip1234",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Steelpan",
+  "slika": "Slike/instrumenti/instrument_053"
+ },
+ {
+  "id": "instrument_055",
+  "naziv": "Gong",
+  "vrsta": "Udaraljke",
+  "autor": "Tropenmuseum",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Gong",
+  "slika": "Slike/instrumenti/instrument_055"
+ }
+]

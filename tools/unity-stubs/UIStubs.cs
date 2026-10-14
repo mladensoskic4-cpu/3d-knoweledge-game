@@ -17,13 +17,18 @@ namespace UnityEngine.EventSystems
     public class PointerEventData : BaseEventData
     {
         public Vector2 position { get; set; }
+        public Vector2 delta { get; set; }
+        public Vector2 scrollDelta { get; set; }
         public Camera pressEventCamera => null;
+        public Camera enterEventCamera => null;
     }
     public interface IEventSystemHandler { }
     public interface IPointerDownHandler : IEventSystemHandler { void OnPointerDown(PointerEventData e); }
     public interface IPointerUpHandler : IEventSystemHandler { void OnPointerUp(PointerEventData e); }
     public interface IPointerClickHandler : IEventSystemHandler { void OnPointerClick(PointerEventData e); }
     public interface IPointerExitHandler : IEventSystemHandler { void OnPointerExit(PointerEventData e); }
+    public interface IDragHandler : IEventSystemHandler { void OnDrag(PointerEventData e); }
+    public interface IScrollHandler : IEventSystemHandler { void OnScroll(PointerEventData e); }
     public class EventSystem : UIBehaviour { public static EventSystem current { get; set; } }
     public class BaseInputModule : UIBehaviour { }
     public class StandaloneInputModule : BaseInputModule { }
@@ -47,7 +52,7 @@ namespace UnityEngine.UI
         public float pixelsPerUnitMultiplier { get; set; }
         public bool preserveAspect { get; set; }
     }
-    public class RawImage : MaskableGraphic { public Texture texture { get; set; } }
+    public class RawImage : MaskableGraphic { public Texture texture { get; set; } public Rect uvRect { get; set; } }
     public class Text : MaskableGraphic
     {
         public string text { get; set; }

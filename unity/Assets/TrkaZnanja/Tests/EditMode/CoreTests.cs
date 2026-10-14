@@ -390,4 +390,128 @@ namespace TrkaZnanja.Tests
             foreach (var v in Catalog.Vehicles) Assert.Greater(Synth.VehicleHop(v.Id).Length, 100, v.Id);
         }
     }
+    public class MinigameDataTests
+    {
+        static List<WorldCountry> world;
+        static List<WorldCountry> World => world ??= WorldGeo.ParseCountries(TestData.Read("Mape/drzave.json"));
+
+        [Test]
+        public void WorldCountriesAndDistances()
+        {
+            Assert.Greater(World.Count, 180);
+            var srb = World.First(c => c.Code == "rs");
+            Assert.IsTrue(WorldGeo.InCountry(20.46, 44.82, srb), "Beograd je u Srbiji");
+            Assert.IsTrue(WorldGeo.InCountry(21.17, 42.66, srb), "Priština je u sastavu Srbije");
+            Assert.AreEqual(0.0, WorldGeo.DistToCountry(20.46, 44.82, srb), 1e-9);
+            var fr = World.First(c => c.Code == "fr");
+            Assert.That(WorldGeo.DistToCountry(-3.7, 40.42, fr), Is.InRange(200.0, 700.0), "Madrid je par stotina km od Francuske");
+            Assert.AreEqual(1.0, WorldGeo.ScoreCountry(0), 1e-9);
+            Assert.AreEqual(0.8, WorldGeo.ScoreCountry(100), 1e-9);
+            Assert.AreEqual(0.0, WorldGeo.ScoreCountry(1000), 1e-9);
+            Assert.AreEqual(1.0, WorldGeo.ScoreForKm(80), 1e-9);
+            Assert.AreEqual(0.5, WorldGeo.ScoreForKm(1100), 1e-9);
+            Assert.AreEqual(0.0, WorldGeo.ScoreForKm(5000), 1e-9);
+            Assert.Greater(World.Count(c => c.Area > 8000), 150);
+        }
+
+        [Test]
+        public void CitiesAndRivers()
+        {
+            WorldGeo.ParsePlaces(TestData.Read("svijet-gradovi-rijeke.json"), out var cities, out var rivers);
+            Assert.GreaterOrEqual(cities.Count, 40);
+            Assert.GreaterOrEqual(rivers.Count, 10);
+            var dunav = rivers.First(r => r.Name == "Dunav");
+            Assert.Less(WorldGeo.DistToLine(20.5, 44.8, dunav.Points), 60, "Dunav kod Beograda");
+            Assert.Greater(WorldGeo.DistToLine(2.35, 48.86, dunav.Points), 400, "Pariz nije na Dunavu");
+            Assert.AreEqual(1.0, WorldGeo.ScoreRiver(100), 1e-9);
+            Assert.AreEqual(1.0, WorldGeo.ScoreCity(149), 1e-9);
+        }
+
+        [Test]
+        public void WorldFrameRoundTrip()
+        {
+            foreach (var (lon, lat) in new[] { (0.0, 0.0), (20.5, 44.8), (-120.0, 35.0), (178.0, -18.0), (-175.0, -20.0) })
+            {
+                var p = WorldFrame.ToLonLat(WorldFrame.U(lon), WorldFrame.V(lat));
+                Assert.AreEqual(lon, p.X, 1e-9); Assert.AreEqual(lat, p.Y, 1e-9);
+                Assert.That(WorldFrame.U(lon), Is.InRange(0.0, 1.0));
+            }
+            var ring = new List<Vec2d> { new Vec2d(179, 0), new Vec2d(-179, 0), new Vec2d(-179, 1), new Vec2d(179, 1) };
+            var u = WorldGeo.Unwrap(ring, 179);
+            Assert.AreEqual(181.0, u[1].X, 1e-9, "prsten preko datumske granice se odmotava");
+        }
+
+        [Test]
+        public void CanvasFillAndShape()
+        {
+            var cv = new Canvas32(20, 10);
+            cv.Clear(new Rgba(0, 0, 255));
+            cv.Fill(new List<IList<Vec2d>> { new List<Vec2d> { new Vec2d(2, 2), new Vec2d(10, 2), new Vec2d(10, 8), new Vec2d(2, 8) } }, new Rgba(255, 0, 0));
+            Assert.AreEqual(255, (int)cv.Get(5, 5).R);
+            Assert.AreEqual(255, (int)cv.Get(15, 5).B);
+            Assert.AreEqual(0, (int)cv.Get(15, 5).R);
+            Assert.AreEqual(255, (int)cv.Data[(4 * 20 + 5) * 4 + 0], "redovi u nizu idu odozdo (y = 5 je red 4)");
+            Assert.AreEqual(0, (int)cv.Data[(0 * 20 + 5) * 4 + 0], "red 0 u nizu je dno slike (y = 9, plavo)");
+
+            var land = WorldGeo.ParseLand(TestData.Read("Mape/kopno-svijet.json"));
+            Assert.Greater(land.Count, 50);
+            foreach (var code in new[] { "me", "ru", "fj", "nz", "cl", "id" })
+            {
+                var d = World.First(c => c.Code == code);
+                var img = WorldPainter.Shape(d, World, land, 340, 250);
+                int green = 0;
+                for (int y = 0; y < img.H; y++) for (int x = 0; x < img.W; x++) { var p = img.Get(x, y); if (p.G > 90 && p.R < 80) green++; }
+                Assert.That((double)green, Is.InRange(img.W * img.H / 100.0, img.W * img.H * 0.7), code + " zauzima razuman dio slike");
+            }
+        }
+
+        [Test]
+        public void ChessPuzzles()
+        {
+            var all = ChessPuzzle.ParseAll(TestData.Read("sah.json"));
+            Assert.GreaterOrEqual(all.Count, 40);
+            foreach (var p in all)
+            {
+                var b = ChessPuzzle.ParseFen(p.Fen);
+                Assert.IsTrue(b.TryGetValue(p.From, out var pc) && ChessPuzzle.IsWhite(pc), p.Fen + ": na polju " + p.From + " je bijela figura");
+                Assert.IsTrue(!b.TryGetValue(p.To, out var t) || !ChessPuzzle.IsWhite(t), p.Fen + ": cilj nije bijela figura");
+                Assert.AreEqual(1, b.Values.Count(x => x == 'K'));
+                Assert.AreEqual(1, b.Values.Count(x => x == 'k'));
+            }
+            Assert.AreEqual("Dh7#", ChessPuzzle.LocalSan("Qh7#"));
+            Lang.LoadEnglish(TestData.Read("prevodi-en.json"));
+            Assert.AreEqual("3.5 points · 12 s", Lang.ToEn("3,5 bodova · 12 s"));
+            Assert.AreEqual("2 mates", Lang.ToEn("2 matova"));
+            Assert.AreEqual("Mate!", Lang.ToEn("Mat!"));
+            Assert.AreEqual("S", ChessPuzzle.Letter('n'));
+        }
+
+        [Test]
+        public void OptionsAreDistinctAndContainAnswer()
+        {
+            var rng = new Rng(5);
+            var pool = new List<string> { "a", "b", "c", "d", "e", "f" };
+            for (int i = 0; i < 50; i++)
+            {
+                var o = Options.Pick(rng, "c", pool);
+                Assert.AreEqual(4, o.Count); Assert.IsTrue(o.Contains("c")); Assert.AreEqual(4, o.Distinct().Count());
+            }
+            var places = Json.Arr(Json.Parse(TestData.Read("slike-mjesta.json"))).Select(Json.Obj).ToList();
+            Assert.Greater(places.Count, 150);
+            for (int i = 0; i < 50; i++)
+            {
+                var it = rng.Pick(places);
+                var o = Options.Similar(rng, it, places, x => Json.Str(x, "kontinent"), x => Json.Str(x, "naziv"));
+                Assert.AreEqual(4, o.Count); Assert.IsTrue(o.Contains(Json.Str(it, "naziv"))); Assert.AreEqual(4, o.Distinct().Count());
+            }
+            foreach (var kat in new[] { "mjesta", "zivotinje", "tijelo", "instrumenti" })
+                foreach (var x in Json.Arr(Json.Parse(TestData.Read("slike-" + kat + ".json"))).Select(Json.Obj))
+                {
+                    Assert.IsTrue(Json.Str(x, "slika").StartsWith("Slike/" + kat + "/"), kat);
+                    Assert.IsTrue(File.Exists(Path.Combine(TestData.Dir, "..", Json.Str(x, "slika") + ".jpg")), Json.Str(x, "slika"));
+                }
+            var ins = Json.Arr(Json.Parse(TestData.Read("instrumenti-zvuk.json")));
+            Assert.GreaterOrEqual(ins.Count, 20);
+        }
+    }
 }

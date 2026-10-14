@@ -1,0 +1,299 @@
+[
+ {
+  "id": "dio_tijela_001",
+  "naziv": "Srce",
+  "sistem": "Krvožilni sistem",
+  "autor": "Jerm",
+  "licenca": "CC BY 2.5",
+  "wikipedia": "Heart",
+  "slika": "Slike/tijelo/dio_tijela_001"
+ },
+ {
+  "id": "dio_tijela_002",
+  "naziv": "Krv",
+  "sistem": "Krvožilni sistem",
+  "autor": "Wesalius",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Blood",
+  "slika": "Slike/tijelo/dio_tijela_002"
+ },
+ {
+  "id": "dio_tijela_003",
+  "naziv": "Krvni sudovi",
+  "sistem": "Krvožilni sistem",
+  "autor": "File:Blood vessels-en.svg: Kelvinsong derivative work: Begoon",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Blood vessel",
+  "slika": "Slike/tijelo/dio_tijela_003"
+ },
+ {
+  "id": "dio_tijela_004",
+  "naziv": "Mozak",
+  "sistem": "Nervni sistem",
+  "autor": "Jensflorian",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Human brain",
+  "slika": "Slike/tijelo/dio_tijela_004"
+ },
+ {
+  "id": "dio_tijela_005",
+  "naziv": "Kičmena moždina",
+  "sistem": "Nervni sistem",
+  "autor": "BruceBlaus",
+  "licenca": "CC BY 3.0",
+  "wikipedia": "Spinal cord",
+  "slika": "Slike/tijelo/dio_tijela_005"
+ },
+ {
+  "id": "dio_tijela_006",
+  "naziv": "Pluća",
+  "sistem": "Disajni sistem",
+  "autor": "Patrick J. Lynch, medical illustrator",
+  "licenca": "CC BY 2.5",
+  "wikipedia": "Lung",
+  "slika": "Slike/tijelo/dio_tijela_006"
+ },
+ {
+  "id": "dio_tijela_007",
+  "naziv": "Dušnik",
+  "sistem": "Disajni sistem",
+  "autor": "Lord Akryl, Jmarchn",
+  "licenca": "Public domain",
+  "wikipedia": "Trachea",
+  "slika": "Slike/tijelo/dio_tijela_007"
+ },
+ {
+  "id": "dio_tijela_008",
+  "naziv": "Oko",
+  "sistem": "Čula",
+  "autor": "ROTFLOLEB",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Human eye",
+  "slika": "Slike/tijelo/dio_tijela_008"
+ },
+ {
+  "id": "dio_tijela_009",
+  "naziv": "Uho",
+  "sistem": "Čula",
+  "autor": "Genusfotografen (Tomas Gunnarsson) / Wikimedia Sverige",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Ear",
+  "slika": "Slike/tijelo/dio_tijela_009"
+ },
+ {
+  "id": "dio_tijela_010",
+  "naziv": "Nos",
+  "sistem": "Čula",
+  "autor": "Franco Folini",
+  "licenca": "CC BY-SA 2.0",
+  "wikipedia": "Human nose",
+  "slika": "Slike/tijelo/dio_tijela_010"
+ },
+ {
+  "id": "dio_tijela_011",
+  "naziv": "Jezik",
+  "sistem": "Čula",
+  "autor": "Mahdiabbasinv",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Tongue",
+  "slika": "Slike/tijelo/dio_tijela_011"
+ },
+ {
+  "id": "dio_tijela_012",
+  "naziv": "Koža",
+  "sistem": "Koža, kosa i nokti",
+  "autor": "Greg Willis from Denver, CO, usa",
+  "licenca": "CC BY-SA 2.0",
+  "wikipedia": "Skin",
+  "slika": "Slike/tijelo/dio_tijela_012"
+ },
+ {
+  "id": "dio_tijela_014",
+  "naziv": "Nokat",
+  "sistem": "Koža, kosa i nokti",
+  "autor": "Hariadhi",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Nail (anatomy)",
+  "slika": "Slike/tijelo/dio_tijela_014"
+ },
+ {
+  "id": "dio_tijela_016",
+  "naziv": "Zub",
+  "sistem": "Probavni sistem",
+  "autor": "dozenist",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Human tooth",
+  "slika": "Slike/tijelo/dio_tijela_016"
+ },
+ {
+  "id": "dio_tijela_017",
+  "naziv": "Želudac",
+  "sistem": "Probavni sistem",
+  "autor": "Henry Vandyke Carter",
+  "licenca": "Public domain",
+  "wikipedia": "Stomach",
+  "slika": "Slike/tijelo/dio_tijela_017"
+ },
+ {
+  "id": "dio_tijela_018",
+  "naziv": "Jetra",
+  "sistem": "Probavni sistem",
+  "autor": "Tvanbr",
+  "licenca": "Public domain",
+  "wikipedia": "Liver",
+  "slika": "Slike/tijelo/dio_tijela_018"
+ },
+ {
+  "id": "dio_tijela_019",
+  "naziv": "Tanko crijevo",
+  "sistem": "Probavni sistem",
+  "autor": "Olek Remesz (wiki-pl: Orem, commons: Orem)",
+  "licenca": "CC BY-SA 2.5",
+  "wikipedia": "Small intestine",
+  "slika": "Slike/tijelo/dio_tijela_019"
+ },
+ {
+  "id": "dio_tijela_020",
+  "naziv": "Debelo crijevo",
+  "sistem": "Probavni sistem",
+  "autor": "Olek Remesz (wiki-pl: Orem, commons: Orem)",
+  "licenca": "CC BY-SA 2.5",
+  "wikipedia": "Large intestine",
+  "slika": "Slike/tijelo/dio_tijela_020"
+ },
+ {
+  "id": "dio_tijela_021",
+  "naziv": "Bubreg",
+  "sistem": "Mokraćni sistem",
+  "autor": "BruceBlaus. When using this image in external sources it can be cited as: Blausen.com staff (2014). \"Medical gallery of Blausen Medical 2014\". WikiJournal of Medicine 1 (2). DOI:10.15347/wjm/2014.010. ISSN 2002-4436.",
+  "licenca": "CC BY 3.0",
+  "wikipedia": "Kidney",
+  "slika": "Slike/tijelo/dio_tijela_021"
+ },
+ {
+  "id": "dio_tijela_022",
+  "naziv": "Mokraćni mjehur",
+  "sistem": "Mokraćni sistem",
+  "autor": "Jordi March i Nogué [1]",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Urinary bladder",
+  "slika": "Slike/tijelo/dio_tijela_022"
+ },
+ {
+  "id": "dio_tijela_023",
+  "naziv": "Kostur",
+  "sistem": "Koštani sistem",
+  "autor": "Sklmsta",
+  "licenca": "CC0",
+  "wikipedia": "Human skeleton",
+  "slika": "Slike/tijelo/dio_tijela_023"
+ },
+ {
+  "id": "dio_tijela_025",
+  "naziv": "Kičma",
+  "sistem": "Koštani sistem",
+  "autor": "Original: Arcadian Vector: Pixelsquid🎱",
+  "licenca": "Public domain",
+  "wikipedia": "Vertebral column",
+  "slika": "Slike/tijelo/dio_tijela_025"
+ },
+ {
+  "id": "dio_tijela_026",
+  "naziv": "Grudni koš",
+  "sistem": "Koštani sistem",
+  "autor": "Mikael Häggström",
+  "licenca": "Public domain",
+  "wikipedia": "Rib cage",
+  "slika": "Slike/tijelo/dio_tijela_026"
+ },
+ {
+  "id": "dio_tijela_027",
+  "naziv": "Butna kost",
+  "sistem": "Koštani sistem",
+  "autor": "Anatomography",
+  "licenca": "CC BY-SA 2.1 jp",
+  "wikipedia": "Femur",
+  "slika": "Slike/tijelo/dio_tijela_027"
+ },
+ {
+  "id": "dio_tijela_028",
+  "naziv": "Biceps",
+  "sistem": "Mišićni sistem",
+  "autor": "CFCF",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Biceps",
+  "slika": "Slike/tijelo/dio_tijela_028"
+ },
+ {
+  "id": "dio_tijela_029",
+  "naziv": "Ahilova tetiva",
+  "sistem": "Mišićni sistem",
+  "autor": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+  "licenca": "CC BY 4.0",
+  "wikipedia": "Achilles tendon",
+  "slika": "Slike/tijelo/dio_tijela_029"
+ },
+ {
+  "id": "dio_tijela_030",
+  "naziv": "Šaka",
+  "sistem": "Dijelovi tijela",
+  "autor": "Genusfotografen (Tomas Gunnarsson) / Wikimedia",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Hand",
+  "slika": "Slike/tijelo/dio_tijela_030"
+ },
+ {
+  "id": "dio_tijela_031",
+  "naziv": "Prst",
+  "sistem": "Dijelovi tijela",
+  "autor": "Sciencia58",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Finger",
+  "slika": "Slike/tijelo/dio_tijela_031"
+ },
+ {
+  "id": "dio_tijela_032",
+  "naziv": "Stopalo",
+  "sistem": "Dijelovi tijela",
+  "autor": "Genusfotografen (Tomas Gunnarsson) / Wikimedia",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Foot",
+  "slika": "Slike/tijelo/dio_tijela_032"
+ },
+ {
+  "id": "dio_tijela_033",
+  "naziv": "Koljeno",
+  "sistem": "Dijelovi tijela",
+  "autor": "Genusfotografen (Tomas Gunnarsson) / Wikimedia Sverige",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Knee",
+  "slika": "Slike/tijelo/dio_tijela_033"
+ },
+ {
+  "id": "dio_tijela_034",
+  "naziv": "Lakat",
+  "sistem": "Dijelovi tijela",
+  "autor": "Genusfotografen (Tommas Gunnarsson) / Wikimedia Sverige",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Elbow",
+  "slika": "Slike/tijelo/dio_tijela_034"
+ },
+ {
+  "id": "dio_tijela_035",
+  "naziv": "Rame",
+  "sistem": "Dijelovi tijela",
+  "autor": "Genusfotografen (Tomas Gunnarsson) / Wikimedia",
+  "licenca": "CC BY-SA 4.0",
+  "wikipedia": "Shoulder",
+  "slika": "Slike/tijelo/dio_tijela_035"
+ },
+ {
+  "id": "dio_tijela_036",
+  "naziv": "Obrva",
+  "sistem": "Dijelovi tijela",
+  "autor": "http://commons.wikimedia.org/wiki/User:Jastrow",
+  "licenca": "CC BY-SA 3.0",
+  "wikipedia": "Eyebrow",
+  "slika": "Slike/tijelo/dio_tijela_036"
+ }
+]

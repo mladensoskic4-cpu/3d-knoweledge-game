@@ -106,6 +106,35 @@ namespace TrkaZnanja.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator EveryMinigamePlaysByItself()
+        {
+            yield return FreshApp(false);
+            Minigame.TestAuto = true;
+            try
+            {
+                Assert.AreEqual(11, Minigame.All.Count);
+                Assert.AreEqual(11, Minigame.All.Select(m => m.Id).Distinct().Count(), "id-jevi mini igara su jedinstveni");
+                var rng = new Rng(9);
+                foreach (var mg in Minigame.All)
+                {
+                    Assert.IsTrue(mg.Ready, mg.Id + ": nema podataka");
+                    var (bs, bl) = mg.SimulateBot(0.7, rng);
+                    Assert.That(bs, Is.InRange(0.0, 1.0), mg.Id);
+                    Assert.IsFalse(string.IsNullOrEmpty(bl), mg.Id);
+                    mg.Prepare();
+                    var host = UIKit.Rect(UIRoot.I.Screen, "Test " + mg.Id);
+                    host.Center(new Vector2(1160, 600));
+                    yield return mg.Play(host, rng, 6);
+                    Assert.That(mg.Score, Is.InRange(0.0, 1.0), mg.Id);
+                    Assert.IsFalse(string.IsNullOrEmpty(mg.ResultLabel), mg.Id);
+                    Object.Destroy(host.gameObject);
+                    yield return null;
+                }
+            }
+            finally { Minigame.TestAuto = false; AudioKit.I?.StopNotes(); }
+        }
+
+        [UnityTest, Timeout(300000)]
         public IEnumerator PlaysAWholeRaceByItself()
         {
             yield return FreshApp(true);

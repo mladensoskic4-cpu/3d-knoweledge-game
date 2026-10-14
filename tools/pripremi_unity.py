@@ -76,6 +76,70 @@ def main():
     with open(os.path.join(CILJ, "drzave-lista.json"), "w", encoding="utf-8") as f:
         json.dump(drzave, f, ensure_ascii=False, indent=1)
     print(f"Pitanja, 7 mapa, {len(drzave)} država i {len(flags)} zastava prebačeno u Unity.")
+
+    # šah (mat u 1)
+    kopiraj(os.path.join(data, "sah.json"), os.path.join(CILJ, "sah.json"))
+
+    # fotografije za mini igre: <kategorija>/podaci.json + slike → Resources/Slike/<kategorija>/<id>.jpg
+    # (smanjene na najviše 512 px, bez isključenih), a spisak u Resources/Data/slike-<kategorija>.json
+    slike_cilj = os.path.join(os.path.dirname(CILJ), "Slike")
+    ukupno = 0
+    for kat in ("mjesta", "zivotinje", "tijelo", "instrumenti"):
+        put = os.path.join(KORIJEN, kat, "podaci.json")
+        if not os.path.exists(put):
+            continue
+        with open(put, encoding="utf-8") as f:
+            stavke = json.load(f)
+        izlaz = []
+        folder = os.path.join(slike_cilj, kat)
+        os.makedirs(folder, exist_ok=True)
+        for x in stavke:
+            if x.get("iskljuceno") or not x.get("slika") or not x.get("naziv"):
+                continue
+            izvor = os.path.join(KORIJEN, x["slika"])
+            if not os.path.exists(izvor):
+                continue
+            ime = x["id"]
+            odr = os.path.join(folder, ime + ".jpg")
+            if not os.path.exists(odr) or os.path.getmtime(odr) < os.path.getmtime(izvor):
+                with Image.open(izvor) as im:
+                    im = im.convert("RGB")
+                    im.thumbnail((512, 512), Image.LANCZOS)
+                    im.save(odr, "JPEG", quality=72, optimize=True, progressive=False)
+            y = {k: v for k, v in x.items() if k not in ("slika", "licenca_url", "izvor", "iskljuceno")}
+            y["slika"] = f"Slike/{kat}/{ime}"
+            izlaz.append(y)
+        with open(os.path.join(CILJ, f"slike-{kat}.json"), "w", encoding="utf-8") as f:
+            json.dump(izlaz, f, ensure_ascii=False, indent=1)
+        ukupno += len(izlaz)
+
+    # zvukovi instrumenata (FluidR3 GM, CC BY 3.0): 4 note po instrumentu → Resources/Zvuk/Instrumenti/<folder>/<nota>.mp3
+    with open(os.path.join(KORIJEN, "js", "minigames", "recognize.js"), encoding="utf-8") as f:
+        src = f.read()
+    blok = src[src.index("export const INSTRUMENTS"):src.index("].map(([name, folder")]
+    instrumenti = [{"naziv": m.group(1), "folder": m.group(2)}
+                   for m in re.finditer(r"\['([^']+)', '([a-z_]+)', '[^']+'", blok)]
+    for ins in instrumenti:
+        for nota in ("C4", "E4", "G4", "C5"):
+            izvor = os.path.join(data, "zvuk", ins["folder"], nota + ".mp3")
+            if os.path.exists(izvor):
+                kopiraj(izvor, os.path.join(os.path.dirname(CILJ), "Zvuk", "Instrumenti", ins["folder"], nota + ".mp3"))
+    with open(os.path.join(CILJ, "instrumenti-zvuk.json"), "w", encoding="utf-8") as f:
+        json.dump(instrumenti, f, ensure_ascii=False, indent=1)
+
+    # veliki gradovi i rijeke svijeta (iz js/world.js, preko Node-a)
+    import subprocess
+    skripta = ("import('./js/world.js').then(m => console.log(JSON.stringify({ gradovi: m.CITIES, rijeke: m.RIVERS })))")
+    try:
+        izlaz = subprocess.run(["node", "--input-type=module", "-e", skripta], cwd=KORIJEN, capture_output=True, text=True, check=True).stdout
+        svijet = json.loads(izlaz)
+        with open(os.path.join(CILJ, "svijet-gradovi-rijeke.json"), "w", encoding="utf-8") as f:
+            json.dump(svijet, f, ensure_ascii=False)
+        print(f"{len(svijet['gradovi'])} gradova i {len(svijet['rijeke'])} rijeka.")
+    except (OSError, subprocess.CalledProcessError) as e:
+        print("Upozorenje: gradovi i rijeke nisu prebačeni (treba Node.js):", e)
+
+    print(f"{ukupno} fotografija, {len(instrumenti)} instrumenata sa zvukom i 45 šahovskih problema prebačeno.")
     return 0
 
 

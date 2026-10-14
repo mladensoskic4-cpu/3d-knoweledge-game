@@ -8,13 +8,15 @@ Ovo je **prva verzija jezgra**:
 - trka od 5, 10 ili 15 minuta;
 - svih 7 tipova pitanja;
 - botovi sa nasumičnim imenima;
-- stanice i bonus runde sa mini igrom „Zastave u letu”;
+- stanice i bonus runde sa svih 11 mini igara iz web verzije: Zastave u letu, Glavni gradovi,
+  Koji je ovo instrument? (zvuk i fotografija), Koja je ovo životinja?, Gdje je ovo?, Gdje je ova fotografija? (mapa svijeta),
+  Koji je ovo dio tijela?, Memorija (zastava i država), Mat u jednom potezu, Pogodi državu po obliku i Pronađi na mapi svijeta;
 - postolje, vatromet i konfete na cilju;
 - garaža sa 3D izlogom: 15 životinja, 12 vozila, boje, kape i naočare;
 - podešavanja (jezik, kvalitet grafike, zvuk, vibracija);
 - Supabase (gost nalog i rezultati) i igra bez interneta.
 
-Ostalih 10 mini igara stiže jedna po jedna.
+Mapa svijeta u mini igrama se uvećava točkićem, dvama prstima ili dugmetom +, pomjera se prevlačenjem i ide ukrug (lijevo-desno).
 
 ## 1. Instalacija (jednom)
 
@@ -46,8 +48,8 @@ Ako nešto pukne pri prvom otvaranju (crvene greške u konzoli), uslikaj konzolu
 ## 3. Testovi
 
 U Unity-ju otvori **Window → General → Test Runner**:
-- **EditMode → Run All**: logika igre (26 testova: pitanja, špil, bodovanje, trka, profil, teren, ćirilica, zvuk).
-- **PlayMode → Run All**: igra se pokrene, napravi svaku mapu u svakoj atmosferi, sve životinje i vozila, otvori svaki tip pitanja i **odigra cijelu trku sama** (AutoPlay). Traje 1–3 minuta.
+- **EditMode → Run All**: logika igre (32 testa: pitanja, špil, bodovanje, trka, profil, teren, ćirilica, zvuk, mapa svijeta, obrisi država, šah, fotografije).
+- **PlayMode → Run All**: igra se pokrene, napravi svaku mapu u svakoj atmosferi, sve životinje i vozila, otvori svaki tip pitanja, **odigra svih 11 mini igara** i **cijelu trku sama** (AutoPlay). Traje 1–3 minuta.
 
 Testovi koriste poseban profil (`profil-test.json`) i ne diraju tvoj napredak.
 
@@ -106,6 +108,9 @@ python tools/pripremi_unity.py
 ```
 
 Skripta kopira pitanja, mape i države u Unity i pretvara zastave iz WebP u PNG (Unity ne čita WebP).
+Za mini igre prebacuje i fotografije (`mjesta`, `zivotinje`, `tijelo`, `instrumenti`, smanjene na 512 px, bez onih označenih
+sa `iskljuceno`), zvukove instrumenata (`data/zvuk`), šahovske probleme (`data/sah.json`) te gradove i rijeke iz `js/world.js`
+(za to treba Node.js). Fotografije i zvuci imaju slobodne licence; autori su upisani uz svaku fotografiju u igri.
 
 ## 8. Build za telefon
 

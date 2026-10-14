@@ -1,0 +1,106 @@
+[
+ {
+  "naziv": "Klavir",
+  "folder": "acoustic_grand_piano"
+ },
+ {
+  "naziv": "Violina",
+  "folder": "violin"
+ },
+ {
+  "naziv": "Violončelo",
+  "folder": "cello"
+ },
+ {
+  "naziv": "Kontrabas",
+  "folder": "contrabass"
+ },
+ {
+  "naziv": "Truba",
+  "folder": "trumpet"
+ },
+ {
+  "naziv": "Trombon",
+  "folder": "trombone"
+ },
+ {
+  "naziv": "Horna",
+  "folder": "french_horn"
+ },
+ {
+  "naziv": "Tuba",
+  "folder": "tuba"
+ },
+ {
+  "naziv": "Flauta",
+  "folder": "flute"
+ },
+ {
+  "naziv": "Panova frula",
+  "folder": "pan_flute"
+ },
+ {
+  "naziv": "Klarinet",
+  "folder": "clarinet"
+ },
+ {
+  "naziv": "Oboa",
+  "folder": "oboe"
+ },
+ {
+  "naziv": "Saksofon",
+  "folder": "alto_sax"
+ },
+ {
+  "naziv": "Klasična gitara",
+  "folder": "acoustic_guitar_nylon"
+ },
+ {
+  "naziv": "Električna gitara",
+  "folder": "electric_guitar_clean"
+ },
+ {
+  "naziv": "Bendžo",
+  "folder": "banjo"
+ },
+ {
+  "naziv": "Sitar",
+  "folder": "sitar"
+ },
+ {
+  "naziv": "Harmonika",
+  "folder": "accordion"
+ },
+ {
+  "naziv": "Usna harmonika",
+  "folder": "harmonica"
+ },
+ {
+  "naziv": "Gajde",
+  "folder": "bagpipe"
+ },
+ {
+  "naziv": "Orgulje",
+  "folder": "church_organ"
+ },
+ {
+  "naziv": "Harfa",
+  "folder": "orchestral_harp"
+ },
+ {
+  "naziv": "Ksilofon",
+  "folder": "xylophone"
+ },
+ {
+  "naziv": "Marimba",
+  "folder": "marimba"
+ },
+ {
+  "naziv": "Timpani",
+  "folder": "timpani"
+ },
+ {
+  "naziv": "Čelični bubanj",
+  "folder": "steel_drums"
+ }
+]
