@@ -291,9 +291,14 @@ namespace TrkaZnanja.Game
             var bg = Box(parent, color, Pill, "Čip · " + text, 1f);
             var t = Label(bg.transform, text, fontSize, Color.white, TextAnchor.MiddleCenter);
             t.rectTransform.Stretch(18, 2, 18, 2);
+            // jedan red: širina čipa = širina teksta, visina stalna (inače se tekst lomi i čip naraste u visinu)
+            t.horizontalOverflow = HorizontalWrapMode.Overflow;
             var fit = bg.gameObject.AddComponent<HorizontalLayoutGroup>();
             fit.padding = new RectOffset(20, 20, 6, 6);
             fit.childControlWidth = true; fit.childControlHeight = true;
+            fit.childForceExpandWidth = false; fit.childForceExpandHeight = false;
+            var le = bg.Size(-1, fontSize + 22);
+            le.flexibleWidth = 0; le.flexibleHeight = 0;
             return bg;
         }
 
@@ -409,5 +414,79 @@ namespace TrkaZnanja.Game
 
         void OnDisable() => Release();
         public bool IsSelectable => selectable;
+    }
+
+    // Sigurnosna mreža za kartice: ako sadržaj (kolona sa rasporedom) ne stane po visini, cijela kolona se
+    // srazmjerno umanji. Tako se dugmad nikad ne preklapaju, ni na najmanjem ekranu ni sa najdužim pitanjem.
+    public sealed class FitInside : MonoBehaviour
+    {
+        RectTransform rt, holder;
+        float scale = 1;
+
+        public static FitInside Add(RectTransform content)
+        {
+            var f = content.gameObject.GetComponent<FitInside>();
+            if (f == null) f = content.gameObject.AddComponent<FitInside>();
+            f.rt = content;
+            f.holder = (RectTransform)content.parent;
+            content.anchorMin = content.anchorMax = new Vector2(0.5f, 1);
+            content.pivot = new Vector2(0.5f, 1);
+            content.anchoredPosition = Vector2.zero;
+            f.Apply(1);
+            return f;
+        }
+
+        void Apply(float s)
+        {
+            scale = s;
+            var size = holder.rect.size;
+            rt.sizeDelta = new Vector2(size.x / s, size.y / s);
+            rt.localScale = new Vector3(s, s, 1);
+        }
+
+        void LateUpdate()
+        {
+            if (rt == null || holder == null) return;
+            var size = holder.rect.size;
+            if (size.y <= 1) return;
+            float need = LayoutUtility.GetPreferredHeight(rt);
+            float have = size.y / scale;
+            float s = scale;
+            if (need > have + 1) s = scale * have / need;               // ne staje: umanji
+            else if (scale < 1 && need < have - 24) s = Mathf.Min(1, size.y / need);   // ima mjesta: vrati
+            s = Mathf.Clamp(s, 0.55f, 1);
+            if (Mathf.Abs(s - scale) > 0.004f || Mathf.Abs(rt.sizeDelta.x - size.x / scale) > 1 || Mathf.Abs(rt.sizeDelta.y - size.y / scale) > 1)
+                Apply(s);
+        }
+    }
+
+    // Slika koja staje u roditelja i čuva proporcije (kao AspectRatioFitter.FitInParent, ali se preračunava
+    // i kad se roditelj kasnije smanji ili poveća, npr. kad FitInside umanji karticu).
+    public sealed class FitAspect : MonoBehaviour
+    {
+        public float Aspect = 1.5f, Pad;
+        RectTransform rt;
+
+        public static FitAspect Add(RectTransform r, float aspect, float pad = 0)
+        {
+            var f = r.gameObject.GetComponent<FitAspect>();
+            if (f == null) f = r.gameObject.AddComponent<FitAspect>();
+            f.rt = r; f.Aspect = aspect > 0 ? aspect : 1.5f; f.Pad = pad;
+            r.anchorMin = r.anchorMax = r.pivot = new Vector2(0.5f, 0.5f);
+            r.anchoredPosition = Vector2.zero;
+            f.LateUpdate();
+            return f;
+        }
+
+        void LateUpdate()
+        {
+            if (rt == null || rt.parent == null) return;
+            var p = ((RectTransform)rt.parent).rect.size - new Vector2(Pad * 2, Pad * 2);
+            if (p.x <= 0 || p.y <= 0) return;
+            float w = p.x, h = w / Aspect;
+            if (h > p.y) { h = p.y; w = h * Aspect; }
+            var size = new Vector2(w, h);
+            if ((rt.sizeDelta - size).sqrMagnitude > 0.25f) rt.sizeDelta = size;
+        }
     }
 }

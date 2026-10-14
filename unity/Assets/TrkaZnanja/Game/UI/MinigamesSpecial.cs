@@ -71,10 +71,7 @@ namespace TrkaZnanja.Game
                 if (card.IsFlag)
                 {
                     var f = UIKit.Raw(front.transform, GameData.Flag(card.C.Code), "Zastava");
-                    f.rectTransform.Stretch(16, 16, 16, 16);
-                    var arf = f.gameObject.AddComponent<AspectRatioFitter>();
-                    arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-                    arf.aspectRatio = f.texture.width / (float)f.texture.height;
+                    FitAspect.Add(f.rectTransform, f.texture.width / (float)f.texture.height, 16);
                     f.raycastTarget = false;
                 }
                 else

@@ -21,6 +21,7 @@ namespace TrkaZnanja.Game
             var col = UIKit.VStack(face.transform, 20, "Sadržaj", TextAnchor.UpperLeft, new RectOffset(48, 48, 40, 40));
             ((RectTransform)col.transform).Stretch();
             col.childForceExpandHeight = false;
+            FitInside.Add((RectTransform)col.transform);
 
             bool cancelled = false;
             MpSession session = null;

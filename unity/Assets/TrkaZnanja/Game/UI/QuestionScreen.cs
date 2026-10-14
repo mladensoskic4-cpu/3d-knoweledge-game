@@ -26,6 +26,18 @@ namespace TrkaZnanja.Game
         public string TutorialHint;
 
         int roundNo;
+        RectTransform timerRow;
+
+        // Širina kartice: što šira na širokim ekranima, ali da tabla runde (620) uvijek stane pored nje.
+        public static float CardWidth
+        {
+            get
+            {
+                float w = UIRoot.I != null ? UIRoot.I.Safe.rect.width : 1920;
+                if (w <= 0) w = 1920;
+                return Mathf.Clamp(w - 620 - 72, 1080, 1500);
+            }
+        }
 
         // Stanje igrača za ovo pitanje: predmet iz kutije, zbunjenost (napad), dupla runda i dupla polja.
         public sealed class Extras
@@ -51,12 +63,15 @@ namespace TrkaZnanja.Game
 
         void Build(int round, Rng rng, IList<(Powerup pu, int count)> powerups)
         {
+            // kartica je u sredini; kad se pojavi tabla runde, ide ulijevo, a tabla desno (širina se računa da obje stanu)
+            Hud.ShowSide(false);
             var face = UIKit.Card(transform, "Kartica");
             card = (RectTransform)face.rectTransform.parent;
-            card.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0.5f, 0.5f), new Vector2(-110, -40), new Vector2(1240, -150));
+            card.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0.5f, 0.5f), new Vector2(0, -40), new Vector2(CardWidth, -150));
             var col = UIKit.VStack(face.transform, 14, "Sadržaj", TextAnchor.UpperLeft, new RectOffset(40, 40, 28, 28));
             ((RectTransform)col.transform).Stretch();
             col.childForceExpandHeight = false;
+            FitInside.Add((RectTransform)col.transform);
 
             // zaglavlje
             var head = UIKit.HStack(col.transform, 12, "Zaglavlje");
@@ -69,33 +84,34 @@ namespace TrkaZnanja.Game
                 var d = UIKit.Box(head.transform, i < q.Tezina ? Theme.Gold : Theme.Line, UIKit.Circle, "Težina");
                 d.Size(22, 22);
             }
-            if (extras.DoubleRound) UIKit.Chip(head.transform, "DUPLA RUNDA ×2", Theme.Gold, 24);
-            else if (extras.DoubleNext) UIKit.Chip(head.transform, "Dupla polja ×2", Theme.Gold, 24);
+            if (extras.DoubleRound) UIKit.Chip(head.transform, "×2 runda", Theme.Gold, 24);
+            else if (extras.DoubleNext) UIKit.Chip(head.transform, "Dupla polja", Theme.Gold, 24);
             if (extras.Confused) UIKit.Chip(head.transform, "Zbunjen: manje vremena", Theme.Red, 24);
-            var spacer = UIKit.Rect(head.transform, "Razmak");
-            spacer.Size(-1, 10, 1);
-            UIKit.Label(head.transform, $"Runda {round}", 28, Theme.InkSoft, TextAnchor.MiddleRight, true).Size(200, 52);
 
             // tajmer
             var trow = UIKit.HStack(col.transform, 14, "Tajmer");
-            trow.Size(-1, 34);
+            trow.Size(-1, 40);
+            timerRow = (RectTransform)trow.transform;
             var bar = UIKit.Bar(trow.transform, Theme.Line, Theme.Go, out timerFill, 20);
             bar.Size(-1, 20, 1);
-            timerNum = UIKit.Label(trow.transform, ((int)limit).ToString(), 30, Theme.Ink, TextAnchor.MiddleRight, true);
-            timerNum.Size(60, 34);
+            timerNum = UIKit.Label(trow.transform, ((int)limit).ToString(), 32, Theme.Ink, TextAnchor.MiddleRight, true);
+            timerNum.horizontalOverflow = HorizontalWrapMode.Overflow;
+            timerNum.Size(70, 40);
 
             // power-upovi i predmet iz kutije
             bool attack = extras.Item != null && Items.IsAttack(extras.Item);
             if (powerups.Count > 0 || extras.Item != null)
             {
+                // dugmad dijele širinu reda (tekst se po potrebi smanji), da nikad ne izađu iz kartice
                 var pb = UIKit.HStack(col.transform, 12, "Power-upovi");
                 pb.Size(-1, 70);
+                pb.childForceExpandWidth = true;
                 puBar = (RectTransform)pb.transform;
                 if (attack)
                 {
                     var item = extras.Item;
-                    var ab = UIKit.Button(pb.transform, "Napad: " + Items.Label(item), Theme.Red, null, 24);
-                    ab.Size(330, 64);
+                    var ab = UIKit.Button(pb.transform, "Napad: " + Items.Label(item), Theme.Red, null, 26);
+                    ab.Size(-1, 66, 1.4f);
                     ab.OnClick += () =>
                     {
                         if (finished || used.Contains(Items.UsePrefix + item)) return;
@@ -108,8 +124,8 @@ namespace TrkaZnanja.Game
                 foreach (var (pu, count) in powerups)
                 {
                     var p = pu;
-                    var b = UIKit.Button(pb.transform, $"{pu.Label}  x{count}", Theme.Purple, null, 24);
-                    b.Size(250, 64);
+                    var b = UIKit.Button(pb.transform, $"{pu.Label}  x{count}", Theme.Purple, null, 26);
+                    b.Size(-1, 66, 1);
                     b.OnClick += () => UsePowerup(p, b);
                 }
             }
@@ -120,7 +136,7 @@ namespace TrkaZnanja.Game
             qt.FitHeight().horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             body = UIKit.Rect(col.transform, "Tijelo");
-            body.Size(-1, 300, 1, 1).minHeight = 260;
+            body.Size(-1, 260, 1, 1);
 
             foot = (RectTransform)UIKit.VStack(col.transform, 10, "Podnožje").transform;
             foot.gameObject.SetActive(false);
@@ -190,6 +206,8 @@ namespace TrkaZnanja.Game
             if (puBar != null) puBar.gameObject.SetActive(false);
         }
 
+        void OnDestroy() => Hud.ShowSide(true);
+
         public IEnumerator WaitAnswer() { while (!finished) yield return null; }
 
         // Presuda, zanimljivost i tabla runde; vraća se kad igrač tapne „Kreni”.
@@ -207,17 +225,18 @@ namespace TrkaZnanja.Game
             vt.rectTransform.Stretch(30, 0, 20, 0);
             goBtn = UIKit.Button(row.transform, "Kreni", Theme.Primary, () => go = true, 38);
             goBtn.Size(240, 84);
-            if (!string.IsNullOrEmpty(q.Info))
-            {
-                var info = UIKit.Label(foot, q.Info, 26, Theme.InkSoft);
-                info.FitHeight();
-            }
-            // tabla runde: posebna kartica desno, a pitanje se pomjeri ulijevo (oba se vide)
+            // tajmer više ne treba: oslobodi mjesto za presudu
+            if (timerRow != null) timerRow.gameObject.SetActive(false);
+            // tabla runde: posebna kartica desno, a pitanje se pomjeri ulijevo (oba se vide); zanimljivost ide na tablu
+            bool hasInfo = !string.IsNullOrEmpty(q.Info);
             var boardFace = UIKit.Card(transform, "Tabla runde", new Color(1, 1, 1, 0.97f));
             var boardRt = (RectTransform)boardFace.rectTransform.parent;
-            boardRt.Anchor(new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-24, 36), new Vector2(620, 500));
+            float safeH = UIRoot.I.Safe.rect.height > 0 ? UIRoot.I.Safe.rect.height : 1080;
+            boardRt.Anchor(new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), new Vector2(-24, 36), new Vector2(620, Mathf.Min(hasInfo ? 700 : 520, safeH - 160)));
             var bcol = UIKit.VStack(boardFace.transform, 10, "Redovi", TextAnchor.UpperLeft, new RectOffset(26, 26, 22, 22));
             ((RectTransform)bcol.transform).Stretch();
+            bcol.childForceExpandHeight = false;
+            FitInside.Add((RectTransform)bcol.transform);
             UIKit.Label(bcol.transform, $"Runda {roundNo}", 30, Theme.InkSoft, TextAnchor.MiddleLeft, true).Size(-1, 44);
             foreach (var e in Race.SortForBoard(entries))
             {
@@ -230,14 +249,23 @@ namespace TrkaZnanja.Game
                 txt.Size(-1, 88, 1);
                 txt.childAlignment = TextAnchor.MiddleLeft;
                 UIKit.Label(txt.transform, e.Racer.Human ? Lang.L("Ti") : e.Racer.Name, 28, Theme.Ink, TextAnchor.MiddleLeft, e.Racer.Human).Size(-1, 40);
-                UIKit.Label(txt.transform, e.Text + "  ·  " + Fmt.Sec(e.Time), 22, Theme.InkSoft).Size(-1, 34);
+                UIKit.Label(txt.transform, e.Text + "  ·  " + Fmt.Sec(e.Time), 24, Theme.InkSoft).Size(-1, 34);
                 var t = UIKit.Label(hr.transform, e.Tiles > 0 ? "+" + e.Tiles : "0", 44, e.Tiles >= 3 ? Theme.Right : e.Tiles > 0 ? Theme.Ink : Theme.Wrong, TextAnchor.MiddleRight, true);
                 t.Size(80, 88);
             }
+            if (hasInfo)
+            {
+                var info = UIKit.Label(bcol.transform, q.Info, 26, Theme.InkSoft);
+                info.horizontalOverflow = HorizontalWrapMode.Wrap;
+                info.Size(-1, 150);
+                info.resizeTextForBestFit = true; info.resizeTextMinSize = 20; info.resizeTextMaxSize = 26; info.verticalOverflow = VerticalWrapMode.Truncate;
+            }
             var from = card.anchoredPosition;
+            float safeW = UIRoot.I.Safe.rect.width > 0 ? UIRoot.I.Safe.rect.width : 1920;
+            float toX = -safeW / 2 + 24 + card.sizeDelta.x / 2;
             StartCoroutine(Tw.Run(0.35f, k =>
             {
-                card.anchoredPosition = Vector2.Lerp(from, new Vector2(-340, from.y), Tw.EaseInOut(k));
+                card.anchoredPosition = Vector2.Lerp(from, new Vector2(toX, from.y), Tw.EaseInOut(k));
                 boardRt.localScale = Vector3.one * Tw.EaseOutBack(k);
             }, true));
             go = false;
@@ -253,6 +281,7 @@ namespace TrkaZnanja.Game
 
         public void Close()
         {
+            Hud.ShowSide(true);
             view?.Dispose();
             Destroy(gameObject);
         }

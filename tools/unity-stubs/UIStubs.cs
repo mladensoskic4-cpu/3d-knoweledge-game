@@ -55,6 +55,8 @@ namespace UnityEngine.UI
     public class RawImage : MaskableGraphic { public Texture texture { get; set; } public Rect uvRect { get; set; } }
     public class Text : MaskableGraphic
     {
+        public float preferredHeight => 0;
+        public float preferredWidth => 0;
         public string text { get; set; }
         public Font font { get; set; }
         public int fontSize { get; set; }
@@ -71,7 +73,7 @@ namespace UnityEngine.UI
     public class BaseMeshEffect : UIBehaviour { }
     public class Shadow : BaseMeshEffect { public Color effectColor { get; set; } public Vector2 effectDistance { get; set; } }
     public class Outline : Shadow { }
-    public class Canvas : Behaviour { public RenderMode renderMode { get; set; } public int sortingOrder { get; set; } }
+    public class Canvas : Behaviour { public RenderMode renderMode { get; set; } public int sortingOrder { get; set; } public static void ForceUpdateCanvases() { } }
     public class CanvasScaler : UIBehaviour
     {
         public enum ScaleMode { ConstantPixelSize, ScaleWithScreenSize, ConstantPhysicalSize }
@@ -124,6 +126,7 @@ namespace UnityEngine.UI
         public float aspectRatio { get; set; }
     }
     public class RectMask2D : UIBehaviour { }
+    public class Mask : UIBehaviour { }
     public class ScrollRect : UIBehaviour
     {
         public enum MovementType { Unrestricted, Elastic, Clamped }
@@ -293,5 +296,22 @@ namespace UnityEditor.SceneManagement
         public static bool SaveCurrentModifiedScenesIfUserWantsTo() => true;
         public static UnityEngine.SceneManagement.Scene NewScene(NewSceneSetup s, NewSceneMode m) => default;
         public static bool SaveScene(UnityEngine.SceneManagement.Scene s, string p) => true;
+    }
+}
+
+namespace UnityEditor.TestTools.TestRunner.Api
+{
+    public enum TestMode { EditMode = 1, PlayMode = 2 }
+    public class Filter { public TestMode testMode; public string[] testNames; }
+    public class ExecutionSettings { public ExecutionSettings(params Filter[] f) { } }
+    public class TestRunnerApi : UnityEngine.ScriptableObject { public string Execute(ExecutionSettings s) => ""; }
+}
+
+namespace UnityEngine.UI
+{
+    public static class LayoutUtility
+    {
+        public static float GetPreferredHeight(UnityEngine.RectTransform rt) => 0;
+        public static float GetMinHeight(UnityEngine.RectTransform rt) => 0;
     }
 }

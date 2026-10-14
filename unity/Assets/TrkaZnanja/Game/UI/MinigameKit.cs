@@ -159,10 +159,7 @@ namespace TrkaZnanja.Game
             frame.rectTransform.Stretch();
             frame.gameObject.AddComponent<RectMask2D>();
             var img = UIKit.Raw(frame.transform, tex, "Fotografija");
-            img.rectTransform.Stretch(10, 10, 10, 10);
-            var arf = img.gameObject.AddComponent<AspectRatioFitter>();
-            arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-            arf.aspectRatio = tex != null ? tex.width / (float)tex.height : 1.5f;
+            FitAspect.Add(img.rectTransform, tex != null ? tex.width / (float)tex.height : 1.5f, 10);
             img.raycastTarget = false;
             var cr = UIKit.Box(frame.transform, new Color(0, 0, 0, 0.5f), UIKit.Pill, "Autor", 1f);
             cr.rectTransform.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 14), new Vector2(520, 34));

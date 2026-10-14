@@ -85,11 +85,7 @@ namespace TrkaZnanja.Game
                 var frame = UIKit.Box(col.transform, Theme.PaperSoft, UIKit.Round, "Okvir", 0.8f);
                 frame.Size(-1, 260, 1, 1);
                 flag = UIKit.Raw(frame.transform, GameData.Flag(Q.Zastava), "Zastava");
-                flag.rectTransform.Center(new Vector2(390, 240));
-                var arf = flag.gameObject.AddComponent<AspectRatioFitter>();
-                arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-                arf.aspectRatio = flag.texture != null ? flag.texture.width / (float)flag.texture.height : 1.5f;
-                flag.rectTransform.Stretch(16, 16, 16, 16);
+                FitAspect.Add(flag.rectTransform, flag.texture != null ? flag.texture.width / (float)flag.texture.height : 1.5f, 16);
                 blurMat = new Material(Mats.UIBlur);
                 blurMat.SetFloat("_Blur", 7);   // zastave su 480 px, pa jedan nivo više
                 blurMat.SetFloat("_Desat", 0.7f);
@@ -606,9 +602,7 @@ namespace TrkaZnanja.Game
             var holder = UIKit.Rect(col.transform, "Okvir mape");
             holder.Size(-1, -1, 1, 1);
             map = UIKit.Raw(holder, tex, "Mapa");
-            var arf = map.gameObject.AddComponent<AspectRatioFitter>();
-            arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-            arf.aspectRatio = texW / (float)texH;
+            FitAspect.Add(map.rectTransform, texW / (float)texH);
             var tap = map.gameObject.AddComponent<TapArea>();
             tap.OnTap = OnTap;
             pins = UIKit.Rect(map.rectTransform, "Oznake").Stretch();

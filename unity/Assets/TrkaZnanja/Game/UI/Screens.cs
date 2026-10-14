@@ -31,8 +31,9 @@ namespace TrkaZnanja.Game
             title.Outlined(Col.Hex("#1b4f8a"), 5);
             title.Size(-1, 130);
             var sub = UIKit.Label(left.transform, "Odgovaraj brzo i tačno da pređeš više polja. Pokupi kutije sa napadima, a svake 4 runde svi igraju mini igru.", 30, Color.white, TextAnchor.UpperLeft);
+            sub.resizeTextForBestFit = true; sub.resizeTextMinSize = 22; sub.resizeTextMaxSize = 30; sub.verticalOverflow = VerticalWrapMode.Truncate;
             sub.Outlined(new Color(0, 0, 0, 0.45f), 2);
-            sub.Size(-1, 90);
+            sub.Size(-1, 116);
             ProfileCard(left.transform, p);
             var playRow = UIKit.HStack(left.transform, 16, "Igraj");
             playRow.Size(-1, 150);
@@ -154,7 +155,9 @@ namespace TrkaZnanja.Game
             UIKit.Label(mid.transform, $"{name} · {Lang.L(rank.Label)}", 34, Theme.Ink, TextAnchor.MiddleLeft, true).Size(-1, 44);
             UIKit.Bar(mid.transform, Theme.Line, Col.Hex(rank.Color), out var fill, 16).Size(-1, 16);
             UIKit.SetFill(fill, (float)prog.pct);
-            UIKit.Label(mid.transform, prog.next != null ? $"{p.Bodovi} bodova · još {prog.need} do ranga {prog.next.Label}" : $"{p.Bodovi} bodova · najviši rang", 24, Theme.InkSoft).Size(-1, 34);
+            var progText = UIKit.Label(mid.transform, prog.next != null ? $"{p.Bodovi} bodova · još {prog.need} do ranga {prog.next.Label}" : $"{p.Bodovi} bodova · najviši rang", 24, Theme.InkSoft);
+            progText.Size(-1, 34);
+            progText.resizeTextForBestFit = true; progText.resizeTextMinSize = 18; progText.resizeTextMaxSize = 24; progText.verticalOverflow = VerticalWrapMode.Truncate;
             var coins = UIKit.Box(row.transform, Theme.Gold, UIKit.Pill, "Novčići", 1f);
             coins.Size(170, 70);
             UIKit.Label(coins.transform, p.Novcici.ToString(), 34, Color.white, TextAnchor.MiddleCenter, true).Outlined(Col.Hex("#a26a00"), 2).rectTransform.Stretch();
@@ -364,11 +367,13 @@ namespace TrkaZnanja.Game
         {
             UIKit.Clear(parent);
             mg.Prepare();
+            Hud.ShowSide(false);
             var face = UIKit.Card(parent, "Mini igra");
-            ((RectTransform)face.rectTransform.parent).Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0.5f, 0.5f), new Vector2(-110, -40), new Vector2(1240, -150));
+            ((RectTransform)face.rectTransform.parent).Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0.5f, 0.5f), new Vector2(0, -40), new Vector2(1240, -150));
             var col = UIKit.VStack(face.transform, 18, "Sadržaj", TextAnchor.UpperLeft, new RectOffset(40, 40, 30, 30));
             ((RectTransform)col.transform).Stretch();
             col.childForceExpandHeight = false;
+            FitInside.Add((RectTransform)col.transform);
             var head = UIKit.HStack(col.transform, 12, "Zaglavlje");
             head.Size(-1, 52);
             UIKit.Chip(head.transform, chip, chipColor, 24);
@@ -422,6 +427,7 @@ namespace TrkaZnanja.Game
             float w = 0;
             while (!go) { w += Time.unscaledDeltaTime; if (App.AutoPlay && w > 0.3f) go = true; yield return null; }
             UIKit.Clear(parent);
+            Hud.ShowSide(true);
         }
     }
 
@@ -430,6 +436,7 @@ namespace TrkaZnanja.Game
         public static void Build(RectTransform parent, Race race, List<Racer> ranked, Profile.Award award, RaceMap map, Profile p, Action again, Action menu)
         {
             UIKit.Clear(parent);
+            Hud.ShowAll(false);   // na cilju HUD trke više ne treba (prekrio bi karticu)
             var me = race.Human;
             int place = ranked.IndexOf(me);
             var winner = ranked[0];
@@ -438,9 +445,11 @@ namespace TrkaZnanja.Game
             var col = UIKit.VStack(face.transform, 16, "Sadržaj", TextAnchor.UpperLeft, new RectOffset(40, 40, 34, 30));
             ((RectTransform)col.transform).Stretch();
             col.childForceExpandHeight = false;
+            FitInside.Add((RectTransform)col.transform);
             UIKit.Label(col.transform, $"Cilj: {map.Finish} · {race.Round} rundi", 26, Theme.InkSoft).Size(-1, 40);
             var t = UIKit.Label(col.transform, winner.Human ? "Pobjeda!" : $"{winner.Name} je prvi stigao", 64, winner.Human ? Theme.Go : Theme.Ink, TextAnchor.MiddleLeft, true);
             t.Size(-1, 90);
+            t.resizeTextForBestFit = true; t.resizeTextMinSize = 34; t.resizeTextMaxSize = 64; t.verticalOverflow = VerticalWrapMode.Truncate;
             UIKit.Label(col.transform, winner.Human ? "Stigao si prvi do cilja." : $"Ti si {place + 1}. na cilju. Probaj ponovo!", 30, Theme.InkSoft).Size(-1, 50);
             var rewards = UIKit.HStack(col.transform, 18, "Nagrade");
             rewards.Size(-1, 110);

@@ -269,6 +269,7 @@ namespace UnityEngine
     {
         public float x, y, width, height;
         public Rect(float x, float y, float w, float h) { this.x = x; this.y = y; width = w; height = h; }
+        public static Rect MinMaxRect(float x0, float y0, float x1, float y1) => new Rect(x0, y0, x1 - x0, y1 - y0);
         public float xMin => x; public float yMin => y; public float xMax => x + width; public float yMax => y + height;
         public Vector2 size => new Vector2(width, height);
         public Vector2 center => new Vector2(x + width / 2, y + height / 2);
@@ -316,7 +317,9 @@ namespace UnityEngine
         public T GetComponent<T>() => go != null ? go.GetComponent<T>() : default;
         public T[] GetComponents<T>() => go != null ? go.GetComponents<T>() : new T[0];
         public T[] GetComponentsInChildren<T>() => go != null ? go.GetComponentsInChildren<T>() : new T[0];
+        public T[] GetComponentsInChildren<T>(bool includeInactive) => GetComponentsInChildren<T>();
         public T GetComponentInParent<T>() => default;
+        public T[] GetComponentsInParent<T>(bool includeInactive) => new T[0];
         public bool TryGetComponent<T>(out T c) { c = GetComponent<T>(); return c != null; }
         public string tag { get; set; }
     }
@@ -402,6 +405,8 @@ namespace UnityEngine
         public Vector3 TransformPoint(Vector3 p) => World.MultiplyPoint3x4(p);
         public Vector3 InverseTransformPoint(Vector3 p) => p;
         public IEnumerator GetEnumerator() => children.GetEnumerator();
+        public Transform Find(string n) => children.Find(c => c.go != null && c.go.name == n);
+        public bool IsChildOf(Transform p) { for (var x = this; x != null; x = x.par) if (x == p) return true; return false; }
     }
 
     public sealed class RectTransform : Transform
@@ -414,6 +419,7 @@ namespace UnityEngine
         public Vector2 offsetMin { get; set; }
         public Vector2 offsetMax { get; set; }
         public Rect rect => new Rect();
+        public void GetWorldCorners(Vector3[] c) { }
     }
 
     public static class RectTransformUtility
@@ -448,6 +454,7 @@ namespace UnityEngine
         public static SystemLanguage systemLanguage => SystemLanguage.English;
         public static int targetFrameRate { get; set; }
         public static string persistentDataPath => "/tmp";
+        public static string dataPath => "/tmp/Assets";
         public static bool isPlaying => true;
     }
 
@@ -500,7 +507,14 @@ namespace UnityEngine
         public void Dispose() { }
     }
 
-    public enum TextureFormat { RGBA32 = 4, R8 = 63 }
+    public enum TextureFormat { RGB24 = 3, RGBA32 = 4, R8 = 63 }
+    public enum RenderTextureFormat { ARGB32 }
+    public sealed class RenderTexture : Texture
+    {
+        public RenderTexture(int w, int h, int depth, RenderTextureFormat f) { }
+        public static RenderTexture active { get; set; }
+        public void Release() { }
+    }
     public enum TextureWrapMode { Repeat, Clamp }
     public enum FilterMode { Point, Bilinear, Trilinear }
     public class Texture : Object
@@ -521,6 +535,8 @@ namespace UnityEngine
         public void Apply() { }
         public void Apply(bool updateMipmaps) { }
         public void LoadRawTextureData(byte[] data) { }
+        public void ReadPixels(Rect r, int x, int y) { }
+        public byte[] EncodeToPNG() => new byte[0];
     }
 
     public enum SpriteMeshType { FullRect, Tight }
@@ -593,6 +609,11 @@ namespace UnityEngine
     public sealed class Camera : Behaviour
     {
         public static Camera main => null;
+        public bool orthographic { get; set; }
+        public float orthographicSize { get; set; }
+        public float aspect { get; set; }
+        public RenderTexture targetTexture { get; set; }
+        public void Render() { }
         public float fieldOfView { get; set; }
         public float nearClipPlane { get; set; }
         public float farClipPlane { get; set; }

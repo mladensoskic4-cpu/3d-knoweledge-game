@@ -139,7 +139,7 @@ namespace TrkaZnanja.Game
                 {
                     float dx = (x + 0.5f) / size * 2 - 1, dy = (y + 0.5f) / size * 2 - 1;
                     float d = Mathf.Sqrt(dx * dx + dy * dy);
-                    float a = Mathf.Clamp01(1 - Mathf.SmoothStep(hard, 1, d));
+                    float a = Mathf.Clamp01(1 - (float)Mathx.SmoothStep(hard, 1, d));
                     px[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
                 }
             t.SetPixels32(px);

@@ -66,11 +66,11 @@ namespace TrkaZnanja.Game
                 case Ground.Snow: return Atmo.Snow * (0.93f + shade * 0.07f);
                 case Ground.Rock: return Color.Lerp(Atmo.Rock, Atmo.Rock * 0.8f, shade);
                 default:
-                    var g = Color.Lerp(Atmo.Grass, Atmo.GrassDry, Mathf.SmoothStep(0.35f, 0.75f, shade));
+                    var g = Color.Lerp(Atmo.Grass, Atmo.GrassDry, (float)Mathx.SmoothStep(0.35f, 0.75f, shade));
                     // više = tamnije zeleno (šuma), pa prelaz u stijenu
                     var hh = Mathf.Clamp01((h - (float)T.LandTop) / 2f);
                     g = Color.Lerp(g, Color.Lerp(g * 0.75f, Atmo.Rock, 0.35f), hh);
-                    if (Atmo.Id == "snijeg") g = Color.Lerp(g, Atmo.Snow, Mathf.SmoothStep(0.15f, 0.6f, hh + shade * 0.3f));
+                    if (Atmo.Id == "snijeg") g = Color.Lerp(g, Atmo.Snow, (float)Mathx.SmoothStep(0.15f, 0.6f, hh + shade * 0.3f));
                     return g;
             }
         }

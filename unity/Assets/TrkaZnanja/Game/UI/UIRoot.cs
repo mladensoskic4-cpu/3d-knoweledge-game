@@ -29,11 +29,12 @@ namespace TrkaZnanja.Game
             ui.Canvas = go.AddComponent<Canvas>();
             ui.Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             ui.Canvas.sortingOrder = 10;
+            // Platno je uvijek bar 1920x1080 jedinica (Expand): na širokim telefonima (20:9) dobija širinu,
+            // na tabletima (4:3) visinu, pa raspored napravljen za 1920x1080 nikad nema manje mjesta.
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.6f;
+            scaler.referenceResolution = Reference;
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
             go.AddComponent<GraphicRaycaster>();
 
             ui.Safe = UIKit.Rect(go.transform, "Sigurna zona").Stretch();
@@ -61,6 +62,42 @@ namespace TrkaZnanja.Game
             _ = newInput;
         }
 
+        public static readonly Vector2 Reference = new Vector2(1920, 1080);
+
+        // Veličina platna (u UI jedinicama) za ekran od px piksela — isto što radi CanvasScaler (Expand).
+        public static Vector2 CanvasSizeFor(Vector2 px)
+        {
+            float s = Mathf.Min(px.x / Reference.x, px.y / Reference.y);
+            return px / s;
+        }
+
+        // Za testove: platno se prebaci u 3D prostor sa veličinom drugog ekrana (telefon, tablet),
+        // pa se raspored provjeri i snimi bez obzira na prozor editora.
+        bool emulating;
+        public static readonly Vector3 EmulationOrigin = new Vector3(0, -5000, 0);
+
+        public void Emulate(Vector2 px, Rect safePx)
+        {
+            emulating = true;
+            Canvas.renderMode = RenderMode.WorldSpace;
+            var rt = (RectTransform)transform;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = CanvasSizeFor(px);
+            rt.position = EmulationOrigin;
+            rt.rotation = Quaternion.identity;
+            rt.localScale = Vector3.one;
+            Safe.anchorMin = new Vector2(safePx.xMin / px.x, safePx.yMin / px.y);
+            Safe.anchorMax = new Vector2(safePx.xMax / px.x, safePx.yMax / px.y);
+            Safe.offsetMin = Safe.offsetMax = Vector2.zero;
+        }
+
+        public void StopEmulating()
+        {
+            emulating = false;
+            Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            ApplySafeArea();
+        }
+
         void ApplySafeArea()
         {
             var sa = UnityEngine.Screen.safeArea;
@@ -74,7 +111,7 @@ namespace TrkaZnanja.Game
 
         void Update()
         {
-            if (UnityEngine.Screen.safeArea != lastSafe) ApplySafeArea();
+            if (!emulating && UnityEngine.Screen.safeArea != lastSafe) ApplySafeArea();
         }
 
         public void ClearScreen() => UIKit.Clear(Screen);
@@ -196,6 +233,29 @@ namespace TrkaZnanja.Game
 
         Text itemText;
         Image itemBox;
+        RectTransform side;
+        bool sideHidden, hasItem;
+
+        // Dok je otvorena kartica (pitanje, mini igra, cilj) poredak i predmet se sklanjaju da je ne prekriju;
+        // isto se vidi na tabli runde i u zaglavlju pitanja.
+        public static void ShowSide(bool on)
+        {
+            var root = UIRoot.I != null ? UIRoot.I.Hud : null;
+            if (root == null) return;
+            foreach (var h in root.GetComponentsInChildren<Hud>(true))
+            {
+                h.sideHidden = !on;
+                if (h.side != null) h.side.gameObject.SetActive(on);
+                if (h.itemBox != null) h.itemBox.gameObject.SetActive(on && h.hasItem);
+            }
+        }
+
+        public static void ShowAll(bool on)
+        {
+            var root = UIRoot.I != null ? UIRoot.I.Hud : null;
+            if (root == null) return;
+            foreach (var h in root.GetComponentsInChildren<Hud>(true)) h.gameObject.SetActive(on);
+        }
 
         void Build()
         {
@@ -213,10 +273,14 @@ namespace TrkaZnanja.Game
                 var k = i / (float)race.Last;
                 st.rectTransform.Anchor(new Vector2(k, 0.5f), new Vector2(k, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(14, 14));
             }
-            var start = UIKit.Label(top.transform, "START", 20, Theme.Go, TextAnchor.MiddleCenter, true);
-            start.rectTransform.Anchor(new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(8, 0), new Vector2(64, 40));
-            var fin = UIKit.Label(top.transform, "CILJ", 20, Theme.Red, TextAnchor.MiddleCenter, true);
-            fin.rectTransform.Anchor(new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-8, 0), new Vector2(60, 40));
+            bar.offsetMin = new Vector2(96, bar.offsetMin.y);
+            bar.offsetMax = new Vector2(-84, bar.offsetMax.y);
+            var start = UIKit.Label(top.transform, "START", 22, Theme.Go, TextAnchor.MiddleCenter, true);
+            start.horizontalOverflow = HorizontalWrapMode.Overflow;
+            start.rectTransform.Anchor(new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(78, 40));
+            var fin = UIKit.Label(top.transform, "CILJ", 22, Theme.Red, TextAnchor.MiddleCenter, true);
+            fin.horizontalOverflow = HorizontalWrapMode.Overflow;
+            fin.rectTransform.Anchor(new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-12, 0), new Vector2(66, 40));
             foreach (var p in race.Players)
             {
                 var d = UIKit.Box(bar, Col.Hex(p.Color), UIKit.Circle, "Igrač " + p.Name);
@@ -230,25 +294,27 @@ namespace TrkaZnanja.Game
 
             // desno: poredak
             var card = UIKit.Card(transform, "Poredak", new Color(1, 1, 1, 0.92f));
-            card.rectTransform.parent.GetComponent<RectTransform>().Anchor(new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-18, -18), new Vector2(330, 300));
-            roundText = UIKit.Label(card.transform, "Runda 1", 26, Theme.InkSoft, TextAnchor.MiddleLeft, true);
-            roundText.rectTransform.Anchor(new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -10), new Vector2(-40, 40));
+            side = card.rectTransform.parent.GetComponent<RectTransform>();
+            side.Anchor(new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-18, -18), new Vector2(380, 310));
+            roundText = UIKit.Label(card.transform, "Runda 1", 28, Theme.InkSoft, TextAnchor.MiddleLeft, true);
+            roundText.rectTransform.Anchor(new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -10), new Vector2(-40, 44));
             board = UIKit.VStack(card.transform, 6, "Lista").GetComponent<RectTransform>();
-            board.Stretch(20, 56, 20, 14);
+            board.Stretch(20, 60, 20, 14);
 
-            // dolje desno: moj predmet iz kutije
+            // ispod poretka: moj predmet iz kutije
             itemBox = UIKit.Box(transform, new Color(1, 1, 1, 0.92f), UIKit.Round, "Predmet", 0.8f);
-            itemBox.rectTransform.Anchor(new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-18, -330), new Vector2(330, 70));
-            itemText = UIKit.Label(itemBox.transform, "", 24, Theme.Ink, TextAnchor.MiddleCenter, true);
+            itemBox.rectTransform.Anchor(new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-18, -342), new Vector2(380, 72));
+            itemText = UIKit.Label(itemBox.transform, "", 26, Theme.Ink, TextAnchor.MiddleCenter, true);
             itemText.rectTransform.Stretch(14, 4, 14, 4);
-            itemText.resizeTextForBestFit = true; itemText.resizeTextMinSize = 16; itemText.resizeTextMaxSize = 24;
+            itemText.resizeTextForBestFit = true; itemText.resizeTextMinSize = 18; itemText.resizeTextMaxSize = 26; itemText.verticalOverflow = VerticalWrapMode.Truncate;
         }
 
         public void Refresh(int round)
         {
             roundText.text = Lang.L($"Runda {round}") + (race.IsDoubleRound ? " · ×2" : "");
             var me = race.Human;
-            itemBox.gameObject.SetActive(me.Item != null || me.DoubleNext);
+            hasItem = me.Item != null || me.DoubleNext;
+            itemBox.gameObject.SetActive(hasItem && !sideHidden);
             itemText.text = me.Item != null ? Lang.L("Predmet: " + Items.Label(me.Item)) : Lang.L("Dupla polja u sljedećem pitanju");
             itemBox.color = me.Item == Items.Shield ? Col.Hex("#dcebff") : me.Item != null ? Col.Hex("#ffe1e4") : Col.Hex("#fff3d6");
             UIKit.Clear(board);
@@ -259,10 +325,12 @@ namespace TrkaZnanja.Game
                 row.Size(-1, 50);
                 var dot = UIKit.Box(row.transform, Col.Hex(p.Color), UIKit.Circle, "Boja");
                 dot.Size(22, 22);
-                var name = UIKit.Label(row.transform, $"{i}. {p.Name}", 26, p.Human ? Theme.Ink : Theme.InkSoft, TextAnchor.MiddleLeft, p.Human);
+                var name = UIKit.Label(row.transform, $"{i}. {p.Name}", 28, p.Human ? Theme.Ink : Theme.InkSoft, TextAnchor.MiddleLeft, p.Human);
                 name.Size(-1, 50, 1);
-                var left = UIKit.Label(row.transform, p.Pos >= race.Last ? "cilj" : (race.Last - p.Pos).ToString(), 24, Theme.InkSoft, TextAnchor.MiddleRight);
-                left.Size(70, 50);
+                name.horizontalOverflow = HorizontalWrapMode.Wrap;
+                name.resizeTextForBestFit = true; name.resizeTextMinSize = 18; name.resizeTextMaxSize = 28; name.verticalOverflow = VerticalWrapMode.Truncate;
+                var left = UIKit.Label(row.transform, p.Pos >= race.Last ? "cilj" : (race.Last - p.Pos).ToString(), 26, Theme.InkSoft, TextAnchor.MiddleRight, true);
+                left.Size(64, 50);
                 i++;
             }
         }
