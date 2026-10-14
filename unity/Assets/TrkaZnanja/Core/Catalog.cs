@@ -93,12 +93,11 @@ namespace TrkaZnanja.Core
         {
             new TrackLength { Id = "5", Label = "5 min", Note = "brza trka", Tiles = 32 },
             new TrackLength { Id = "10", Label = "10 min", Note = "standardna trka", Tiles = 58 },
-            new TrackLength { Id = "15", Label = "15 min", Note = "duga trka, više stanica", Tiles = 84 },
+            new TrackLength { Id = "15", Label = "15 min", Note = "duga trka, više mini igara", Tiles = 84 },
         };
         public static TrackLength LengthOf(string id) => Lengths.FirstOrDefault(l => l.Id == id) ?? Lengths[1];
 
-        public const int CheckpointEvery = 7;
-        public static readonly int[] BonusRounds = { 4, 10, 16, 22 };
+        public const int MinigameEvery = 4;          // svake 4 runde svi igraju istu mini igru
         public const double BonusTime = 1.6;
 
         public static readonly RaceMap[] Maps =

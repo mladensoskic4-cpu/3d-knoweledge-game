@@ -39,6 +39,15 @@ namespace TrkaZnanja.Core
         public Look Izgled = new Look();
         public GameSettings Podesavanja = new GameSettings();
         public RaceStats Statistika = new RaceStats();
+        public List<string> Vidjena = new List<string>();     // id-jevi pitanja iz ranijih trka (da se ne ponavljaju)
+        public const int VidjenaMax = 4000;
+
+        public void MarkSeen(string questionId)
+        {
+            if (string.IsNullOrEmpty(questionId)) return;
+            Vidjena.Add(questionId);
+            if (Vidjena.Count > VidjenaMax) Vidjena.RemoveRange(0, Vidjena.Count - VidjenaMax);
+        }
 
         public Rank Rank => Catalog.RankOf(Bodovi);
 
@@ -157,6 +166,7 @@ namespace TrkaZnanja.Core
                     ["trke"] = (double)Statistika.Trke, ["pobjede"] = (double)Statistika.Pobjede,
                     ["tacni"] = (double)Statistika.Tacni, ["odgovori"] = (double)Statistika.Odgovori,
                 },
+                ["vidjena"] = Vidjena.Cast<object>().ToList(),
                 ["istorija"] = Istorija.Select(r => (object)new Dictionary<string, object>
                 {
                     ["datum"] = r.Datum, ["mapa"] = r.Mapa, ["mjesto"] = (double)r.Mjesto, ["bodovi"] = (double)r.Bodovi,
@@ -183,6 +193,8 @@ namespace TrkaZnanja.Core
             p.Grad = Json.Str(d, "grad", "");
             p.Skola = Json.Str(d, "skola", "");
             p.Novcici = Math.Max(0, Json.Int(d, "novcici", p.Novcici));
+            p.Vidjena = Json.StrList(Json.Get(d, "vidjena"));
+            if (p.Vidjena.Count > VidjenaMax) p.Vidjena.RemoveRange(0, p.Vidjena.Count - VidjenaMax);
             p.Bodovi = Math.Max(0, Json.Int(d, "bodovi", 0));
             var kup = Json.StrList(Json.Get(d, "kupljeno"));
             p.Kupljeno = Catalog.FreeItems.Union(kup.Where(id => Catalog.ShopItemOf(id) != null)).ToList();

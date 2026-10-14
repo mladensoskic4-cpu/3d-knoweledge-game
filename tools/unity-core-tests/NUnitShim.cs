@@ -53,6 +53,7 @@ namespace NUnit.Framework
         {
             if (Math.Abs(expected - actual) > delta) Fail($"očekivano {expected} ± {delta}, dobijeno {actual}", message);
         }
+        public static void AreSame(object expected, object actual, string message = null) { if (!ReferenceEquals(expected, actual)) Fail($"očekivan isti objekat {expected}, dobijen {actual}", message); }
         public static void IsTrue(bool c, string message = null) { if (!c) Fail("očekivano true", message); }
         public static void IsFalse(bool c, string message = null) { if (c) Fail("očekivano false", message); }
         public static void IsNotNull(object o, string message = null) { if (o == null) Fail("očekivano da nije null", message); }

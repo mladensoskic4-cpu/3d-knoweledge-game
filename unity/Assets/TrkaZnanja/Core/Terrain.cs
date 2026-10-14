@@ -156,7 +156,7 @@ namespace TrkaZnanja.Core
                         h = -0.45 - Mathx.SmoothStep(0, 3, dCoastOut[i]) * 0.9;
                         // put preko mora ide po nasipu (pješčani nasip, kao u Boki)
                         // (samo blizu obale; preko okeana staza ide po mostu)
-                        var dike = dCoastOut[i] < 2.5 ? Mathx.SmoothStep(0.55, 1.15, dRoad[i]) : 1;
+                        var dike = dCoastOut[i] < 2.5 ? Mathx.SmoothStep(0.7, 1.3, dRoad[i]) : 1;
                         h = Mathx.Lerp(s.LandTop, h, dike);
                         T.Height[i] = (float)h;
                         T.Kind[i] = h > s.SeaLevel ? Ground.Sand : Ground.Sea;
@@ -179,7 +179,7 @@ namespace TrkaZnanja.Core
                     var coast = Mathx.SmoothStep(0, 1.3, dCoastIn[i]);
                     h = Mathx.Lerp(s.SeaLevel - 0.25, h, coast);
                     // put ostaje ravan
-                    var flat = Mathx.SmoothStep(0.6, 1.1, dRoad[i]);
+                    var flat = Mathx.SmoothStep(0.72, 1.2, dRoad[i]);   // put je širok ~1,2
                     h = Mathx.Lerp(s.LandTop, h, flat);
                     // jezero
                     if (T.Lake[i]) h = s.LandTop - 0.2 - Mathx.SmoothStep(0, 1.5, dLake[i]) * 0.3;
@@ -223,7 +223,7 @@ namespace TrkaZnanja.Core
                     var ang = rng.Range(0, Math.PI * 2);
                     var r = rng.Range(0.75, 2.0);
                     double x = pos.X + Math.Cos(ang) * r, z = pos.Z + Math.Sin(ang) * r;
-                    if (!T.IsLandAt(x, z) || track.DistanceToRoad(x, z) < 0.55) continue;
+                    if (!T.IsLandAt(x, z) || track.DistanceToRoad(x, z) < 0.85) continue;
                     T.Houses.Add(new Scatter { Pos = new Vec3d(x, T.SampleHeight(x, z), z), Scale = rng.Range(0.8, 1.25), Rot = rng.Range(0, 360), Variant = rng.Range(0, 4) });
                     k++;
                 }

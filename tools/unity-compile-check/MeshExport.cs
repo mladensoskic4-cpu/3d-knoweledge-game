@@ -116,6 +116,7 @@ namespace TrkaZnanja.LocalTools
             File.WriteAllText(path, sb.ToString());
             var me = racers[0];
             var t0 = track.SlotPosition(me.Pos, 0, 2);
+            Console.WriteLine("polja: " + string.Join(" ", track.Tiles.Take(16).Select(t => t.Index + ":" + t.Type)));
             Console.WriteLine($"scena: {tris} trouglova; igrač na {t0.x:0.00} {t0.y:0.00} {t0.z:0.00}; pravac {track.Tiles[me.Pos].Dir.X:0.00} {track.Tiles[me.Pos].Dir.Z:0.00}");
             return 0;
         }

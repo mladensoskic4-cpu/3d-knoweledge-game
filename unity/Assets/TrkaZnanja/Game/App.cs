@@ -280,24 +280,26 @@ namespace TrkaZnanja.Game
             var tiles = setup.Tiles;
             worldKey = null;
             var oldLen = S.Duzina;
-            ShowWorldExact(map, tiles, setup.Atmosphere);
+            var kinds = TileKinds.Generate(tiles, setup.Seed);
+            ShowWorldExact(map, tiles, setup.Atmosphere, kinds);
 
             // sve što mora biti isto na svim uređajima ide iz zajedničkog semena: botovi, pitanja, mini igre
             var shared = new Rng(setup.Seed);
             raceRng = shared;
             Minigame.ResetQueue();
-            var race = new Race(setup.BuildPlayers(localId, shared), tiles, shared);
+            var race = new Race(setup.BuildPlayers(localId, shared), tiles, shared, kinds);
             var human = race.Human;
             CurrentRace = race;
             Multi = mp;
             var questions = mp != null ? GameData.Questions.Take(GameData.BaseQuestionCount).ToList() : GameData.Questions;
-            var deck = new Deck(questions, setup.Areas, shared, setup.MaxTezina);
+            // u igri protiv botova preskačemo pitanja viđena u ranijim trkama (u multiplayeru špil mora biti isti za sve)
+            var deck = new Deck(questions, setup.Areas, shared, setup.MaxTezina, mp == null ? new HashSet<string>(Profile.Vidjena) : null);
 
             foreach (var v in views) if (v != null) Destroy(v.gameObject);
             views.Clear();
             foreach (var p in race.Players) views.Add(RacerView.Create(p, track, world.transform));
             yield return Relayout(race);
-            hud = Hud.Create(ui.Hud, race, Catalog.CheckpointEvery);
+            hud = Hud.Create(ui.Hud, race);
             hud.Refresh(1);
             var me = views.First(v => v.Racer.Human);
             Camera.Follow(me.transform);
@@ -310,6 +312,12 @@ namespace TrkaZnanja.Game
             {
                 int round = race.NextRound();
                 hud.Refresh(round);
+                if (race.IsDoubleRound)
+                {
+                    ui.Toast("DUPLA RUNDA! Sva polja ×2", Theme.Gold, 2.5f);
+                    AudioKit.I?.Play("fanfara", 0.6f);
+                    if (!AutoPlay) yield return Tw.Wait(1.0f, true);
+                }
                 var q = deck.Next().Localized(Lang.Mode);
                 if (setup.BonusSeconds > 0) { q = q.Clone(); q.Vrijeme = QuizTypes.TimeLimitOf(q) + setup.BonusSeconds; }
 
@@ -317,8 +325,11 @@ namespace TrkaZnanja.Game
                 Camera.QuestionOrbit(me.transform);
                 fx.BlurBackground(true);
                 var pus = Catalog.Powerups.Select(pu => (pu, Profile.Powerupi.TryGetValue(pu.Id, out var n) ? n : 0)).Where(x => x.Item2 > 0).ToList();
-                var qs = QuestionScreen.Open(ui.Screen, q, round, rng, tutorial ? new List<(Powerup, int)>() : pus);
-                if (tutorial && round == 2) ui.Toast("Zlatna polja su stanice sa mini igrom.", Theme.Gold, 4);
+                var extras = new QuestionScreen.Extras { Item = human.Item, Confused = human.Confused, DoubleRound = race.IsDoubleRound, DoubleNext = human.DoubleNext };
+                var qs = QuestionScreen.Open(ui.Screen, q, round, rng, tutorial ? new List<(Powerup, int)>() : pus, extras);
+                if (human.Confused) ui.Toast("Zbunjen si: manje vremena za ovo pitanje!", Theme.Red, 2.5f);
+                Profile.MarkSeen(q.Id);
+                if (tutorial && round == 2) ui.Toast("Kutije na putu daju napade, zelene strelice su prečice, a blato vraća nazad.", Theme.Gold, 5);
                 if (tutorial && round == 3) ui.Toast("Prvi na cilju pobjeđuje!", Theme.Go, 4);
                 qs.OnUsePowerup = id => { Profile.UsePowerup(id); Save(); return true; };
                 if (AutoPlay) { yield return Tw.Wait(0.2f, true); qs.AutoAnswer(rng); }
@@ -345,14 +356,26 @@ namespace TrkaZnanja.Game
                     }
                     entries = race.ResolveRound(q, res.ToDictionary(kv => kv.Key, kv => MpAnswer.FromJson(kv.Value)));
                 }
+                var attacks = race.Events.ToList();
                 yield return qs.ShowBoard(entries);
                 qs.Close();
                 fx.BlurBackground(false);
+                foreach (var ev in attacks) ui.Toast(ev.Text, ev.Kind == "blokirano" ? Theme.Blue : Theme.Red, 3);
 
-                // vožnja
+                // vožnja (i nazad, ako je neko napadnut)
                 var moves = race.MovesFor(entries);
                 yield return Drive(race, moves);
                 race.Apply(moves);
+                // polja na kojima su stali: prečica, blato, dupla polja, kutija
+                race.Events.Clear();
+                var landings = race.Landings(moves);
+                foreach (var ev in race.Events)
+                {
+                    var c = ev.Kind == "blato" ? Col.Hex("#8a5a33") : ev.Kind == "precica" ? Theme.Go : ev.Kind == "kutija" ? Theme.Purple : Theme.Gold;
+                    if (ev.Who.Human || ev.Kind == "kutija") ui.Toast(ev.Text, c, 2.5f);
+                    if (ev.Who.Human && ev.Kind == "kutija") AudioKit.I?.Play("novcic", 0.8f);
+                }
+                if (landings.Count > 0) { yield return Drive(race, landings); race.Apply(landings); }
                 yield return Relayout(race);
                 hud.Refresh(round);
 
@@ -367,9 +390,7 @@ namespace TrkaZnanja.Game
                     yield break;
                 }
 
-                var station = race.AtStation(moves);
-                if (station.Count > 0) yield return Station(race, station);
-                if (race.IsBonusRound) yield return Bonus(race);
+                if (race.IsMinigameRound) yield return Bonus(race);
 
                 if (race.CheckFinish())
                 {
@@ -380,14 +401,14 @@ namespace TrkaZnanja.Game
             }
         }
 
-        void ShowWorldExact(RaceMap map, int tiles, string atmosphere)
+        void ShowWorldExact(RaceMap map, int tiles, string atmosphere, IList<string> kinds = null)
         {
-            var key = $"{map.Id}|{tiles}|{atmosphere}";
+            var key = $"{map.Id}|{tiles}|{atmosphere}|{(kinds == null ? "" : string.Join(",", kinds))}";
             if (key == worldKey && world != null) return;
             worldKey = key;
             if (world != null) Destroy(world.gameObject);
             labels?.Clear();
-            world = WorldView.Build(worldRoot, map, tiles, atmosphere, rng.Range(1, 100000));
+            world = WorldView.Build(worldRoot, map, tiles, atmosphere, rng.Range(1, 100000), kinds);
             track = TrackView.Build(world);
             world.Atmo.Apply(sun);
             fx.Apply(world.Atmo);
@@ -413,7 +434,7 @@ namespace TrkaZnanja.Game
             }
             var running = new List<Coroutine>();
             foreach (var m in moves)
-                if (m.Target > m.From) running.Add(StartCoroutine(ViewOf(m.Racer).DriveTo(m.Target, AutoPlay ? 6 : 1)));
+                if (m.Target != m.From) running.Add(StartCoroutine(ViewOf(m.Racer).DriveTo(m.Target, AutoPlay ? 6 : 1)));
             foreach (var c in running) yield return c;
             if (finisher != null) { Time.timeScale = 1; if (!AutoPlay) yield return Tw.Wait(0.6f, true); }
             foreach (var m in moves.Where(x => x.Target > x.From && x.Racer.Human))
@@ -436,65 +457,10 @@ namespace TrkaZnanja.Game
             foreach (var c in running) yield return c;
         }
 
-        IEnumerator Station(Race race, List<Racer> atStation)
-        {
-            var mg = Minigame.Pick(raceRng);
-            var me = atStation.FirstOrDefault(p => p.Human);
-            var outcomes = new List<StationOutcome>();
-            var key = "st:" + race.Round;
-            var persons = atStation.Where(p => p.Person).Select(p => p.Id).ToList();
-            Dictionary<string, Dictionary<string, object>> scores = null;
-            // ishodi idu redom igrača sa stanice (isto na svim uređajima): ljudi iz odluke, botovi iz zajedničkog Rng-a
-            List<StationOutcome> Outcomes(double myScore, string myLabel)
-            {
-                var list = new List<StationOutcome>();
-                foreach (var p in atStation)
-                {
-                    if (p.Human && Multi == null) list.Add(race.Station(p, myScore, myLabel));
-                    else if (p.Person) { var sc = MpScore.FromJson(scores != null && scores.TryGetValue(p.Id, out var v) ? v : null) ?? new MpScore { Label = "—" }; list.Add(race.Station(p, sc.Score, sc.Label)); }
-                    else { var s = mg.SimulateBot(Bots.MinigameSkill(p), raceRng); list.Add(race.Station(p, s.score, s.label)); }
-                }
-                // moj red prvi (za prikaz rezultata)
-                return list.OrderBy(o => o.Racer.Human ? 0 : 1).ToList();
-            }
-            IEnumerator Exchange(double score, string label)
-            {
-                if (Multi == null) yield break;
-                Multi.Contribute(key, new MpScore { Score = score, Label = label }.ToJson());
-                yield return Multi.Await(key, persons, mg.Duration + 25, id => new MpScore { Label = "—" }.ToJson(), d => scores = d);
-            }
-            if (me != null)
-            {
-                fx.BlurBackground(true);
-                var tile = track.Tiles[me.Pos];
-                yield return MinigameScreen.Run(ui.Screen, mg, mg.Duration, $"Stanica · {tile.Near}", Theme.Gold,
-                    Lang.L("Nagrada: novčići i skok do 3 polja naprijed."), rng, outcomes, Outcomes, Multi != null ? Exchange : (System.Func<double, string, IEnumerator>)null);
-                fx.BlurBackground(false);
-                if (outcomes.Count > 0 && outcomes[0].Coins > 0) AudioKit.I?.Play("novcic");
-            }
-            else
-            {
-                if (Multi != null && persons.Count > 0)
-                {
-                    ui.Toast($"{string.Join(", ", atStation.Where(p => p.Person).Select(p => p.Name))} igra mini igru…", Theme.Gold, 3);
-                    yield return Multi.Await(key, persons, mg.Duration + 40, id => new MpScore { Label = "—" }.ToJson(), d => scores = d);
-                }
-                outcomes.AddRange(Outcomes(0, ""));
-                foreach (var o in outcomes)
-                    ui.Toast($"{o.Racer.Name} na stanici: {Lang.L(o.Label)} » {(o.Jump > 0 ? $"+{o.Jump} polja" : "bez skoka")}", Col.Hex(o.Racer.Color));
-                yield return Tw.Wait(0.8f, true);
-            }
-            var jumps = race.Jumps(outcomes);
-            yield return Drive(race, jumps);
-            race.Apply(jumps);
-            yield return Relayout(race);
-            hud.Refresh(race.Round);
-        }
-
         IEnumerator Bonus(Race race)
         {
             var mg = Minigame.Pick(raceRng);
-            int seconds = Mathf.RoundToInt(mg.Duration * (float)Catalog.BonusTime / 5f) * 5;
+            int seconds = mg.Duration;
             var outcomes = new List<StationOutcome>();
             var key = "bo:" + race.Round;
             var persons = race.Players.Where(p => p.Person).Select(p => p.Id).ToList();
@@ -506,8 +472,8 @@ namespace TrkaZnanja.Game
                 yield return Multi.Await(key, persons, seconds + 25, id => new MpScore { Label = "—" }.ToJson(), d => scores = d);
             }
             fx.BlurBackground(true);
-            yield return MinigameScreen.Run(ui.Screen, mg, seconds, "Bonus runda · svi igraju", Theme.Purple,
-                Lang.L("Sva četiri igrača igraju istu mini igru. Pobjednik ide 3 polja naprijed i dobija 50 novčića, drugi ide 1 polje."), rng, outcomes,
+            yield return MinigameScreen.Run(ui.Screen, mg, seconds, "Mini igra · svi igraju", Theme.Purple,
+                Lang.L("Svi igraju istu mini igru. 1. mjesto ide 3 polja naprijed, 2. mjesto 2 polja, 3. mjesto 1 polje, uz novčiće."), rng, outcomes,
                 (score, label) =>
                 {
                     var results = race.Players.Select(p =>

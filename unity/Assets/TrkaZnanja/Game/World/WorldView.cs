@@ -23,20 +23,20 @@ namespace TrkaZnanja.Game
 
         public float RoadY => (float)(Terrain?.LandTop ?? 0.4) + 0.06f;
 
-        public static WorldView Build(Transform parent, RaceMap map, int tiles, string atmosphere, int seed)
+        public static WorldView Build(Transform parent, RaceMap map, int tiles, string atmosphere, int seed, IList<string> kinds = null)
         {
             var go = new GameObject("Svijet · " + map.Name);
             go.transform.SetParent(parent, false);
             var w = go.AddComponent<WorldView>();
-            w.Create(map, tiles, atmosphere, seed);
+            w.Create(map, tiles, atmosphere, seed, kinds);
             return w;
         }
 
-        void Create(RaceMap map, int tiles, string atmosphere, int seed)
+        void Create(RaceMap map, int tiles, string atmosphere, int seed, IList<string> kinds)
         {
             Map = map;
             Atmo = AtmospherePreset.Get(atmosphere);
-            Track = TrackLayout.Build(map, tiles);
+            Track = TrackLayout.Build(map, tiles, 0, kinds ?? TileKinds.Generate(tiles, seed));
             var settings = new TerrainParams { Seed = seed, SnowLine = Atmo.SnowLine };
             Terrain = TerrainBuilder.Build(Track, GameData.Land(map.Land), GeoData.LakesFor(map.Id), settings, map.Id);
             var T = Terrain;
@@ -259,7 +259,7 @@ namespace TrkaZnanja.Game
             var T = Terrain;
             var kit = new MeshKit();
             var pillar = MeshKit.C("#e9e1d0");
-            float y = RoadY - 0.02f;
+            float y = RoadY - 0.07f;     // vrh stuba ispod asfalta (inače probija put)
             int last = -10;
             for (int i = 0; i < Track.Road.Count; i++)
             {

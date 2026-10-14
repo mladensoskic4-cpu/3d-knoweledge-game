@@ -37,9 +37,8 @@ namespace TrkaZnanja.Core
     {
         public int Index;
         public Vec3d Pos, Dir;          // Dir = pravac staze (vodoravno, normalizovan)
-        public string Type;             // start, polje, stanica, cilj
+        public string Type;             // start, polje, precica, blato, dupla, kutija, cilj
         public string City;             // ime grada kod ovog polja (ako ga ima)
-        public string Near;             // najbliži grad (za stanice)
     }
 
     public static class CatmullRom
@@ -117,7 +116,7 @@ namespace TrkaZnanja.Core
         public List<(string name, Vec3d pos)> Cities = new List<(string, Vec3d)>();
         public int Last => Tiles.Count - 1;
 
-        public static TrackLayout Build(RaceMap map, int tileCount, double y = 0)
+        public static TrackLayout Build(RaceMap map, int tileCount, double y = 0, IList<string> kinds = null)
         {
             var t = new TrackLayout { Proj = WorldProjection.ForRoute(map.Route, tileCount) };
             var pts = map.Route.Select(r => { var w = t.Proj.ToWorld(r.lon, r.lat); return new Vec3d(w.X, y, w.Y); }).ToList();
@@ -125,12 +124,13 @@ namespace TrkaZnanja.Core
             var sp = CatmullRom.Spaced(pts, tileCount);
             t.Road = CatmullRom.Sample(pts, Math.Max(200, tileCount * 12));
             int last = tileCount - 1;
+            kinds ??= TileKinds.Generate(tileCount, 1);
             for (int i = 0; i < tileCount; i++)
             {
                 var a = sp[Math.Max(0, i - 1)];
                 var b = sp[Math.Min(last, i + 1)];
                 var dir = new Vec3d(b.X - a.X, 0, b.Z - a.Z).Normalized;
-                t.Tiles.Add(new Tile { Index = i, Pos = sp[i], Dir = dir, Type = Race.TileType(i, last) });
+                t.Tiles.Add(new Tile { Index = i, Pos = sp[i], Dir = dir, Type = kinds[i] });
             }
             // najbliže polje svakom gradu dobija ime grada
             foreach (var (name, pos) in t.Cities)
@@ -143,8 +143,6 @@ namespace TrkaZnanja.Core
                 }
                 if (t.Tiles[best].City == null) t.Tiles[best].City = name;
             }
-            foreach (var tile in t.Tiles.Where(x => x.Type == "stanica"))
-                tile.Near = t.Cities.OrderBy(c => c.pos.DistanceTo(tile.Pos)).First().name;
             return t;
         }
 

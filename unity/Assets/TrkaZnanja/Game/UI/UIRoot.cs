@@ -184,17 +184,20 @@ namespace TrkaZnanja.Game
         readonly Dictionary<Racer, RectTransform> dots = new Dictionary<Racer, RectTransform>();
         Race race;
 
-        public static Hud Create(RectTransform parent, Race race, int checkpointEvery)
+        public static Hud Create(RectTransform parent, Race race)
         {
             UIKit.Clear(parent);
             var go = UIKit.Rect(parent, "HUD trke").Stretch();
             var h = go.gameObject.AddComponent<Hud>();
             h.race = race;
-            h.Build(checkpointEvery);
+            h.Build();
             return h;
         }
 
-        void Build(int every)
+        Text itemText;
+        Image itemBox;
+
+        void Build()
         {
             // gore: traka do cilja
             var top = UIKit.Card(transform, "Traka do cilja");
@@ -202,11 +205,13 @@ namespace TrkaZnanja.Game
             bar = UIKit.Rect(top.transform, "Put").Stretch(70, 30, 70, 30);
             var line = UIKit.Box(bar, Theme.Line, UIKit.Pill, "Linija", 1f);
             line.rectTransform.Stretch(0, 8, 0, 8);
-            for (int i = every; i < race.Last; i += every)
+            // kutije na traci (gdje se dobijaju napadi)
+            for (int i = 1; i < race.Last; i++)
             {
-                var st = UIKit.Box(bar, Theme.Gold, UIKit.Circle, "Stanica");
+                if (race.KindAt(i) != TileKinds.Box) continue;
+                var st = UIKit.Box(bar, Col.Hex("#8e5bff"), UIKit.RoundSmall, "Kutija", 1f);
                 var k = i / (float)race.Last;
-                st.rectTransform.Anchor(new Vector2(k, 0.5f), new Vector2(k, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(18, 18));
+                st.rectTransform.Anchor(new Vector2(k, 0.5f), new Vector2(k, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(14, 14));
             }
             var start = UIKit.Label(top.transform, "START", 20, Theme.Go, TextAnchor.MiddleCenter, true);
             start.rectTransform.Anchor(new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(8, 0), new Vector2(64, 40));
@@ -230,11 +235,22 @@ namespace TrkaZnanja.Game
             roundText.rectTransform.Anchor(new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1), new Vector2(0, -10), new Vector2(-40, 40));
             board = UIKit.VStack(card.transform, 6, "Lista").GetComponent<RectTransform>();
             board.Stretch(20, 56, 20, 14);
+
+            // dolje desno: moj predmet iz kutije
+            itemBox = UIKit.Box(transform, new Color(1, 1, 1, 0.92f), UIKit.Round, "Predmet", 0.8f);
+            itemBox.rectTransform.Anchor(new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-18, -330), new Vector2(330, 70));
+            itemText = UIKit.Label(itemBox.transform, "", 24, Theme.Ink, TextAnchor.MiddleCenter, true);
+            itemText.rectTransform.Stretch(14, 4, 14, 4);
+            itemText.resizeTextForBestFit = true; itemText.resizeTextMinSize = 16; itemText.resizeTextMaxSize = 24;
         }
 
         public void Refresh(int round)
         {
-            roundText.text = Lang.L($"Runda {round}");
+            roundText.text = Lang.L($"Runda {round}") + (race.IsDoubleRound ? " · ×2" : "");
+            var me = race.Human;
+            itemBox.gameObject.SetActive(me.Item != null || me.DoubleNext);
+            itemText.text = me.Item != null ? Lang.L("Predmet: " + Items.Label(me.Item)) : Lang.L("Dupla polja u sljedećem pitanju");
+            itemBox.color = me.Item == Items.Shield ? Col.Hex("#dcebff") : me.Item != null ? Col.Hex("#ffe1e4") : Col.Hex("#fff3d6");
             UIKit.Clear(board);
             int i = 1;
             foreach (var p in race.Standings())

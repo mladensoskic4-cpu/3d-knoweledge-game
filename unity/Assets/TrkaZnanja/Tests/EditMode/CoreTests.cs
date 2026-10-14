@@ -200,22 +200,131 @@ namespace TrkaZnanja.Tests
         {
             var rng = new Rng(seed);
             var human = new Racer { Id = "ti", Name = "Ti", Human = true, Look = new Look() };
-            return new Race(human, Bots.Create("srednje", rng), tiles, rng);
+            return new Race(new[] { human }.Concat(Bots.Create("srednje", rng)), tiles, rng, TileKinds.Generate(tiles, seed));
         }
 
         [Test]
-        public void StopsAtFirstUnvisitedStation()
+        public void TileKindsAreDeterministicAndSpaced()
         {
-            var r = NewRace(1);
+            foreach (var n in new[] { 15, 32, 58, 84 })
+            {
+                var k = TileKinds.Generate(n, 123);
+                CollectionAssert.AreEqual(k, TileKinds.Generate(n, 123), "isto seme = ista staza");
+                Assert.AreEqual(TileKinds.Start, k[0]); Assert.AreEqual(TileKinds.Finish, k[n - 1]);
+                for (int i = 1; i < n - 1; i++)
+                    if (k[i] != TileKinds.Plain) Assert.AreEqual(TileKinds.Plain, k[i - 1], "posebna polja nisu jedno do drugog");
+                if (n >= 32)
+                {
+                    Assert.GreaterOrEqual(k.Count(x => x == TileKinds.Box), 3, "ima kutija");
+                    Assert.Greater(k.Count(x => x != TileKinds.Plain), n / 6);
+                }
+            }
+            Assert.IsFalse(TileKinds.Generate(58, 1).SequenceEqual(TileKinds.Generate(58, 2)));
+        }
+
+        static Race FixedRace(params string[] kinds)
+        {
+            var list = Enumerable.Repeat(TileKinds.Plain, 20).ToList();
+            list[0] = TileKinds.Start; list[19] = TileKinds.Finish;
+            for (int i = 0; i + 1 < kinds.Length; i += 2) list[int.Parse(kinds[i])] = kinds[i + 1];
+            var rng = new Rng(9);
+            var players = new List<Racer> { new Racer { Id = "ti", Name = "Ti", Human = true, Look = new Look() } };
+            players.AddRange(Bots.Create("srednje", rng));
+            return new Race(players, 20, rng, list);
+        }
+
+        [Test]
+        public void LandingTilesWork()
+        {
+            var r = FixedRace("5", TileKinds.Shortcut, "8", TileKinds.Mud, "11", TileKinds.Double, "14", TileKinds.Box);
             var me = r.Human;
-            me.Pos = 5;
-            var m = r.AdvanceTarget(me, 4);
-            Assert.AreEqual(7, m.Target);
-            Assert.IsTrue(m.Checkpoint);
-            r.Apply(new[] { m });
-            var m2 = r.AdvanceTarget(me, 3);
-            Assert.AreEqual(10, m2.Target);
-            Assert.IsFalse(m2.Checkpoint);
+            var m = r.AdvanceTarget(me, 5); r.Apply(new[] { m });
+            var extra = r.Landings(new[] { m });
+            Assert.AreEqual(7, extra[0].Target, "prečica +2");
+            r.Apply(extra);
+            m = r.AdvanceTarget(me, 1); r.Apply(new[] { m });
+            extra = r.Landings(new[] { m });
+            Assert.AreEqual(7, extra[0].Target, "blato −1");
+            r.Apply(extra);
+            m = r.AdvanceTarget(me, 4); r.Apply(new[] { m });
+            Assert.AreEqual(0, r.Landings(new[] { m }).Count);
+            Assert.IsTrue(me.DoubleNext, "dupla polja");
+            m = r.AdvanceTarget(me, 3); r.Apply(new[] { m });
+            r.Landings(new[] { m });
+            Assert.IsTrue(Items.All.Contains(me.Item), "kutija daje predmet");
+            Assert.AreEqual(0, r.Landings(new[] { new Move { Racer = me, From = 14, Target = 14 } }).Count, "ko stoji, ne aktivira polje");
+        }
+
+        [Test]
+        public void AttacksShieldAndDoubleTiles()
+        {
+            var r = FixedRace();
+            var me = r.Human;
+            var a = r.Players[1]; var b = r.Players[2]; var c = r.Players[3];
+            me.Pos = 3; a.Pos = 6; b.Pos = 9; c.Pos = 1;
+            Assert.AreSame(a, r.TargetFor(me), "meta je najbliži ispred");
+            Assert.AreSame(a, r.TargetFor(b), "prvi napada onoga odmah iza");
+            var q = TestData.Questions.First(x => x.Tip == "izbor");
+            r.NextRound();
+            me.Item = Items.Back;
+            var ans = new MpAnswer { Acc = 1, Time = 3, Tiles = 3, Text = "ok", Powerups = new List<string> { Items.UsePrefix + Items.Back } };
+            var entries = r.ResolveRound(q, new Dictionary<string, MpAnswer> { ["ti"] = ans });
+            Assert.IsNull(me.Item, "napad je potrošen");
+            var ea = entries.First(e => e.Racer == a);
+            Assert.IsTrue(ea.Text.Contains("napad"), ea.Text);
+            Assert.IsTrue(r.Events.Any(e => e.Kind == "napad" && e.Target == a));
+
+            // štit brani
+            r.NextRound();
+            me.Item = Items.Back; a.Item = Items.Shield;
+            r.ResolveRound(q, new Dictionary<string, MpAnswer> { ["ti"] = ans });
+            Assert.IsNull(a.Item, "štit je potrošen");
+            Assert.IsTrue(r.Events.Any(e => e.Kind == "blokirano"));
+
+            // dupla polja
+            r.NextRound();
+            me.DoubleNext = true;
+            var e2 = r.ResolveRound(q, new Dictionary<string, MpAnswer> { ["ti"] = new MpAnswer { Acc = 1, Time = 3, Tiles = 3, Text = "ok" } });
+            Assert.AreEqual(r.IsDoubleRound ? 12 : 6, e2.First(e => e.Racer == me).Tiles);
+            Assert.IsFalse(me.DoubleNext);
+
+            // napad može vratiti i ispod starta: ostaje 0
+            c.Pos = 1;
+            Assert.AreEqual(0, r.AdvanceTarget(c, -2).Target);
+        }
+
+        [Test]
+        public void MinigameEveryFourRoundsAndDoubleRoundsAreRare()
+        {
+            var r = FixedRace();
+            int doubles = 0;
+            for (int i = 1; i <= 600; i++)
+            {
+                r.NextRound();
+                Assert.AreEqual(i % 4 == 0, r.IsMinigameRound, "runda " + i);
+                if (r.IsDoubleRound) doubles++;
+                Assert.IsFalse(i < 3 && r.IsDoubleRound, "prve dvije runde nisu duple");
+            }
+            Assert.That((double)doubles, Is.InRange(60.0, 150.0), "otprilike 1 u 6");
+        }
+
+        [Test]
+        public void DeckSkipsSeenQuestions()
+        {
+            var areas = Catalog.Areas.Select(a => a.Id).ToList();
+            var first = new Deck(TestData.Questions, areas, new Rng(1));
+            var seen = new HashSet<string>();
+            for (int i = 0; i < 40; i++) seen.Add(first.Next().Id);
+            var second = new Deck(TestData.Questions, areas, new Rng(1), 3, seen);
+            int repeats = 0;
+            for (int i = 0; i < 40; i++) if (seen.Contains(second.Next().Id)) repeats++;
+            Assert.LessOrEqual(repeats, 2, "nova trka ne ponavlja viđena pitanja");
+            var p = new Profile();
+            for (int i = 0; i < Profile.VidjenaMax + 10; i++) p.MarkSeen("q" + i);
+            Assert.AreEqual(Profile.VidjenaMax, p.Vidjena.Count);
+            var back = Profile.FromJson(p.ToJson());
+            Assert.AreEqual(Profile.VidjenaMax, back.Vidjena.Count);
+            Assert.AreEqual("q10", back.Vidjena[0]);
         }
 
         [Test]
@@ -243,8 +352,8 @@ namespace TrkaZnanja.Tests
                     var res = new QuizResult { Accuracy = acc, TimeUsed = limit / 2, Limit = limit, Tiles = QuizTypes.TilesFor(acc, limit / 2, limit) };
                     var moves = r.MovesFor(r.ResolveRound(q, res));
                     r.Apply(moves);
-                    foreach (var p in r.AtStation(moves)) r.Apply(r.Jumps(new[] { r.Station(p, r.Rng.Next(), "test") }));
-                    if (r.IsBonusRound) r.Apply(r.Jumps(r.Bonus(r.Players.Select(p => (p, r.Rng.Next(), "x")))));
+                    r.Apply(r.Landings(moves));
+                    if (r.IsMinigameRound) r.Apply(r.Jumps(r.Bonus(r.Players.Select(p => (p, r.Rng.Next(), "x")))));
                     done = r.CheckFinish();
                 }
                 Assert.IsTrue(done, "trka mora da se završi");
@@ -614,7 +723,7 @@ namespace TrkaZnanja.Tests
             {
                 var shared = new Rng(wire.Seed);
                 var players = wire.BuildPlayers(h.Id, shared);
-                return (id: h.Id, race: new Race(players, wire.Tiles, shared), deck: new Deck(TestData.Questions, wire.Areas, shared, wire.MaxTezina), own: new Rng(h.Id.GetHashCode()));
+                return (id: h.Id, race: new Race(players, wire.Tiles, shared, TileKinds.Generate(wire.Tiles, wire.Seed)), deck: new Deck(TestData.Questions, wire.Areas, shared, wire.MaxTezina), own: new Rng(h.Id.GetHashCode()));
             }).ToList();
             Assert.AreEqual(4, devices[0].race.Players.Count);
             Assert.AreEqual(1, devices[0].race.Players.Count(p => p.Human));
@@ -633,8 +742,11 @@ namespace TrkaZnanja.Tests
                 {
                     if (d.id == "u2" && round % 5 == 3) continue;
                     double acc = d.own.Chance(0.7) ? 1 : 0, t = d.own.Range(2.0, limit);
-                    answers.Add(d.id, new MpAnswer { Acc = acc, Time = t, Tiles = QuizTypes.TilesFor(acc, t, limit), Text = "odgovor",
-                        Powerups = d.own.Chance(0.05) ? new List<string> { "precica" } : new List<string>() });
+                    var me = d.race.Players.First(p => p.Id == d.id);
+                    var pu = new List<string>();
+                    if (d.own.Chance(0.05)) pu.Add("precica");
+                    if (me.Item != null && Items.IsAttack(me.Item) && d.own.Chance(0.5)) pu.Add(Items.UsePrefix + me.Item);
+                    answers.Add(d.id, new MpAnswer { Acc = acc, Time = t, Tiles = QuizTypes.TilesFor(acc, t, limit), Text = "odgovor", Powerups = pu });
                 }
                 var decided = answers.Decide(id => MpAnswer.Timeout(limit));
                 var wireRound = Json.Write(decided.ToDictionary(kv => kv.Key, kv => (object)kv.Value.ToJson()));
@@ -646,25 +758,18 @@ namespace TrkaZnanja.Tests
                     var moves = d.race.MovesFor(entries);
                     d.race.Apply(moves);
                     firstMoves ??= moves;
-                    // stanica: ljudi šalju svoje rezultate, botovi se simuliraju istim Rng-om
-                    var atStation = d.race.AtStation(moves);
-                    var outcomes = new List<StationOutcome>();
-                    foreach (var p in atStation)
+                    d.race.Apply(d.race.Landings(moves));
+                    // svake 4 runde: mini igra za sve (ljudi iz odluke domaćina, botovi iz zajedničkog Rng-a)
+                    if (d.race.IsMinigameRound)
                     {
-                        double score = p.Person ? (p.Id.Length * 0.17 + round * 0.013) % 1 : Mathx.Clamp(0.6 + d.race.Rng.Gaussian() * 0.15, 0, 1);
-                        outcomes.Add(d.race.Station(p, score, "x"));
-                    }
-                    d.race.Apply(d.race.Jumps(outcomes));
-                    if (d.race.IsBonusRound)
-                    {
-                        var res = d.race.Players.Select(p => (p, p.Person ? (p.Id[1] * 0.11) % 1 : d.race.Rng.Next(), "b")).ToList();
+                        var res = d.race.Players.Select(p => (p, p.Person ? (p.Id[1] * 0.11 + round * 0.07) % 1 : d.race.Rng.Next(), "b")).ToList();
                         d.race.Apply(d.race.Jumps(d.race.Bonus(res)));
                     }
                 }
                 foreach (var d in devices) done |= d.race.CheckFinish();
-                var reference = devices[0].race.Players.Select(p => $"{p.Id}:{p.Pos}:{p.Coins}:{p.LastCheckpoint}").ToList();
+                var reference = devices[0].race.Players.Select(p => $"{p.Id}:{p.Pos}:{p.Coins}:{p.Item}:{p.DoubleNext}:{p.Confused}").ToList();
                 foreach (var d in devices)
-                    CollectionAssert.AreEqual(reference, d.race.Players.Select(p => $"{p.Id}:{p.Pos}:{p.Coins}:{p.LastCheckpoint}").ToList(), "runda " + round + " na " + d.id);
+                    CollectionAssert.AreEqual(reference, d.race.Players.Select(p => $"{p.Id}:{p.Pos}:{p.Coins}:{p.Item}:{p.DoubleNext}:{p.Confused}").ToList(), "runda " + round + " na " + d.id);
             }
             Assert.IsTrue(done, "trka se završila");
             var rank = devices.Select(d => string.Join(",", d.race.Ranking().Select(p => p.Id))).Distinct().ToList();

@@ -24,7 +24,9 @@ namespace TrkaZnanja.Core
         public BotProfile Bot;
         public string Level = "srednje";
         // stanje u trci
-        public int Pos, Coins, LastCheckpoint, Correct, Answered;
+        public int Pos, Coins, Correct, Answered;
+        public string Item;                // predmet iz kutije: nazad, zbuni, stit (najviše jedan)
+        public bool DoubleNext, Confused;  // dupla polja u sljedećem pitanju; zbunjen u sljedećem pitanju
         public int? FinishedRound;
         public double LastScore;
     }

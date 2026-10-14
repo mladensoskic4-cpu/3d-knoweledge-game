@@ -27,16 +27,27 @@ namespace TrkaZnanja.Game
 
         int roundNo;
 
-        public static QuestionScreen Open(RectTransform parent, Question question, int round, Rng rng, IList<(Powerup pu, int count)> powerups)
+        // Stanje igrača za ovo pitanje: predmet iz kutije, zbunjenost (napad), dupla runda i dupla polja.
+        public sealed class Extras
+        {
+            public string Item;
+            public bool Confused, DoubleRound, DoubleNext;
+        }
+
+        public static QuestionScreen Open(RectTransform parent, Question question, int round, Rng rng, IList<(Powerup pu, int count)> powerups, Extras extras = null)
         {
             var root = UIKit.Rect(parent, "Pitanje").Stretch();
             var s = root.gameObject.AddComponent<QuestionScreen>();
             s.q = question;
             s.roundNo = round;
             s.limit = (float)QuizTypes.TimeLimitOf(question);
+            s.extras = extras ?? new Extras();
+            if (s.extras.Confused) s.limit = Mathf.Max(5, Mathf.Round(s.limit * 0.6f));
             s.Build(round, rng, powerups);
             return s;
         }
+
+        Extras extras;
 
         void Build(int round, Rng rng, IList<(Powerup pu, int count)> powerups)
         {
@@ -58,6 +69,9 @@ namespace TrkaZnanja.Game
                 var d = UIKit.Box(head.transform, i < q.Tezina ? Theme.Gold : Theme.Line, UIKit.Circle, "Težina");
                 d.Size(22, 22);
             }
+            if (extras.DoubleRound) UIKit.Chip(head.transform, "DUPLA RUNDA ×2", Theme.Gold, 24);
+            else if (extras.DoubleNext) UIKit.Chip(head.transform, "Dupla polja ×2", Theme.Gold, 24);
+            if (extras.Confused) UIKit.Chip(head.transform, "Zbunjen: manje vremena", Theme.Red, 24);
             var spacer = UIKit.Rect(head.transform, "Razmak");
             spacer.Size(-1, 10, 1);
             UIKit.Label(head.transform, $"Runda {round}", 28, Theme.InkSoft, TextAnchor.MiddleRight, true).Size(200, 52);
@@ -70,12 +84,27 @@ namespace TrkaZnanja.Game
             timerNum = UIKit.Label(trow.transform, ((int)limit).ToString(), 30, Theme.Ink, TextAnchor.MiddleRight, true);
             timerNum.Size(60, 34);
 
-            // power-upovi
-            if (powerups.Count > 0)
+            // power-upovi i predmet iz kutije
+            bool attack = extras.Item != null && Items.IsAttack(extras.Item);
+            if (powerups.Count > 0 || extras.Item != null)
             {
                 var pb = UIKit.HStack(col.transform, 12, "Power-upovi");
                 pb.Size(-1, 70);
                 puBar = (RectTransform)pb.transform;
+                if (attack)
+                {
+                    var item = extras.Item;
+                    var ab = UIKit.Button(pb.transform, "Napad: " + Items.Label(item), Theme.Red, null, 24);
+                    ab.Size(330, 64);
+                    ab.OnClick += () =>
+                    {
+                        if (finished || used.Contains(Items.UsePrefix + item)) return;
+                        used.Add(Items.UsePrefix + item);
+                        ab.Interactable = false;
+                        UIRoot.I.Toast(Items.Hint(item), Theme.Red, 2.5f);
+                    };
+                }
+                else if (extras.Item == Items.Shield) UIKit.Chip(pb.transform, "Štit te čuva", Theme.Blue, 24);
                 foreach (var (pu, count) in powerups)
                 {
                     var p = pu;
@@ -239,6 +268,7 @@ namespace TrkaZnanja.Game
                 r = new QuizResult { Accuracy = QuizTypes.ScoreChoice(q, pick), Chosen = pick };
             }
             else r.Accuracy = rng.Next();
+            if (extras.Item != null && Items.IsAttack(extras.Item) && rng.Chance(0.7)) used.Add(Items.UsePrefix + extras.Item);
             elapsed = limit * 0.4f;
             Finish(r, false);
         }

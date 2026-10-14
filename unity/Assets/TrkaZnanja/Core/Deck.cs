@@ -20,12 +20,22 @@ namespace TrkaZnanja.Core
 
         public int Size { get; }
 
-        public Deck(IEnumerable<Question> questions, ICollection<string> areas, Rng rng, int maxTezina = 3)
+        // seen: pitanja koja je igrač već vidio u ranijim trkama; preskaču se dok ima dovoljno novih (po tipu).
+        public Deck(IEnumerable<Question> questions, ICollection<string> areas, Rng rng, int maxTezina = 3, ICollection<string> seen = null)
         {
             this.rng = rng;
             var all = questions.Where(q => QuizTypes.Get(q.Tip) != null && areas.Contains(q.Oblast)).ToList();
             var pool = all.Where(q => q.Tezina <= maxTezina).ToList();
             if (pool.Count < 20) pool = all;
+            if (seen != null && seen.Count > 0)
+            {
+                // po tipu: ako ima bar 8 neviđenih, uzimaju se samo neviđena
+                pool = pool.GroupBy(q => q.Tip).SelectMany(g =>
+                {
+                    var fresh = g.Where(q => q.Id == null || !seen.Contains(q.Id)).ToList();
+                    return fresh.Count >= 8 ? fresh : g.ToList();
+                }).ToList();
+            }
             if (pool.Count == 0) throw new InvalidOperationException("Nema pitanja za izabrane oblasti.");
             Size = pool.Count;
 

@@ -250,6 +250,7 @@ namespace UnityEngine
         public static float Exp(float a) => (float)Math.Exp(a);
         public static float Sign(float f) => f >= 0 ? 1 : -1;
         public static float Min(float a, float b) => Math.Min(a, b);
+        public static float Round(float v) => (float)Math.Round(v);
         public static float Max(float a, float b) => Math.Max(a, b);
         public static int Min(int a, int b) => Math.Min(a, b);
         public static int Max(int a, int b) => Math.Max(a, b);

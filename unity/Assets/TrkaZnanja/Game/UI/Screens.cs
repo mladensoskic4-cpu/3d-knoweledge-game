@@ -30,7 +30,7 @@ namespace TrkaZnanja.Game
             var title = UIKit.Label(left.transform, "Trka znanja", 104, Color.white, TextAnchor.MiddleLeft, true);
             title.Outlined(Col.Hex("#1b4f8a"), 5);
             title.Size(-1, 130);
-            var sub = UIKit.Label(left.transform, "Odgovaraj brzo i tačno da pređeš više polja. Na zlatnim stanicama te čeka mini igra.", 30, Color.white, TextAnchor.UpperLeft);
+            var sub = UIKit.Label(left.transform, "Odgovaraj brzo i tačno da pređeš više polja. Pokupi kutije sa napadima, a svake 4 runde svi igraju mini igru.", 30, Color.white, TextAnchor.UpperLeft);
             sub.Outlined(new Color(0, 0, 0, 0.45f), 2);
             sub.Size(-1, 90);
             ProfileCard(left.transform, p);

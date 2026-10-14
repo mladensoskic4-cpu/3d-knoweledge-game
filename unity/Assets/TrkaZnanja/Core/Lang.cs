@@ -99,14 +99,23 @@ namespace TrkaZnanja.Core
                 ["Kvalitet grafike"] = "Graphics quality", ["Automatski"] = "Automatic", ["Nisko"] = "Low", ["Visoko"] = "High",
                 ["Vibracija"] = "Vibration", ["Uključeno"] = "On", ["Isključeno"] = "Off", ["Zvučni efekti"] = "Sound effects",
                 ["Životinja"] = "Animal", ["Boja vozila"] = "Paint", ["Naočare"] = "Glasses", ["Kupi"] = "Buy", ["Opremi"] = "Equip",
-                ["brza trka"] = "quick race", ["standardna trka"] = "standard race", ["duga trka, više stanica"] = "long race, more stations",
+                ["brza trka"] = "quick race", ["standardna trka"] = "standard race", ["duga trka, više mini igara"] = "long race, more mini games",
                 ["Kuče"] = "Puppy", ["Mače"] = "Kitten", ["Zec"] = "Hare", ["Soko"] = "Falcon", ["Bicikl"] = "Bicycle", ["Kolica"] = "Go-kart",
                 ["Skuter"] = "Scooter", ["Mali retro auto"] = "Little retro car", ["Motor"] = "Motorbike", ["Traktor"] = "Tractor",
                 ["Konjska zaprega"] = "Horse cart", ["Brod"] = "Boat", ["Balon"] = "Hot-air balloon", ["Avion"] = "Plane", ["Roze"] = "Pink",
                 ["Poredak"] = "Standings", ["Uskoro"] = "Coming soon", ["Mini igre stižu u sljedećoj verziji."] = "Mini games arrive in the next version.",
                 ["Proba: 3 pitanja da vidiš kako se igra."] = "Practice: 3 questions to learn how to play.", ["Preskoči"] = "Skip",
                 ["Odgovori na pitanje. Brz i tačan odgovor = više polja."] = "Answer the question. Fast and correct = more tiles.",
-                ["Zlatna polja su stanice sa mini igrom."] = "Golden tiles are stations with a mini game.",
+                ["Kutije na putu daju napade, zelene strelice su prečice, a blato vraća nazad."] = "Boxes on the road give attacks, green arrows are shortcuts and mud sends you back.",
+                ["Odgovaraj brzo i tačno da pređeš više polja. Pokupi kutije sa napadima, a svake 4 runde svi igraju mini igru."] = "Answer fast and right to move further. Grab attack boxes, and every 4 rounds everyone plays a mini game.",
+                ["DUPLA RUNDA! Sva polja ×2"] = "DOUBLE ROUND! All tiles ×2", ["DUPLA RUNDA ×2"] = "DOUBLE ROUND ×2", ["Dupla polja ×2"] = "Double tiles ×2",
+                ["Zbunjen: manje vremena"] = "Confused: less time", ["Zbunjen si: manje vremena za ovo pitanje!"] = "You're confused: less time for this question!",
+                ["Štit te čuva"] = "Shield protects you", ["Vrati 2 polja"] = "Send back 2", ["Zbuni protivnika"] = "Confuse rival", ["Štit"] = "Shield",
+                ["Igrač ispred tebe ide 2 polja nazad."] = "The player ahead of you goes 2 tiles back.",
+                ["Igrač ispred tebe u sljedećem pitanju ima manje vremena i mutne odgovore."] = "The player ahead of you gets less time in the next question.",
+                ["Sam te brani od jednog napada."] = "Automatically blocks one attack.", ["Mini igra · svi igraju"] = "Mini game · everyone plays",
+                ["Svi igraju istu mini igru. 1. mjesto ide 3 polja naprijed, 2. mjesto 2 polja, 3. mjesto 1 polje, uz novčiće."] = "Everyone plays the same mini game. 1st place moves 3 tiles, 2nd 2 tiles, 3rd 1 tile, plus coins.",
+                ["Dupla polja u sljedećem pitanju"] = "Double tiles in the next question",
                 ["Prvi na cilju pobjeđuje!"] = "First to the finish wins!", ["Bez interneta: igraš protiv botova, rezultati se šalju kasnije."] = "Offline: you play against bots, results are sent later.",
                 ["Atmosfera"] = "Weather", ["dan"] = "day", ["zalazak"] = "sunset", ["noć"] = "night", ["kiša"] = "rain", ["snijeg"] = "snow",
                 ["Mat!"] = "Mate!", ["Nije mat. Tačno je bilo:"] = "Not mate. The answer was:",
@@ -137,6 +146,8 @@ namespace TrkaZnanja.Core
             rules.Add((new Regex(@"^(\d+) min$"), "$1 min"));
             rules.Add((new Regex(@"^Tražim igrače… \((\d+) u čekaonici, (\d+) s\)$"), "Looking for players… ($1 waiting, $2 s)"));
             rules.Add((new Regex(@"^Tvoj rezultat: (.+)$"), "\u0001yours"));
+            rules.Add((new Regex(@"^Napad: (.+)$"), "\u0001attack"));
+            rules.Add((new Regex(@"^Predmet: (.+)$"), "\u0001item"));
             rules.Add((new Regex(@"^(\d+) do cilja$"), "$1 to go"));
             rules.Add((new Regex(@"^(\d+)\. mjesto$"), "Place $1"));
             rules.Add((new Regex(@"^Otključava se na rangu (.+)$"), "\u0001unlock"));
@@ -167,6 +178,8 @@ namespace TrkaZnanja.Core
                         var x = m.Groups[1].Value;
                         res = "Tap the " + (x == "državu" ? "country" : x == "grad" ? "city" : "river") + ":";
                         break;
+                    case "\u0001attack": res = "Attack: " + ToEn(m.Groups[1].Value); break;
+                    case "\u0001item": res = "Item: " + ToEn(m.Groups[1].Value); break;
                     case "\u0001yours": res = "Your result: " + ToEn(m.Groups[1].Value); break;
                     case "\u0001bonus": res = "Bonus round · " + ToEn(m.Groups[1].Value); break;
                     case "\u0001unlock": res = "Unlocks at rank " + ToEn(m.Groups[1].Value); break;

@@ -86,6 +86,27 @@ namespace TrkaZnanja.Game
         public IEnumerator DriveTo(int to, float speedK = 1f)
         {
             float start = arc, end = track.ArcOfTile(to);
+            if (end < start - 1e-3f)
+            {
+                // nazad (napad, blato): kratko klizanje unazad sa poskokom
+                Moving = true;
+                Vector3 l0 = lateral;
+                float bt = 0, bd = 0.8f;
+                while (bt < bd)
+                {
+                    bt += Time.deltaTime;
+                    float k = Mathf.Clamp01(bt / bd);
+                    arc = Mathf.Lerp(start, end, Tw.EaseInOut(k));
+                    lateral = Vector3.Lerp(l0, Vector3.zero, k) + Vector3.up * (Mathf.Abs(Mathf.Sin(k * Mathf.PI * 2)) * 0.12f * (1 - k));
+                    Place();
+                    yield return null;
+                }
+                arc = end;
+                lateral = Vector3.zero;
+                Place();
+                Moving = false;
+                yield break;
+            }
             if (end <= start + 1e-3f) yield break;
             Moving = true;
             var dustEm = dust.emission;
