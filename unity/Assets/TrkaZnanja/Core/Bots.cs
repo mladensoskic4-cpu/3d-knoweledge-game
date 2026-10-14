@@ -17,7 +17,9 @@ namespace TrkaZnanja.Core
     public sealed class Racer
     {
         public string Id, Name, Color;
-        public bool Human;
+        public bool Human;                 // ovaj uređaj
+        public bool Remote;                // drugi čovjek preko mreže
+        public bool Person => Human || Remote;
         public Look Look;
         public BotProfile Bot;
         public string Level = "srednje";

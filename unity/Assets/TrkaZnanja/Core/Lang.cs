@@ -112,6 +112,20 @@ namespace TrkaZnanja.Core
                 ["Mat!"] = "Mate!", ["Nije mat. Tačno je bilo:"] = "Not mate. The answer was:",
                 ["Oznake poteza: K kralj · D dama · T top · L lovac · S skakač"] = "Move notation: K king · Q queen · R rook · B bishop · N knight",
                 ["Pojavljuje se fotografija životinje. Izaberi koja je. Što više tačnih za 25 sekundi, greška oduzima pola boda."] = "A photo of an animal appears. Pick which one it is. As many correct as you can in 25 seconds; a mistake costs half a point.",
+                ["Sa drugima"] = "Multiplayer", ["Igraj sa drugima"] = "Play with others", ["Brza igra"] = "Quick match", ["Napravi sobu"] = "Create room",
+                ["Imaš kod od prijatelja?"] = "Got a code from a friend?", ["Uđi"] = "Join", ["Kod sobe (5 znakova)"] = "Room code (5 characters)",
+                ["Nazad"] = "Back", ["Otkaži"] = "Cancel", ["Izađi"] = "Leave", ["Kreni"] = "Go", ["domaćin"] = "host", ["ti"] = "you",
+                ["slobodno mjesto (bot)"] = "free seat (bot)", ["Čekam ostale igrače…"] = "Waiting for other players…", ["Povezujem se…"] = "Connecting…",
+                ["Ti si domaćin: pokreni trku kad su svi tu."] = "You are the host: start the race when everyone is here.",
+                ["Čeka se da domaćin pokrene trku."] = "Waiting for the host to start the race.", ["Čekam da svi uđu…"] = "Waiting for everyone to join…",
+                ["Soba za prijatelje"] = "Room for friends", ["Pošalji prijateljima ovaj kod da uđu u sobu."] = "Send this code to your friends so they can join.",
+                ["Našli smo igrače! Trka kreće čim svi uđu."] = "Players found! The race starts as soon as everyone joins.",
+                ["Kod ima 5 slova i brojeva, npr. K7RTX."] = "The code has 5 letters and digits, e.g. K7RTX.",
+                ["Brza igra te spaja sa nasumičnim igračima tvog uzrasta. Sa prijateljima: napravi sobu i pošalji im kod. Prazna mjesta popunjavaju botovi."] = "Quick match pairs you with random players of your age group. With friends: create a room and send them the code. Empty seats are filled by bots.",
+                ["Čim se skupe 4 igrača, trka kreće. Ako čekaš duže od 15 sekundi, krećemo i sa manje (ostalo su botovi)."] = "The race starts when 4 players gather. After 15 seconds we start with fewer (bots fill the rest).",
+                ["Igra sa drugima radi u aplikaciji za telefon i računar, ne u web verziji."] = "Playing with others works in the phone and PC app, not in the web version.",
+                ["Ne mogu da se povežem sa serverom. Provjeri internet."] = "Can't connect to the server. Check your internet.",
+                ["Veza je prekinuta."] = "Connection lost.", ["Domaćin se ne javlja. Nastavljaš sam."] = "The host is not responding. You continue alone.",
                 ["Nasumično"] = "Random", ["Slijedeća runda"] = "Next round", ["Runda"] = "Round", ["Ti"] = "You", ["Garaža stiže uskoro."] = "Garage is coming soon.",
             };
             foreach (var kv in extra) if (!exact.ContainsKey(kv.Key)) exact[kv.Key] = kv.Value;
@@ -121,6 +135,8 @@ namespace TrkaZnanja.Core
             rules.Add((new Regex(@"^Tapni (državu|grad|rijeku):$"), "\u0001tap"));
             rules.Add((new Regex(@"^Bonus runda · (.+)$"), "\u0001bonus"));
             rules.Add((new Regex(@"^(\d+) min$"), "$1 min"));
+            rules.Add((new Regex(@"^Tražim igrače… \((\d+) u čekaonici, (\d+) s\)$"), "Looking for players… ($1 waiting, $2 s)"));
+            rules.Add((new Regex(@"^Tvoj rezultat: (.+)$"), "\u0001yours"));
             rules.Add((new Regex(@"^(\d+) do cilja$"), "$1 to go"));
             rules.Add((new Regex(@"^(\d+)\. mjesto$"), "Place $1"));
             rules.Add((new Regex(@"^Otključava se na rangu (.+)$"), "\u0001unlock"));
@@ -151,6 +167,7 @@ namespace TrkaZnanja.Core
                         var x = m.Groups[1].Value;
                         res = "Tap the " + (x == "državu" ? "country" : x == "grad" ? "city" : "river") + ":";
                         break;
+                    case "\u0001yours": res = "Your result: " + ToEn(m.Groups[1].Value); break;
                     case "\u0001bonus": res = "Bonus round · " + ToEn(m.Groups[1].Value); break;
                     case "\u0001unlock": res = "Unlocks at rank " + ToEn(m.Groups[1].Value); break;
                     default: res = rx.Replace(t, rep); break;

@@ -39,6 +39,9 @@ namespace TrkaZnanja.Game
         };
         static readonly List<Minigame> queue = new List<Minigame>();
 
+        // nova trka: red mini igara kreće ispočetka (isto na svim uređajima u multiplayeru)
+        public static void ResetQueue() => queue.Clear();
+
         public static Minigame ById(string id) => All.FirstOrDefault(m => m.Id == id);
 
         // Smjenjivanje: svaka mini igra dođe na red prije nego što se neka ponovi.

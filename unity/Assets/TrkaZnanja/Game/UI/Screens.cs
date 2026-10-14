@@ -12,7 +12,7 @@ namespace TrkaZnanja.Game
 {
     public sealed class MenuChoice
     {
-        public bool Start, Garage, Settings, Leaderboard;
+        public bool Start, Garage, Settings, Leaderboard, Multiplayer;
         public string MapChanged;
     }
 
@@ -34,8 +34,11 @@ namespace TrkaZnanja.Game
             sub.Outlined(new Color(0, 0, 0, 0.45f), 2);
             sub.Size(-1, 90);
             ProfileCard(left.transform, p);
-            var play = UIKit.Button(left.transform, "Igraj", Theme.Go, () => onChoice(new MenuChoice { Start = true }), 64);
-            play.Size(-1, 150);
+            var playRow = UIKit.HStack(left.transform, 16, "Igraj");
+            playRow.Size(-1, 150);
+            playRow.childForceExpandWidth = true;
+            UIKit.Button(playRow.transform, "Igraj", Theme.Go, () => onChoice(new MenuChoice { Start = true }), 64).Size(-1, 150, 1.3f);
+            UIKit.Button(playRow.transform, "Sa drugima", Theme.Primary, () => onChoice(new MenuChoice { Multiplayer = true }), 40).Size(-1, 150, 1);
             var row = UIKit.HStack(left.transform, 16, "Dugmad");
             row.Size(-1, 100);
             row.childForceExpandWidth = true;
@@ -356,7 +359,8 @@ namespace TrkaZnanja.Game
     public static class MinigameScreen
     {
         public static IEnumerator Run(RectTransform parent, Minigame mg, int seconds, string chip, Color chipColor, string rule,
-            Rng rng, List<StationOutcome> resultsOut, Func<double, string, List<StationOutcome>> computeResults)
+            Rng rng, List<StationOutcome> resultsOut, Func<double, string, List<StationOutcome>> computeResults,
+            Func<double, string, IEnumerator> exchange = null)
         {
             UIKit.Clear(parent);
             mg.Prepare();
@@ -384,6 +388,15 @@ namespace TrkaZnanja.Game
             var host = UIKit.Rect(col.transform, "Igra");
             host.Size(-1, 600, 1, 1);
             yield return mg.Play(host, rng, seconds);
+            if (exchange != null)
+            {
+                // multiplayer: pošalji svoj rezultat i sačekaj ostale ljude
+                UIKit.Clear(host);
+                var wait = UIKit.Label(host, $"Tvoj rezultat: {mg.ResultLabel}\nČekam ostale igrače…", 40, Theme.Ink, TextAnchor.MiddleCenter, true);
+                wait.rectTransform.Stretch();
+                wait.text = Lang.L($"Tvoj rezultat: {mg.ResultLabel}") + "\n" + Lang.L("Čekam ostale igrače…");
+                yield return exchange(mg.Score, mg.ResultLabel);
+            }
             var results = computeResults(mg.Score, mg.ResultLabel);
             resultsOut.AddRange(results);
 

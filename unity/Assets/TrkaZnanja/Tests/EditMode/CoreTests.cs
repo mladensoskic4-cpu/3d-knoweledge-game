@@ -523,4 +523,154 @@ namespace TrkaZnanja.Tests
             Assert.GreaterOrEqual(ins.Count, 20);
         }
     }
+    public class MultiplayerTests
+    {
+        [Test]
+        public void RoomCodesAreReadableAndNormalize()
+        {
+            var rng = new Rng(1);
+            for (int i = 0; i < 200; i++)
+            {
+                var c = RoomCode.New(rng);
+                Assert.AreEqual(5, c.Length);
+                Assert.IsTrue(c.All(ch => RoomCode.Alphabet.IndexOf(ch) >= 0));
+                Assert.AreEqual(c, RoomCode.Normalize(" " + c.ToLowerInvariant().Insert(2, "-") + " "));
+            }
+            Assert.IsNull(RoomCode.Normalize("ABC"));
+            Assert.IsNull(RoomCode.Normalize("AB0CD"), "nula nije u abecedi");
+            Assert.IsNull(RoomCode.Normalize(null));
+        }
+
+        [Test]
+        public void PhoenixMessagesRoundTrip()
+        {
+            var join = Phoenix.Decode(Phoenix.Join("realtime:trka-soba-ABCDE", "u1", "tok", "1"));
+            Assert.AreEqual("phx_join", join.Event);
+            Assert.AreEqual("1", join.JoinRef);
+            var cfg = Json.Obj(join.Payload["config"]);
+            Assert.AreEqual("u1", Json.Str(Json.Obj(cfg["presence"]), "key"));
+            Assert.AreEqual("tok", Json.Str(join.Payload, "access_token"));
+
+            var ans = new MpAnswer { Acc = 0.8, Time = 4.25, Tiles = 4, Text = "Beograd", Powerups = new List<string> { "precica" } };
+            var b = Phoenix.Decode(Phoenix.Broadcast("realtime:x", "m", new Dictionary<string, object> { ["t"] = "ans", ["a"] = ans.ToJson() }, "5", "1"));
+            Assert.AreEqual("broadcast", b.Event);
+            Assert.AreEqual("m", Json.Str(b.Payload, "event"));
+            var back = MpAnswer.FromJson(Json.Get(Json.Obj(b.Payload["payload"]), "a"));
+            Assert.AreEqual(0.8, back.Acc, 1e-9); Assert.AreEqual(4, back.Tiles); Assert.AreEqual("precica", back.Powerups[0]);
+            Assert.AreEqual(12, MpAnswer.FromJson(Json.Parse("{\"tiles\": 99}")).Tiles, "varanje: najviše 12 polja");
+
+            var state = Json.Obj(Json.Parse("{\"u1\":{\"metas\":[{\"phx_ref\":\"x\",\"name\":\"Ana\",\"since\":5}]}}"));
+            var metas = Phoenix.PresenceMetas(state);
+            Assert.AreEqual("Ana", Json.Str(metas["u1"], "name"));
+            Assert.IsNull(Phoenix.Decode("nije json"));
+        }
+
+        [Test]
+        public void MatchmakerGroupsOldestFirst()
+        {
+            var lobby = new List<Matchmaker.Waiting> { new Matchmaker.Waiting { Id = "c", Since = 30 }, new Matchmaker.Waiting { Id = "a", Since = 10 } };
+            Assert.AreEqual("a", Matchmaker.Leader(lobby));
+            Assert.IsNull(Matchmaker.Group(lobby, 20), "čeka se još igrača");
+            CollectionAssert.AreEqual(new[] { "a", "c" }, Matchmaker.Group(lobby, 26));
+            lobby.Add(new Matchmaker.Waiting { Id = "d", Since = 31 });
+            lobby.Add(new Matchmaker.Waiting { Id = "e", Since = 32 });
+            lobby.Add(new Matchmaker.Waiting { Id = "f", Since = 33 });
+            CollectionAssert.AreEqual(new[] { "a", "c", "d", "e" }, Matchmaker.Group(lobby, 11), "četvorica odmah");
+            var g = Matchmaker.Group(lobby, 11);
+            Assert.AreEqual(Matchmaker.RoomFor(g, 10), Matchmaker.RoomFor(g, 10.2));
+        }
+
+        [Test]
+        public void CollectorWaitsForEveryoneThenDecides()
+        {
+            var c = new Collector<MpAnswer>(new[] { "a", "b", "c" });
+            Assert.IsTrue(c.Add("a", new MpAnswer { Acc = 1, Tiles = 5 }));
+            Assert.IsFalse(c.Add("a", new MpAnswer()), "drugi odgovor istog igrača se ne računa");
+            Assert.IsFalse(c.Add("x", new MpAnswer()), "stranac");
+            Assert.IsFalse(c.Complete);
+            c.Drop("c");
+            Assert.IsFalse(c.Complete);
+            c.Add("b", new MpAnswer { Acc = 0.5, Tiles = 2 });
+            Assert.IsTrue(c.Complete);
+            var d = new Collector<MpAnswer>(new[] { "a", "b" });
+            d.Add("a", new MpAnswer { Tiles = 3 });
+            var res = d.Decide(id => MpAnswer.Timeout(20));
+            Assert.AreEqual(0, res["b"].Tiles);
+            Assert.IsTrue(res["b"].TimedOut);
+        }
+
+        // Tri uređaja igraju istu trku: svaki ima svoj Race, a domaćin objavljuje odgovore ljudi i rezultate mini igara.
+        // Na kraju svako mora imati iste pozicije, novčiće i poredak.
+        [Test]
+        public void ThreeDevicesStayInSync()
+        {
+            var setup = new RaceSetup { Seed = 777, Map = "cg", Tiles = 32, Level = "srednje", Areas = Catalog.Areas.Select(a => a.Id).ToList(), MaxTezina = 3 };
+            foreach (var (id, name) in new[] { ("u1", "Ana"), ("u2", "Bojan"), ("u3", "Ceca") })
+                setup.Humans.Add(new MpPlayer { Id = id, Name = name, Look = new Look { Zivotinja = "lisica" } });
+            var wire = RaceSetup.FromJson(Json.Parse(Json.Write(setup.ToJson())));   // preko mreže
+            Assert.AreEqual(3, wire.Humans.Count);
+
+            var devices = wire.Humans.Select(h =>
+            {
+                var shared = new Rng(wire.Seed);
+                var players = wire.BuildPlayers(h.Id, shared);
+                return (id: h.Id, race: new Race(players, wire.Tiles, shared), deck: new Deck(TestData.Questions, wire.Areas, shared, wire.MaxTezina), own: new Rng(h.Id.GetHashCode()));
+            }).ToList();
+            Assert.AreEqual(4, devices[0].race.Players.Count);
+            Assert.AreEqual(1, devices[0].race.Players.Count(p => p.Human));
+            Assert.AreEqual(2, devices[0].race.Players.Count(p => p.Remote));
+            CollectionAssert.AreEqual(devices[0].race.Players.Select(p => p.Name).ToList(), devices[2].race.Players.Select(p => p.Name).ToList(), "isti botovi");
+
+            bool done = false;
+            for (int round = 0; round < 200 && !done; round++)
+            {
+                var qs = devices.Select(d => { d.race.NextRound(); return d.deck.Next(); }).ToList();
+                Assert.IsTrue(qs.All(q => q.Id == qs[0].Id), "isto pitanje");
+                var limit = QuizTypes.TimeLimitOf(qs[0]);
+                // svaki čovjek odgovara na svom uređaju; u2 kasni pa domaćin odluči da mu je isteklo vrijeme
+                var answers = new Collector<MpAnswer>(wire.Humans.Select(h => h.Id));
+                foreach (var d in devices)
+                {
+                    if (d.id == "u2" && round % 5 == 3) continue;
+                    double acc = d.own.Chance(0.7) ? 1 : 0, t = d.own.Range(2.0, limit);
+                    answers.Add(d.id, new MpAnswer { Acc = acc, Time = t, Tiles = QuizTypes.TilesFor(acc, t, limit), Text = "odgovor",
+                        Powerups = d.own.Chance(0.05) ? new List<string> { "precica" } : new List<string>() });
+                }
+                var decided = answers.Decide(id => MpAnswer.Timeout(limit));
+                var wireRound = Json.Write(decided.ToDictionary(kv => kv.Key, kv => (object)kv.Value.ToJson()));
+                List<Move> firstMoves = null;
+                foreach (var d in devices)
+                {
+                    var got = Json.Obj(Json.Parse(wireRound)).ToDictionary(kv => kv.Key, kv => MpAnswer.FromJson(kv.Value));
+                    var entries = d.race.ResolveRound(qs[0], got);
+                    var moves = d.race.MovesFor(entries);
+                    d.race.Apply(moves);
+                    firstMoves ??= moves;
+                    // stanica: ljudi šalju svoje rezultate, botovi se simuliraju istim Rng-om
+                    var atStation = d.race.AtStation(moves);
+                    var outcomes = new List<StationOutcome>();
+                    foreach (var p in atStation)
+                    {
+                        double score = p.Person ? (p.Id.Length * 0.17 + round * 0.013) % 1 : Mathx.Clamp(0.6 + d.race.Rng.Gaussian() * 0.15, 0, 1);
+                        outcomes.Add(d.race.Station(p, score, "x"));
+                    }
+                    d.race.Apply(d.race.Jumps(outcomes));
+                    if (d.race.IsBonusRound)
+                    {
+                        var res = d.race.Players.Select(p => (p, p.Person ? (p.Id[1] * 0.11) % 1 : d.race.Rng.Next(), "b")).ToList();
+                        d.race.Apply(d.race.Jumps(d.race.Bonus(res)));
+                    }
+                }
+                foreach (var d in devices) done |= d.race.CheckFinish();
+                var reference = devices[0].race.Players.Select(p => $"{p.Id}:{p.Pos}:{p.Coins}:{p.LastCheckpoint}").ToList();
+                foreach (var d in devices)
+                    CollectionAssert.AreEqual(reference, d.race.Players.Select(p => $"{p.Id}:{p.Pos}:{p.Coins}:{p.LastCheckpoint}").ToList(), "runda " + round + " na " + d.id);
+            }
+            Assert.IsTrue(done, "trka se završila");
+            var rank = devices.Select(d => string.Join(",", d.race.Ranking().Select(p => p.Id))).Distinct().ToList();
+            Assert.AreEqual(1, rank.Count, "isti poredak na svim uređajima");
+            Assert.AreEqual("u1", devices[0].race.Human.Id);
+            Assert.AreEqual("u3", devices[2].race.Human.Id);
+        }
+    }
 }

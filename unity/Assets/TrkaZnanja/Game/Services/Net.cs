@@ -22,6 +22,7 @@ namespace TrkaZnanja.Game
         static long expires;
         public static bool Online => !string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(access);
         public static string UserId => userId;
+        public static string AccessToken => access;
 
         static UnityWebRequest Request(string method, string path, string body, bool auth)
         {

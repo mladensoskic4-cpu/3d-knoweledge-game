@@ -136,3 +136,24 @@ ID aplikacije je `me.trkaznanja.igra`, a projekat je već podešen za IL2CPP i A
 | `Assets/TrkaZnanja/Resources` | šejderi, fontovi (Nunito, OFL), pitanja, mape, zastave |
 | `Assets/TrkaZnanja/Editor` | automatsko podešavanje projekta |
 | `Assets/TrkaZnanja/Tests` | EditMode i PlayMode testovi |
+
+## 9. Igra sa drugima (multiplayer)
+
+U meniju je dugme **Sa drugima**:
+- **Brza igra**: spaja te sa nasumičnim igračima istog uzrasta. Kad se skupe 4 igrača, trka kreće odmah; poslije 15 sekundi kreće i sa 2–3 igrača, a ostala mjesta popunjavaju botovi.
+- **Napravi sobu**: dobiješ kod od 5 znakova (npr. K7RTX) i pošalješ ga prijateljima. Ti si domaćin i pokrećeš trku.
+- **Uđi**: upišeš kod koji ti je prijatelj poslao.
+
+Kako radi: svi uređaji vrte istu trku iz istog semena (pitanja, botovi, mini igre), a preko Supabase Realtime kanala šalju se samo odgovori.
+Domaćin čeka odgovore svih i objavi konačan rezultat runde, pa svi vide isto. Ako domaćin izađe, domaćin postaje sljedeći igrač.
+Ko izgubi vezu, nastavlja sam (ostali mu se računaju kao da im je isteklo vrijeme).
+
+Na Supabase-u treba (jednom):
+- **Authentication → Sign In / Providers → Anonymous sign-ins**: uključeno (već je, zbog gost naloga);
+- **Realtime → Settings**: „Allow public access” uključeno (sobe su javni kanali `trka-soba-KOD` i `trka-predvorje-uzrast`).
+
+Kako da probaš sam na jednom računaru: **File → Build Profiles → Windows → Build And Run** napravi igru za PC. Pokreni je, a u Unity-ju pritisni Play.
+U jednoj napravi sobu, u drugoj upiši kod. Editor i napravljena igra imaju odvojene gost naloge, pa se vide kao dva igrača.
+PlayMode test `TwoPlayerRaceOverLoopback` odigra cijelu trku sa dva igrača bez interneta (lokalna veza u memoriji).
+
+Web verzija (WebGL) zasad nema igru sa drugima (Unity tamo nema WebSocket bez dodatka).

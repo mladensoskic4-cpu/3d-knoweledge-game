@@ -134,6 +134,57 @@ namespace TrkaZnanja.Tests
             finally { Minigame.TestAuto = false; AudioKit.I?.StopNotes(); }
         }
 
+        // Dva igrača u istoj sobi (lokalna veza, bez interneta): igra ide preko pravog toka poruka
+        // (doprinosi, odluke domaćina, stanice i bonus runde) i mora stići do cilja.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator TwoPlayerRaceOverLoopback()
+        {
+            yield return FreshApp(false);
+            RealtimeChannel.Loopback = true;
+            MpSession host = null, guest = null;
+            try
+            {
+                App.I.Profile.Podesavanja.Duzina = "5";
+                host = MpSession.Join("TESTA", App.I.Profile, App.I.transform, "domacin");
+                yield return null;
+                var other = new Profile { Ime = "Drugi" };
+                // drugi igrač je samo „sesija” bez ekrana: na svaki doprinos domaćina odgovori svojim
+                var gObj = new GameObject("Gost");
+                guest = MpSession.Join("TESTA", other, gObj.transform, "gost", current: false);
+                var rng = new Rng(4);
+                var g = guest;
+                g.OnContribution += (key, id) =>
+                {
+                    if (id == g.LocalId) return;
+                    var round = key.Substring(key.IndexOf(':') + 1);
+                    g.Contribute("q:" + round, new MpAnswer { Acc = rng.Chance(0.6) ? 1 : 0, Time = 5, Tiles = rng.Range(0, 5), Text = "gost" }.ToJson());
+                    g.Contribute("st:" + round, new MpScore { Score = rng.Next(), Label = "gost" }.ToJson());
+                    g.Contribute("bo:" + round, new MpScore { Score = rng.Next(), Label = "gost" }.ToJson());
+                };
+                float t = 0;
+                while ((!host.Connected || !guest.Connected || host.Members.Count < 2) && t < 5) { t += Time.unscaledDeltaTime; yield return null; }
+                Assert.AreEqual(2, host.Members.Count, "oba igrača su u sobi");
+                Assert.IsTrue(host.IsHost, "prvi u sobi je domaćin");
+                Assert.IsFalse(guest.IsHost);
+                App.AutoPlay = true;
+                Minigame.TestAuto = true;
+                App.I.StartMultiplayerRace(host);
+                t = 0;
+                while (guest.Setup == null && t < 3) { t += Time.unscaledDeltaTime; yield return null; }
+                Assert.IsNotNull(guest.Setup, "gost je dobio postavu trke");
+                Assert.AreEqual(2, guest.Setup.Humans.Count);
+                t = 0;
+                while (App.I.RacesFinished < 1 && t < 280) { t += Time.unscaledDeltaTime; yield return null; }
+                Assert.GreaterOrEqual(App.I.RacesFinished, 1, "trka sa dva igrača se nije završila");
+            }
+            finally
+            {
+                Minigame.TestAuto = false;
+                RealtimeChannel.Loopback = false;
+                if (guest != null) Object.Destroy(guest.transform.parent != null ? guest.transform.parent.gameObject : guest.gameObject);
+            }
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator PlaysAWholeRaceByItself()
         {

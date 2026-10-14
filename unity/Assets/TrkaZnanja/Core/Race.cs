@@ -37,13 +37,16 @@ namespace TrkaZnanja.Core
         public int Round { get; private set; }
         public readonly Rng Rng;
 
-        public Race(Racer human, IEnumerable<Racer> bots, int tileCount, Rng rng)
+        public Race(Racer human, IEnumerable<Racer> bots, int tileCount, Rng rng) : this(new[] { human }.Concat(bots), tileCount, rng) { }
+
+        // Svi igrači u redosljedu koji je isti na svim uređajima (multiplayer); tačno jedan ima Human (ovaj uređaj).
+        public Race(IEnumerable<Racer> players, int tileCount, Rng rng)
         {
             if (tileCount < 8) throw new ArgumentException("Staza je prekratka.", nameof(tileCount));
             TileCount = tileCount;
             Rng = rng;
-            Players = new List<Racer> { human };
-            Players.AddRange(bots);
+            Players = players.ToList();
+            if (Players.Count(p => p.Human) != 1) throw new ArgumentException("Tačno jedan igrač mora biti na ovom uređaju.", nameof(players));
             foreach (var p in Players)
             {
                 p.Pos = 0; p.Coins = 0; p.LastCheckpoint = 0; p.Correct = 0; p.Answered = 0; p.FinishedRound = null; p.LastScore = 0;
@@ -65,19 +68,28 @@ namespace TrkaZnanja.Core
         public List<RoundEntry> ResolveRound(Question q, QuizResult human)
         {
             var type = QuizTypes.Get(q.Tip);
+            var text = human.TimedOut && human.Accuracy < 0.2 ? "isteklo vrijeme" : type.Summarize(q, human);
+            return ResolveRound(q, new Dictionary<string, MpAnswer> { [Human.Id] = MpAnswer.From(human, text) });
+        }
+
+        // Multiplayer: odgovori svih ljudi (ključ = Id igrača); ko nema odgovor, isteklo mu je vrijeme. Botovi se simuliraju
+        // istim Rng-om, pa je rezultat isti na svakom uređaju.
+        public List<RoundEntry> ResolveRound(Question q, IDictionary<string, MpAnswer> people)
+        {
+            var type = QuizTypes.Get(q.Tip);
             var limit = QuizTypes.TimeLimitOf(q);
-            bool shortcut = human.UsedPowerups.Contains("precica"), slow = human.UsedPowerups.Contains("uspori");
+            // usporavanje: svako ko ga upotrijebi usporava sve ostale za 1 polje
+            var slowers = Players.Where(p => p.Person && people.TryGetValue(p.Id, out var a) && a.Powerups.Contains("uspori")).ToList();
             var list = new List<RoundEntry>();
             foreach (var p in Players)
             {
                 RoundEntry e;
-                if (p.Human)
+                bool shortcut = false;
+                if (p.Person)
                 {
-                    e = new RoundEntry
-                    {
-                        Racer = p, Accuracy = human.Accuracy, Time = human.TimeUsed, Tiles = human.Tiles,
-                        Text = human.TimedOut && human.Accuracy < 0.2 ? "isteklo vrijeme" : type.Summarize(q, human)
-                    };
+                    var a = people.TryGetValue(p.Id, out var got) && got != null ? got : MpAnswer.Timeout(limit);
+                    shortcut = a.Powerups.Contains("precica");
+                    e = new RoundEntry { Racer = p, Accuracy = a.Acc, Time = a.Time, Tiles = a.Tiles, Text = a.Text };
                 }
                 else
                 {
@@ -92,8 +104,8 @@ namespace TrkaZnanja.Core
                 p.Answered++;
                 if (e.Accuracy >= 0.75) p.Correct++;
                 p.LastScore = e.Tiles * 100 - e.Time;
-                if (p.Human && shortcut) { e.Tiles += 2; e.Text += " · prečica +2"; }
-                if (!p.Human && slow && e.Tiles > 0) { e.Tiles -= 1; e.Text += " · usporen"; }
+                if (shortcut) { e.Tiles += 2; e.Text += " · prečica +2"; }
+                if (slowers.Any(s => s != p) && e.Tiles > 0) { e.Tiles -= 1; e.Text += " · usporen"; }
                 list.Add(e);
             }
             return list;

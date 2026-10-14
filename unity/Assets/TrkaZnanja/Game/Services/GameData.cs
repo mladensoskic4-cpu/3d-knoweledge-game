@@ -41,7 +41,17 @@ namespace TrkaZnanja.Game
             }
         }
 
-        public static void AddQuestions(IEnumerable<Question> extra) => Questions.AddRange(extra.Where(q => q.IsValid()));
+        // pitanja iz igre (bez onih koje su igrači predložili preko servera): ista na svim uređajima, za multiplayer
+        static int baseCount = -1;
+        public static int BaseQuestionCount => baseCount >= 0 ? baseCount : Questions.Count;
+
+        public static void AddQuestions(IEnumerable<Question> extra)
+        {
+            if (baseCount < 0) baseCount = Questions.Count;
+            AddMore(extra);
+        }
+
+        static void AddMore(IEnumerable<Question> extra) => Questions.AddRange(extra.Where(q => q.IsValid()));
 
         public static void LoadTranslations()
         {
