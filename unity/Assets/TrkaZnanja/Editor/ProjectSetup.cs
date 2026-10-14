@@ -110,7 +110,12 @@ namespace TrkaZnanja.EditorTools
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.runInBackground = false;
+            // PC verzija (za testiranje): prozor 1280×720 i rad u pozadini, da veza za igru sa drugima ne stane kad prozor nije u fokusu
+            PlayerSettings.runInBackground = true;
+            PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+            PlayerSettings.defaultScreenWidth = 1280;
+            PlayerSettings.defaultScreenHeight = 720;
+            PlayerSettings.resizableWindow = true;
             PlayerSettings.bundleVersion = "0.1.0";
         }
 

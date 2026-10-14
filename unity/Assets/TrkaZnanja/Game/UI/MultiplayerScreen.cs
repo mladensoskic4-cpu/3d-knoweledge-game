@@ -122,9 +122,11 @@ namespace TrkaZnanja.Game
                         cell.Size(-1, 66);
                         var r = UIKit.HStack(cell.transform, 14, "Red", TextAnchor.MiddleLeft, new RectOffset(20, 20, 0, 0));
                         ((RectTransform)r.transform).Stretch();
-                        UIKit.Box(r.transform, Col.Hex(RaceSetup.SeatColors[i]), UIKit.Circle, "Boja").Size(26, 26);
+                        r.childForceExpandWidth = false;
+                        r.childControlWidth = true;
+                        UIKit.Box(r.transform, Col.Hex(RaceSetup.SeatColors[i]), UIKit.Circle, "Boja").Size(26, 26, 0, 0);
                         UIKit.Label(r.transform, m.Name + (m.Id == s.LocalId ? " (" + Lang.L("ti") + ")" : ""), 30, Theme.Ink, TextAnchor.MiddleLeft, true).Size(-1, 66, 1);
-                        if (m.Id == s.HostId) UIKit.Chip(r.transform, "domaćin", Theme.Gold, 22);
+                        if (m.Id == s.HostId) UIKit.Chip(r.transform, "domaćin", Theme.Gold, 22).Size(150, 44, 0, 0);
                     }
                     for (int i = members.Count; i < RaceSetup.Seats; i++)
                     {

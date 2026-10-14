@@ -168,6 +168,7 @@ namespace UnityEngine
     public enum VerticalWrapMode { Truncate, Overflow }
     public enum FontStyle { Normal, Bold }
     public class RectOffset { public RectOffset() { } public RectOffset(int l, int r, int t, int b) { } }
+    public enum FullScreenMode { ExclusiveFullScreen, FullScreenWindow, MaximizedWindow, Windowed }
     public enum UIOrientation { Portrait, PortraitUpsideDown, LandscapeRight, LandscapeLeft, AutoRotation }
 }
 
@@ -220,6 +221,10 @@ namespace UnityEditor
         public static bool allowedAutorotateToLandscapeLeft { get; set; }
         public static bool allowedAutorotateToLandscapeRight { get; set; }
         public static bool runInBackground { get; set; }
+        public static UnityEngine.FullScreenMode fullScreenMode { get; set; }
+        public static int defaultScreenWidth { get; set; }
+        public static int defaultScreenHeight { get; set; }
+        public static bool resizableWindow { get; set; }
         public static string bundleVersion { get; set; }
         public static void SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget t, string id) { }
         public static void SetScriptingBackend(UnityEditor.Build.NamedBuildTarget t, ScriptingImplementation s) { }
